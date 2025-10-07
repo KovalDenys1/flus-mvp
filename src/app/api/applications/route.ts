@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { applications, type Application } from "../../../lib/data/aplications";
+import { applications, type Application } from "../../../lib/data/applications";
 
 const MOCK_WORKER_ID = "worker1";
 
