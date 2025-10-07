@@ -109,21 +109,25 @@ export default function Page() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Jobber</h1>
-        <div className="flex gap-2 w-full sm:w-96">
+    <div className="max-w-2xl mx-auto py-10 px-2 space-y-8 bg-gray-50 rounded-2xl">
+      <header className="flex flex-col items-center gap-3 mb-4">
+        <h1 className="text-3xl font-bold text-gray-900 text-center">Ledige jobber</h1>
+        <p className="text-gray-500 text-center max-w-lg leading-relaxed">
+          Søk blant småjobber i ditt område eller filtrer etter kategori og avstand.
+        </p>
+        <div className="w-full flex gap-2 mt-2">
           <Input
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             placeholder="Søk i tittel, beskrivelse eller område"
+            className="bg-white/90 border-0 rounded-lg shadow-sm"
           />
         </div>
-      </div>
+      </header>
 
-      <div className="flex items-center gap-2 overflow-x-auto py-1">
+      <div className="flex flex-wrap items-center gap-2 justify-center">
         <button
-          className={`px-3 py-1 rounded ${category === null ? "bg-gray-900 text-white" : "bg-gray-100"}`}
+          className={`px-3 py-1 rounded-lg font-medium transition ${category === null ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"}`}
           onClick={() => setCategory(null)}
         >
           Alle
@@ -131,7 +135,7 @@ export default function Page() {
         {categories.map((c) => (
           <button
             key={c}
-            className={`px-3 py-1 rounded ${category === c ? "bg-gray-900 text-white" : "bg-gray-100"}`}
+            className={`px-3 py-1 rounded-lg font-medium transition ${category === c ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"}`}
             onClick={() => setCategory(category === c ? null : c)}
           >
             {c}
@@ -139,13 +143,13 @@ export default function Page() {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-4 justify-center">
+        <label className="flex items-center gap-2 text-sm">
           Avstand:
           <select
             value={radius}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRadius(parseInt(e.target.value))}
-            className="border rounded px-2 py-1"
+            className="border rounded px-2 py-1 bg-white"
           >
             {[1, 3, 5, 10].map((km) => (
               <option key={km} value={km}>
@@ -155,12 +159,12 @@ export default function Page() {
           </select>
         </label>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm">
           Kategori:
           <select
             value={category ?? ""}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value || null)}
-            className="border rounded px-2 py-1"
+            className="border rounded px-2 py-1 bg-white"
           >
             <option value="">Alle</option>
             {categories.map((c) => (
@@ -172,27 +176,27 @@ export default function Page() {
         </label>
 
         {geoStatus === "unsupported" && (
-          <span className="text-sm text-gray-500">Geolokasjon støttes ikke.</span>
+          <span className="text-sm text-gray-400">Geolokasjon støttes ikke.</span>
         )}
         {geoStatus === "denied" && (
-          <span className="text-sm text-gray-500">Posisjon ble ikke gitt — viser alle jobber.</span>
+          <span className="text-sm text-gray-400">Posisjon ble ikke gitt — viser alle jobber.</span>
         )}
       </div>
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="border rounded p-4 animate-pulse h-36" />
+            <div key={i} className="rounded-xl bg-white/80 p-4 animate-pulse h-36 shadow-sm" />
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <div className="py-12 text-center text-gray-600">Ingen jobber funnet.</div>
+        <div className="py-12 text-center text-gray-500">Ingen jobber funnet.</div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           {visible.map((job) => {
             const dist = pos ? distanceKm(pos, { lat: job.lat, lng: job.lng }).toFixed(1) + " km" : null;
             return (
-            <Card key={job.id} className="hover:shadow-md transition w-full max-w-full overflow-hidden">
+            <Card key={job.id} className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
                   <div className="min-w-0 flex-1">
@@ -200,7 +204,7 @@ export default function Page() {
                   </div>
                   <div className="flex items-center gap-2 sm:flex-col sm:items-end">
                     <span className="text-sm font-medium">{job.payNok} NOK</span>
-                    <Badge variant="secondary">{minutesToHhMm(job.durationMinutes)}</Badge>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs">{minutesToHhMm(job.durationMinutes)}</Badge>
                   </div>
                 </div>
               </CardHeader>
@@ -208,12 +212,12 @@ export default function Page() {
                 <p className="text-sm text-gray-700 line-clamp-3 break-words">{job.desc}</p>
                 <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
                   <div className="flex flex-wrap gap-2 items-center max-w-full">
-                    <Badge className="truncate">{job.category}</Badge>
-                    <Badge variant="outline" className="truncate">{job.areaName}</Badge>
-                    {dist && <span className="text-xs text-gray-500">{dist}</span>}
+                    <Badge className="truncate bg-gray-200 text-gray-700 px-2 py-0.5 text-xs">{job.category}</Badge>
+                    <Badge variant="outline" className="truncate px-2 py-0.5 text-xs">{job.areaName}</Badge>
+                    {dist && <span className="text-xs text-gray-400">{dist}</span>}
                   </div>
                   <div className="ml-0 sm:ml-auto w-full sm:w-auto">
-                    <Button className="w-full sm:w-auto" size="sm" onClick={() => apply(job.id)} disabled={appliedJobIds.has(job.id)}>
+                    <Button className="w-full sm:w-auto rounded-lg" size="sm" onClick={() => apply(job.id)} disabled={appliedJobIds.has(job.id)}>
                       {appliedJobIds.has(job.id) ? "Allerede sendt" : "Søk"}
                     </Button>
                   </div>
