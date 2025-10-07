@@ -2,53 +2,100 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type User = { id: string; email: string; role: "worker" | "employer" } | null;
 
 export default function Navbar() {
   const [user, setUser] = useState<User>(null);
-  const [loading, setLoading] = useState(true);
-
-  async function loadUser() {
-    const res = await fetch("/api/auth/me");
-    const data = await res.json();
-    setUser(data.user);
-    setLoading(false);
-  }
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    loadUser();
+    fetch("/api/auth/me").then(r=>r.json()).then(d=>setUser(d.user ?? null)).catch(()=>{});
   }, []);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
     window.location.href = "/login";
   }
 
+  const linkClass = "hover:text-gray-900/80 transition";
+  const pathname = usePathname();
+
+  function isActive(href: string) {
+    return pathname === href || pathname?.startsWith(href + "/");
+  }
+
   return (
-    <nav className="flex gap-4 p-4 border-b">
-      <Link href="/jobber">Jobber</Link>
-      <Link href="/prestasjoner">Prestasjoner</Link>
-      <Link href="/grunder">Gründer</Link>
-      <Link href="/profil">Profil</Link>
-      <div className="ml-auto flex gap-3">
-        {loading ? (
-          <span className="text-sm text-gray-500">Laster…</span>
-        ) : user ? (
-          <>
-            <span className="text-sm text-gray-600">{user.email}</span>
-            <button onClick={logout} className="underline text-sm">
-              Logg ut
+    <nav className="relative bg-white border-b shadow-sm">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-16">
+          {/* left: brand + mobile toggle */}
+          <div className="flex items-center gap-4">
+            <button
+              className={`sm:hidden p-2 rounded-md hover:bg-gray-100 transition-transform ${open ? "rotate-90" : ""}`}
+              aria-label="Toggle menu"
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <svg className="h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+              </svg>
             </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login">Logg inn</Link>
-            <Link href="/register">Registrer</Link>
-          </>
-        )}
+
+            <div className="text-sm font-semibold">Flus</div>
+          </div>
+
+          {/* center: links (hidden on small) */}
+          <div className="hidden sm:flex sm:items-center sm:gap-4 ml-6">
+            <Link className={`${linkClass} ${isActive('/jobber') ? 'nav-link-active' : ''}`} href="/jobber">Jobber</Link>
+            <Link className={`${linkClass} ${isActive('/prestasjoner') ? 'nav-link-active' : ''}`} href="/prestasjoner">Prestasjoner</Link>
+            <Link className={`${linkClass} ${isActive('/grunder') ? 'nav-link-active' : ''}`} href="/grunder">Gründer</Link>
+            <Link className={`${linkClass} ${isActive('/profil') ? 'nav-link-active' : ''}`} href="/profil">Profil</Link>
+          </div>
+
+          {/* right: auth actions */}
+          <div className="ml-auto flex items-center gap-3">
+            {user ? (
+              <div className="flex items-center gap-3">
+                  <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-[12rem]">{user.email}</span>
+                  <button onClick={logout} className="underline text-sm">Logg ut</button>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-3">
+                <Link className={linkClass} href="/login">Logg inn</Link>
+                <Link className={linkClass} href="/register">Registrer</Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* mobile menu panel */}
+      {open && (
+        <div className="sm:hidden border-t bg-white animate-slide-down">
+          <div className="px-4 pt-2 pb-4 space-y-2">
+            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/jobber">Jobber</Link>
+            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/prestasjoner">Prestasjoner</Link>
+            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/grunder">Gründer</Link>
+            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/profil">Profil</Link>
+
+            <div className="border-t pt-2">
+              {user ? (
+                <>
+                  <div className="text-sm text-gray-700 truncate">{user.email}</div>
+                  <button onClick={() => { setOpen(false); logout(); }} className="mt-2 block w-full text-left px-2 py-2 rounded hover:bg-gray-50">Logg ut</button>
+                </>
+              ) : (
+                <>
+                  <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/login">Logg inn</Link>
+                  <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/register">Registrer</Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
