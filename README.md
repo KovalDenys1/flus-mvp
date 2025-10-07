@@ -63,7 +63,7 @@ Målet er å gi elever en trygg og enkel måte å finne lokale småjobber på, b
 
 ---
 
-## 🏗️ Struktur
+## 🏗 Struktur
 
 .
 ├─ app/
