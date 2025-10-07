@@ -59,7 +59,7 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-3">
                   <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-[12rem]">{user.email}</span>
-                  <button onClick={logout} className="underline text-sm">Logg ut</button>
+                  <button onClick={logout} className="underline text-sm cursor-pointer">Logg ut</button>
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-3">
@@ -84,7 +84,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <div className="text-sm text-gray-700 truncate">{user.email}</div>
-                  <button onClick={() => { setOpen(false); logout(); }} className="mt-2 block w-full text-left px-2 py-2 rounded hover:bg-gray-50">Logg ut</button>
+                  <button onClick={() => { setOpen(false); logout(); }} className="mt-2 block w-full text-left px-2 py-2 rounded hover:bg-gray-50 cursor-pointer">Logg ut</button>
                 </>
               ) : (
                 <>

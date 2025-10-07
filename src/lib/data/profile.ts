@@ -50,5 +50,5 @@ export const workerProfile: WorkerProfile = {
 
 export const recentReviews: Review[] = [
   { id: "r1", rating: 5, text: "Punktlig og effektiv.", date: "2025-06-20" },
-  { id: "r2", rating: 4, text: "God kommunikasjon.",    date: "2025-07-02" },
+  { id: "r2", rating: 4.5, text: "God kommunikasjon.",    date: "2025-07-02" },
 ];
