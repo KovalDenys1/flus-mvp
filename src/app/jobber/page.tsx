@@ -17,6 +17,14 @@ type Job = {
   status: "open" | "closed";
 };
 
+type Application = {
+  id: string;
+  jobId: string;
+  workerId: string;
+  status: "sendt" | "akseptert" | "avslatt";
+  createdAt: string;
+};
+
 export default function Page() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +35,8 @@ export default function Page() {
 
   const [radius, setRadius] = useState<number>(5);
   const [category, setCategory] = useState<string>("Alle");
+
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/jobs")
@@ -57,6 +67,16 @@ export default function Page() {
     );
   }, []);
 
+  useEffect(() => {
+    fetch("/api/applications")
+      .then((r) => r.json())
+      .then((d) => {
+        const ids = new Set<string>((d.applications ?? []).map((a: Application) => a.jobId));
+        setAppliedJobIds(ids);
+      })
+      .catch(() => {});
+  }, []);
+
   const categories = useMemo(
     () => ["Alle", ...Array.from(new Set(jobs.map((j) => j.category)))],
     [jobs]
@@ -65,17 +85,32 @@ export default function Page() {
   const visible = useMemo(() => {
     return jobs.filter((j) => {
       const catOK = category === "Alle" || j.category === category;
-      if (!pos) return catOK; // если гео нет, показываем все по категории
+      if (!pos) return catOK;
       const d = distanceKm(pos, { lat: j.lat, lng: j.lng });
       return catOK && d <= radius;
     });
   }, [jobs, pos, radius, category]);
 
+  async function apply(jobId: string) {
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const d = await res.json();
+      setAppliedJobIds((prev) => new Set(prev).add(jobId));
+      alert("Søknad sendt ✅");
+    } catch (e: any) {
+      alert("Kunne ikke sende søknad: " + String(e?.message || e));
+    }
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Jobber</h1>
 
-      {}
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2">
           Avstand:
@@ -129,6 +164,8 @@ export default function Page() {
           const m = j.durationMinutes % 60;
           const dur = h === 0 ? `${m} min` : m === 0 ? `${h} t` : `${h} t ${m} min`;
 
+          const already = appliedJobIds.has(j.id);
+
           return (
             <li key={j.id} className="border rounded p-3">
               <div className="font-medium">{j.title}</div>
@@ -137,7 +174,13 @@ export default function Page() {
                 {dist ? ` • ${dist}` : ""}
               </div>
               <p className="mt-2 text-sm">{j.desc}</p>
-              <button className="mt-2 border rounded px-3 py-1">Søk</button>
+              <button
+                className="mt-2 border rounded px-3 py-1 disabled:opacity-50"
+                onClick={() => apply(j.id)}
+                disabled={already}
+              >
+                {already ? "Allerede sendt" : "Søk"}
+              </button>
             </li>
           );
         })}
