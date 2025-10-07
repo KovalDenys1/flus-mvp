@@ -1,5 +1,5 @@
 export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
-  const R = 6371; // earth radius km
+  const R = 6371;
   const dLat = (b.lat - a.lat) * Math.PI / 180;
   const dLng = (b.lng - a.lng) * Math.PI / 180;
   const lat1 = a.lat * Math.PI / 180;
