@@ -35,6 +35,7 @@ export default function Page() {
   const [geoStatus, setGeoStatus] = useState<"idle" | "ok" | "denied" | "unsupported">("idle");
 
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -66,6 +67,13 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => setIsLoggedIn(!!d.user))
+      .catch(() => setIsLoggedIn(false));
+  }, []);
+
   const categories = useMemo(() => {
     const s = new Set<string>();
     jobs.forEach((j) => s.add(j.category));
@@ -94,6 +102,10 @@ export default function Page() {
   }, [filtered, pos, radius]);
 
   async function apply(jobId: string) {
+    if (!isLoggedIn) {
+      toast.error("Du må være innlogget for å søke på jobber.");
+      return;
+    }
     try {
       const res = await fetch("/api/applications", {
         method: "POST",
@@ -217,8 +229,18 @@ export default function Page() {
                     {dist && <span className="text-xs text-gray-400">{dist}</span>}
                   </div>
                   <div className="ml-0 sm:ml-auto w-full sm:w-auto">
-                    <Button className="w-full sm:w-auto rounded-lg" size="sm" onClick={() => apply(job.id)} disabled={appliedJobIds.has(job.id)}>
-                      {appliedJobIds.has(job.id) ? "Allerede sendt" : "Søk"}
+                    <Button
+                      className="w-full sm:w-auto rounded-lg"
+                      size="sm"
+                      onClick={() => apply(job.id)}
+                      disabled={appliedJobIds.has(job.id) || !isLoggedIn}
+                      title={!isLoggedIn ? "Du må være innlogget for å søke" : ""}
+                    >
+                      {appliedJobIds.has(job.id)
+                        ? "Allerede sendt"
+                        : !isLoggedIn
+                        ? "Logg inn for å søke"
+                        : "Søk"}
                     </Button>
                   </div>
                 </div>

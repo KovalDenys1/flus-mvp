@@ -62,8 +62,21 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-2 sm:px-0">
+      {/* Demo-informasjon */}
+      <div className="mb-6">
+        <table className="w-full border border-yellow-200 rounded-lg bg-yellow-50 text-yellow-900 text-sm shadow">
+          <tbody>
+            <tr>
+              <td className="p-3 font-semibold">Demo-profil</td>
+              <td className="p-3">
+                Dette er en demo-profil. I den ekte appen ville du blitt bedt om å logge inn eller registrere deg, og hvis du var innlogget ville du sett din egen profil her.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       {/* HERO */}
-  <section className="relative bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
+      <section className="relative bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {profile.avatarUrl ? (
