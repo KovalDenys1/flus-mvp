@@ -1,5 +1,6 @@
 "use client";
 
+import { JobDetailsDialog } from "@/components/JobDetailsDialog";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function Page() {
 
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [openJob, setOpenJob] = useState<Job | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -208,48 +210,69 @@ export default function Page() {
           {visible.map((job) => {
             const dist = pos ? distanceKm(pos, { lat: job.lat, lng: job.lng }).toFixed(1) + " km" : null;
             return (
-            <Card key={job.id} className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0">
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg font-semibold truncate">{job.title}</CardTitle>
+              <Card
+                key={job.id}
+                onClick={() => setOpenJob(job)}
+                className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0 cursor-pointer"
+              >
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg font-semibold truncate">{job.title}</CardTitle>
+                      <div className="text-xs text-gray-500">
+                        <a
+                          href={`/jobber/${job.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="underline"
+                        >
+                          Åpne side
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+                      <span className="text-sm font-medium">{job.payNok} NOK</span>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs">
+                        {minutesToHhMm(job.durationMinutes)}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 sm:flex-col sm:items-end">
-                    <span className="text-sm font-medium">{job.payNok} NOK</span>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs">{minutesToHhMm(job.durationMinutes)}</Badge>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-700 line-clamp-3 break-words">{job.desc}</p>
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+                    <div className="flex flex-wrap gap-2 items-center max-w-full">
+                      <Badge className="truncate bg-gray-200 text-gray-700 px-2 py-0.5 text-xs">{job.category}</Badge>
+                      <Badge variant="outline" className="truncate px-2 py-0.5 text-xs">{job.areaName}</Badge>
+                      {dist && <span className="text-xs text-gray-400">{dist}</span>}
+                    </div>
+                    <div className="ml-0 sm:ml-auto w-full sm:w-auto">
+                      <Button
+                        className="w-full sm:w-auto rounded-lg"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); apply(job.id); }}
+                        disabled={appliedJobIds.has(job.id) || !isLoggedIn}
+                        title={!isLoggedIn ? "Du må være innlogget for å søke" : ""}
+                      >
+                        {appliedJobIds.has(job.id)
+                          ? "Allerede sendt"
+                          : !isLoggedIn
+                          ? "Logg inn for å søke"
+                          : "Søk"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-700 line-clamp-3 break-words">{job.desc}</p>
-                <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
-                  <div className="flex flex-wrap gap-2 items-center max-w-full">
-                    <Badge className="truncate bg-gray-200 text-gray-700 px-2 py-0.5 text-xs">{job.category}</Badge>
-                    <Badge variant="outline" className="truncate px-2 py-0.5 text-xs">{job.areaName}</Badge>
-                    {dist && <span className="text-xs text-gray-400">{dist}</span>}
-                  </div>
-                  <div className="ml-0 sm:ml-auto w-full sm:w-auto">
-                    <Button
-                      className="w-full sm:w-auto rounded-lg"
-                      size="sm"
-                      onClick={() => apply(job.id)}
-                      disabled={appliedJobIds.has(job.id) || !isLoggedIn}
-                      title={!isLoggedIn ? "Du må være innlogget for å søke" : ""}
-                    >
-                      {appliedJobIds.has(job.id)
-                        ? "Allerede sendt"
-                        : !isLoggedIn
-                        ? "Logg inn for å søke"
-                        : "Søk"}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
       )}
+      <JobDetailsDialog
+        open={!!openJob}
+        onOpenChange={(v) => !v && setOpenJob(null)}
+        job={openJob}
+        onApply={openJob ? () => apply(openJob.id) : undefined}
+      />
     </div>
   );
 }
