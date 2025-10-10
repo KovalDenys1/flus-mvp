@@ -50,6 +50,7 @@ export default function Navbar() {
           <div className="hidden sm:flex sm:items-center sm:gap-4 ml-6">
             <Link className={`${linkClass} ${isActive('/jobber') ? 'nav-link-active' : ''}`} href="/jobber">Jobber</Link>
             <Link className={`${linkClass} ${isActive('/prestasjoner') ? 'nav-link-active' : ''}`} href="/prestasjoner">Prestasjoner</Link>
+            {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Mine Samtaler</Link>}
             <Link className={`${linkClass} ${isActive('/grunder') ? 'nav-link-active' : ''}`} href="/grunder">Gründer</Link>
             <Link className={`${linkClass} ${isActive('/profil') ? 'nav-link-active' : ''}`} href="/profil">Profil</Link>
           </div>
@@ -77,6 +78,7 @@ export default function Navbar() {
           <div className="px-4 pt-2 pb-4 space-y-2">
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/jobber">Jobber</Link>
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/prestasjoner">Prestasjoner</Link>
+            {user && <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/samtaler">Mine Samtaler</Link>}
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/grunder">Gründer</Link>
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/profil">Profil</Link>
 

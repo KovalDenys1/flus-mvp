@@ -1,6 +1,11 @@
+"use client";
+
 import { googleMapsEmbedUrl } from "@/lib/utils/map";
 import { minutesToHhMm } from "@/lib/utils/format";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type Job = {
   id: string;
@@ -24,8 +29,51 @@ async function getJob(id: string): Promise<Job | null> {
   return data.job as Job;
 }
 
-export default async function JobDetailPage({ params }: { params: { id: string } }) {
-  const job = await getJob(params.id);
+export default function JobDetailPage({ params }: { params: { id: string } }) {
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
+  const router = useRouter();
+
+  // Extract id from params to avoid reading properties on `params` directly inside effects
+  const { id } = params;
+
+  useEffect(() => {
+    getJob(id)
+      .then(setJob)
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const handleApply = async () => {
+    setApplying(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: job?.id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Kunne ikke starte samtale.");
+      }
+
+      // Перенаправляем пользователя в созданный чат
+      router.push(`/samtaler/${data.conversationId}`);
+
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Kunne ikke starte samtale.";
+      toast.error(message);
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="max-w-2xl mx-auto py-10 px-2">Laster jobb...</div>;
+  }
+
   if (!job) {
     return (
       <div className="max-w-2xl mx-auto py-10 px-2">
@@ -52,9 +100,11 @@ export default async function JobDetailPage({ params }: { params: { id: string }
           ← Tilbake
         </Link>
         <button
-          className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+          onClick={handleApply}
+          disabled={applying}
+          className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:bg-orange-300"
         >
-          Søk
+          {applying ? "Starter samtale..." : "Søk"}
         </button>
       </div>
     </div>
