@@ -3,7 +3,8 @@ import { minutesToHhMm } from "@/lib/utils/format";
 import Link from "next/link";
 
 async function getJob(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/jobs/${id}`, { cache: "no-store" });
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/jobs/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
   return data.job as any;
