@@ -40,13 +40,21 @@ export function JobDetailsDialog({ open, onOpenChange, job, onApply }: Props) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
-          <button className="text-sm underline" onClick={() => onOpenChange(false)}>Lukk</button>
+        <div className="flex gap-2 w-full mt-4">
           {onApply && (
-            <button className="text-sm underline" onClick={() => onApply(job.id)}>
+            <button
+              className="w-1/2 px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+              onClick={() => onApply(job.id)}
+            >
               Søk
             </button>
           )}
+          <a
+            href={`/jobber/${job.id}`}
+            className="w-1/2 px-4 py-2 rounded-lg bg-orange-100 text-orange-700 text-sm font-medium shadow hover:bg-orange-200 transition text-center flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+          >
+            Åpne full side
+          </a>
         </div>
       </DialogContent>
     </Dialog>

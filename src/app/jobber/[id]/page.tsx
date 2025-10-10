@@ -44,8 +44,18 @@ export default async function JobDetailPage({ params }: { params: { id: string }
       <div className="aspect-video w-full overflow-hidden rounded-lg border">
         <iframe src={mapSrc} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Kart" />
       </div>
-      <div className="pt-2">
-        <Link href="/jobber" className="underline">← Tilbake</Link>
+      <div className="w-full flex gap-3 mt-4">
+        <Link
+          href="/jobber"
+          className="flex-1 px-6 py-2 rounded-lg border border-orange-300 text-orange-700 text-base font-medium shadow hover:bg-orange-100 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+        >
+          ← Tilbake
+        </Link>
+        <button
+          className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+        >
+          Søk
+        </button>
       </div>
     </div>
   );
