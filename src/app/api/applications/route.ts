@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     applications.push(application);
 
     return NextResponse.json({ ok: true, application }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 500 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

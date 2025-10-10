@@ -26,9 +26,10 @@ export default function Page() {
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       toast.success("Registrert! Du er nå innlogget.");
       window.location.href = "/jobber";
-    } catch (e: any) {
-      setError(e.message || "Feil ved registrering");
-      toast.error(e.message || "Feil ved registrering");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Feil ved registrering";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

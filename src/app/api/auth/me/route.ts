@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { sessions, findSession } from "../../../../lib/data/sessions";
+import { findSession } from "../../../../lib/data/sessions";
 import { users } from "../../../../lib/data/users";
 import { SESSION_COOKIE } from "../../../../lib/utils/cookies";
 

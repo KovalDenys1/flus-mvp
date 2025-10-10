@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ ok: true, user: { id: user.id, email: user.email, role: user.role } });
     res.cookies.set(SESSION_COOKIE, session.token, COOKIE_OPTIONS);
     return res;
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 400 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }

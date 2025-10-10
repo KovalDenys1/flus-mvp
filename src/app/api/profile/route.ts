@@ -22,8 +22,11 @@ export async function POST(req: NextRequest) {
     if (!url || !type) return NextResponse.json({ error: "url and type are required" }, { status: 400 });
     if (!isAllowedSocial(url)) return NextResponse.json({ error: "domain not allowed" }, { status: 400 });
 
+    console.log(`Adding social link: ${url} (type: ${type}, visible: ${visible})`);
+
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 500 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

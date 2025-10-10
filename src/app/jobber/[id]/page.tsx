@@ -2,12 +2,26 @@ import { googleMapsEmbedUrl } from "@/lib/utils/map";
 import { minutesToHhMm } from "@/lib/utils/format";
 import Link from "next/link";
 
-async function getJob(id: string) {
+type Job = {
+  id: string;
+  title: string;
+  desc: string;
+  category: string;
+  payNok: number;
+  durationMinutes: number;
+  areaName: string;
+  lat: number;
+  lng: number;
+  createdAt: string;
+  status: "open" | "closed";
+};
+
+async function getJob(id: string): Promise<Job | null> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const res = await fetch(`${baseUrl}/api/jobs/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
-  return data.job as any;
+  return data.job as Job;
 }
 
 export default async function JobDetailPage({ params }: { params: { id: string } }) {

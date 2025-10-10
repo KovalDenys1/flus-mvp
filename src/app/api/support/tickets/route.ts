@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
     supportTickets.push(ticket);
 
     return NextResponse.json({ ok: true, ticket }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 500 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

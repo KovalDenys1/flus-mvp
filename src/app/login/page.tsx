@@ -26,9 +26,10 @@ export default function Page() {
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       toast.success("Innlogging vellykket");
       window.location.href = "/jobber";
-    } catch (e: any) {
-      setError(e.message || "Feil ved innlogging");
-      toast.error(e.message || "Feil ved innlogging");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Feil ved innlogging";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

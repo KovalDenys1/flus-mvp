@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image"; // Добавь импорт
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,10 +81,13 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div className="flex-shrink-0">
           {profile.avatarUrl ? (
-            <img
+            <Image
               src={profile.avatarUrl}
               alt={profile.name}
+              width={96}
+              height={96}
               className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+              priority={true}
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-700 border-4 border-white shadow">

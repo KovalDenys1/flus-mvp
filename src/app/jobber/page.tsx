@@ -30,7 +30,6 @@ export default function Page() {
   const [category, setCategory] = useState<string | null>(null);
   const [radius, setRadius] = useState<number>(5);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<"idle" | "ok" | "denied" | "unsupported">("idle");
@@ -44,7 +43,7 @@ export default function Page() {
     fetch("/api/jobs")
       .then((r) => r.json())
       .then((d) => setJobs(d.jobs ?? []))
-      .catch((e) => setError(String(e)))
+      .catch((e) => console.error("Failed to fetch jobs:", e))
       .finally(() => setLoading(false));
   }, []);
 
@@ -54,7 +53,7 @@ export default function Page() {
       return;
     }
     setGeoStatus("idle");
-    const id = navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.getCurrentPosition(
       (p) => {
         setPos({ lat: p.coords.latitude, lng: p.coords.longitude });
         setGeoStatus("ok");
@@ -64,9 +63,6 @@ export default function Page() {
       },
       { timeout: 5000 }
     );
-    return () => {
-      // no clear needed for getCurrentPosition
-    };
   }, []);
 
   useEffect(() => {
@@ -117,8 +113,9 @@ export default function Page() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setAppliedJobIds((prev) => new Set(prev).add(jobId));
       toast.success("Søknad sendt ✅");
-    } catch (e: any) {
-      toast.error("Kunne ikke sende søknad: " + String(e?.message || e));
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast.error("Kunne ikke sende søknad: " + errorMessage);
     }
   }
 
@@ -219,15 +216,6 @@ export default function Page() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-lg font-semibold truncate">{job.title}</CardTitle>
-                      <div className="text-xs text-gray-500">
-                        <a
-                          href={`/jobber/${job.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="underline"
-                        >
-                          Åpne side
-                        </a>
-                      </div>
                     </div>
                     <div className="flex items-center gap-2 sm:flex-col sm:items-end">
                       <span className="text-sm font-medium">{job.payNok} NOK</span>
