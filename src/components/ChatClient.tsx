@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { Message } from "@/lib/data/messages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -119,66 +118,78 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   if (error) return <div className="max-w-3xl mx-auto py-10 px-4 text-red-500">{error}</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-3xl mx-auto">
-      {/* Job Header */}
-      {job && (
-        <div className="bg-white border-b shadow-sm p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
-              {job.title.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="font-bold text-lg truncate">{job.title}</h2>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <span>📍 {job.areaName}</span>
-                <span>💰 {job.payNok} NOK</span>
-                <Badge variant="secondary" className="text-xs">{job.category}</Badge>
+    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto bg-white shadow-lg">
+      {/* Header with Back Button and Job Info */}
+      <div className="bg-white border-b shadow-sm p-4 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <Link href="/samtaler">
+            <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </Button>
+          </Link>
+          {job && (
+            <>
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                {job.title.charAt(0)}
               </div>
-            </div>
-            <Link href={`/jobber/${job.id}`}>
-              <Button variant="outline" size="sm">Se jobb</Button>
-            </Link>
-          </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-bold text-base truncate">{job.title}</h2>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>📍 {job.areaName}</span>
+                  <span>💰 {job.payNok} NOK</span>
+                </div>
+              </div>
+              <Link href={`/jobber/${job.id}`}>
+                <Button variant="outline" size="sm" className="text-xs">Se jobb</Button>
+              </Link>
+            </>
+          )}
         </div>
-      )}
-      
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      </div>
+
+      {/* Messages - Scrollable Area */}
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ minHeight: 0 }}>
         {messages.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-lg mb-2">👋 Start samtalen!</p>
-            <p className="text-sm">Send den første meldingen til arbeidsgiveren.</p>
+          <div className="flex items-center justify-center h-full text-center text-gray-500">
+            <div>
+              <p className="text-lg mb-2">👋 Start samtalen!</p>
+              <p className="text-sm">Send den første meldingen til arbeidsgiveren.</p>
+            </div>
           </div>
         ) : (
-          messages.map((msg) => {
-            const isOwn = msg.senderId === currentUserId;
-            return (
-              <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
-                {!isOwn && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-xs font-bold">
-                    👤
+          <div className="space-y-3">
+            {messages.map((msg) => {
+              const isOwn = msg.senderId === currentUserId;
+              return (
+                <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
+                  {!isOwn && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-xs font-bold">
+                      👤
+                    </div>
+                  )}
+                  <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
+                    <p className="text-sm break-words">{msg.text}</p>
+                    <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
+                      {new Date(msg.createdAt).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
                   </div>
-                )}
-                <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
-                  <p className="text-sm break-words">{msg.text}</p>
-                  <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
-                    {new Date(msg.createdAt).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  {isOwn && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                      Du
+                    </div>
+                  )}
                 </div>
-                {isOwn && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
-                    Du
-                  </div>
-                )}
-              </div>
-            );
-          })
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
-      
-      {/* Input */}
-      <div className="p-4 bg-white border-t shadow-lg">
+
+      {/* Input - Fixed at Bottom */}
+      <div className="p-4 bg-white border-t shadow-lg flex-shrink-0">
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input 
             value={newMessage} 

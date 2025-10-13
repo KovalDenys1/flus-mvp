@@ -109,16 +109,16 @@ export default function ConversationsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {conversations.map((convo) => {
             const job = jobs[convo.jobId];
             const isDemo = DEMO_CONVERSATION_JOB_IDS.includes(convo.jobId);
             return (
-              <Link key={convo.id} href={`/samtaler/${convo.id}`} passHref>
-                <Card className="hover:shadow-md hover:border-orange-300 transition cursor-pointer border border-gray-200">
-                  <CardContent className="p-4">
+              <Link key={convo.id} href={`/samtaler/${convo.id}`} className="block">
+                <Card className="hover:shadow-lg hover:border-orange-300 transition-all duration-200 cursor-pointer border border-gray-200 bg-white">
+                  <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
                         {job?.title.charAt(0) || "?"}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -130,10 +130,10 @@ export default function ConversationsPage() {
                             <Badge variant="outline" className="text-xs">Demo</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 line-clamp-1">
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                           {job?.desc || "Ingen beskrivelse tilgjengelig"}
                         </p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
                           <span>📍 {job?.areaName || "Ukjent"}</span>
                           <span>💰 {job?.payNok || "?"} NOK</span>
                           <span className="ml-auto">
