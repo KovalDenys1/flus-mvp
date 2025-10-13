@@ -1,11 +1,11 @@
 
 export type Conversation = {
   id: string;
-  // ID пользователя, который инициировал чат (например, работодатель)
+  // ID of the user who initiated the chat (e.g., employer)
   initiatorId: string;
-  // ID пользователя, который откликнулся (например, соискатель)
+  // ID of the user who responded (e.g., job seeker)
   participantId: string;
-  // ID вакансии, к которой относится чат
+  // ID of the job posting related to this chat
   jobId: string;
   createdAt: string;
 };
@@ -50,8 +50,8 @@ export function makeDemoConversationsForUser(userId: string): Conversation[] {
 }
 
 /**
- * Находит или создает новый чат между двумя пользователями по поводу конкретной вакансии.
- * Это гарантирует, что для одной и той же вакансии между двумя пользователями будет только один чат.
+ * Finds or creates a new conversation between two users regarding a specific job posting.
+ * This ensures that there is only one conversation per job between the same two users.
  */
 export function findOrCreateConversation(jobId: string, initiatorId: string, participantId: string): Conversation {
   let conversation = conversations.find(c => 
@@ -75,7 +75,7 @@ export function findOrCreateConversation(jobId: string, initiatorId: string, par
 }
 
 /**
- * Находит все чаты для конкретного пользователя.
+ * Finds all conversations for a specific user.
  */
 export function getConversationsForUser(userId: string): Conversation[] {
   const res = conversations.filter(c => c.initiatorId === userId || c.participantId === userId);
@@ -86,7 +86,7 @@ export function getConversationsForUser(userId: string): Conversation[] {
 }
 
 /**
- * Находит чат по его ID.
+ * Finds a conversation by its ID.
  */
 export function getConversationById(conversationId: string): Conversation | undefined {
   return conversations.find(c => c.id === conversationId);

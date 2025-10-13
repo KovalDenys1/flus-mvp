@@ -6,7 +6,7 @@ import { SESSION_COOKIE } from "@/lib/utils/cookies";
 
 /**
  * GET /api/conversations
- * Возвращает список всех чатов для текущего пользователя.
+ * Returns a list of all conversations for the current user.
  */
 export async function GET(req: NextRequest) {
   // Try to read token directly from incoming request cookies first. This is

@@ -112,7 +112,7 @@ export const jobs: Job[] = [
     lng: 10.820,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_5", // Пример ID работодателя
+    employerId: "u_employer_5",
   },
   {
     id: "j25",
@@ -126,7 +126,7 @@ export const jobs: Job[] = [
     lng: 10.818,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_3", // Пример ID работодателя
+    employerId: "u_employer_3",
   },
   {
     id: "j26",
@@ -140,7 +140,7 @@ export const jobs: Job[] = [
     lng: 10.822,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_4", // Пример ID работодателя
+    employerId: "u_employer_4",
   },
   {
     id: "j27",
@@ -154,7 +154,7 @@ export const jobs: Job[] = [
     lng: 10.815,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_2", // Пример ID работодателя
+    employerId: "u_employer_2",
   },
   {
     id: "j28",
@@ -168,7 +168,7 @@ export const jobs: Job[] = [
     lng: 10.813,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_3", // Пример ID работодателя
+    employerId: "u_employer_3",
   },
   {
     id: "j29",
@@ -182,7 +182,7 @@ export const jobs: Job[] = [
     lng: 10.817,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_4", // Пример ID работодателя
+    employerId: "u_employer_4",
   },
   {
     id: "j30",
@@ -196,7 +196,7 @@ export const jobs: Job[] = [
     lng: 10.814,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_5", // Пример ID работодателя
+    employerId: "u_employer_5",
   },
   {
     id: "j31",
@@ -210,7 +210,7 @@ export const jobs: Job[] = [
     lng: 10.820,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_1", // Пример ID работодателя
+    employerId: "u_employer_1",
   },
   {
     id: "j32",
@@ -224,7 +224,7 @@ export const jobs: Job[] = [
     lng: 10.819,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_2", // Пример ID работодателя
+    employerId: "u_employer_2",
   },
   {
     id: "j33",
@@ -238,7 +238,7 @@ export const jobs: Job[] = [
     lng: 10.818,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_3", // Пример ID работодателя
+    employerId: "u_employer_3",
   },
   {
     id: "j34",
@@ -252,7 +252,7 @@ export const jobs: Job[] = [
     lng: 10.816,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_4", // Пример ID работодателя
+    employerId: "u_employer_4",
   },
   {
     id: "j35",
@@ -266,7 +266,7 @@ export const jobs: Job[] = [
     lng: 10.815,
     createdAt: new Date().toISOString(),
     status: "open",
-    employerId: "u_employer_5", // Пример ID работодателя
+    employerId: "u_employer_5",
   },
 ];
 
