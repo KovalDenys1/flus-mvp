@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { googleMapsEmbedUrl } from "@/lib/utils/map";
 import { minutesToHhMm } from "@/lib/utils/format";
+import { googleMapsEmbedUrl } from "@/lib/utils/map";
 
-type Job = {
+export type Job = {
   id: string;
   title: string;
   desc: string;
@@ -21,41 +21,9 @@ type Job = {
   status: "open" | "closed";
 };
 
-export default function JobDetailClient({ job: initialJob }: { job: Job }) {
-  const [job, setJob] = useState<Job | null>(initialJob ?? null);
-  const [loading, setLoading] = useState(false);
-  const [applying, setApplying] = useState(false);
+export default function JobDetailClient({ job }: { job?: Job | null }) {
   const router = useRouter();
-
-  useEffect(() => {
-    // initialJob is passed from the server; keep it in state
-    setJob(initialJob ?? null);
-  }, [initialJob]);
-
-  const handleApply = async () => {
-    if (!job) return;
-    setApplying(true);
-    try {
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId: job.id }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Could not start conversation.");
-      }
-
-      router.push(`/samtaler/${data.conversationId}`);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Could not start conversation.";
-      toast.error(message);
-    } finally {
-      setApplying(false);
-    }
-  };
+  const [applying, setApplying] = useState(false);
 
   if (!job) {
     return (
@@ -65,6 +33,25 @@ export default function JobDetailClient({ job: initialJob }: { job: Job }) {
       </div>
     );
   }
+
+  const handleApply = async () => {
+    setApplying(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: job.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not start conversation");
+      router.push(`/samtaler/${data.conversationId}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(msg);
+    } finally {
+      setApplying(false);
+    }
+  };
 
   const mapSrc = googleMapsEmbedUrl(job.lat, job.lng, job.title);
 
