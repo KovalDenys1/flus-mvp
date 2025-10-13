@@ -22,20 +22,21 @@ type Job = {
 };
 
 async function getJob(id: string): Promise<Job | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/jobs/${id}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.job as Job;
+  try {
+    const res = await fetch(`/api/jobs/${id}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.job as Job;
+  } catch (e) {
+    return null;
+  }
 }
-
 export default function JobDetailPage({ params }: { params: { id: string } }) {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const router = useRouter();
 
-  // Extract id from params to avoid reading properties on `params` directly inside effects
   const { id } = params;
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
         throw new Error(data.error || "Kunne ikke starte samtale.");
       }
 
-      // Перенаправляем пользователя в созданный чат
+      // Redirect user to the created conversation
       router.push(`/samtaler/${data.conversationId}`);
 
     } catch (error: unknown) {
@@ -73,7 +74,6 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   if (loading) {
     return <div className="max-w-2xl mx-auto py-10 px-2">Laster jobb...</div>;
   }
-
   if (!job) {
     return (
       <div className="max-w-2xl mx-auto py-10 px-2">
