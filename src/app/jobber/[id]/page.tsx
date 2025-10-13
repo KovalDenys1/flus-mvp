@@ -17,15 +17,14 @@ type Job = {
 };
 
 async function getJob(id: string): Promise<Job | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/jobs/${id}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.job as Job;
+  const { jobs } = await import("@/lib/data/jobs");
+  const found = (jobs ?? []).find((j: Job) => j.id === id) ?? null;
+  return found;
 }
 
-export default async function JobDetailPage({ params }: { params: { id: string } }) {
-  const job = await getJob(params.id);
+export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const job = await getJob(id);
   if (!job) {
     return (
       <div className="max-w-2xl mx-auto py-10 px-2">

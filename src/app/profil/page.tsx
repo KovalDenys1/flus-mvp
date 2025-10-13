@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image"; // Добавь импорт
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,8 @@ export default function ProfilePage() {
         <div className="h-6 bg-gray-200 rounded w-1/4" />
       </div>
     );
-  if (err) return <div className="text-red-600 max-w-2xl mx-auto mt-10">Feil: {err}</div>;
-  if (!profile) return <div className="max-w-2xl mx-auto mt-10">Fant ikke profil.</div>;
+  if (err) return <div className="text-red-600 max-w-2xl mx-auto mt-10">Error: {err}</div>;
+  if (!profile) return <div className="max-w-2xl mx-auto mt-10">Profile not found.</div>;
 
   return (
     <div className="max-w-2xl mx-auto px-2 sm:px-0">
@@ -68,9 +68,9 @@ export default function ProfilePage() {
         <table className="w-full border border-yellow-200 rounded-lg bg-yellow-50 text-yellow-900 text-sm shadow">
           <tbody>
             <tr>
-              <td className="p-3 font-semibold">Demo-profil</td>
+              <td className="p-3 font-semibold">Demo profile</td>
               <td className="p-3">
-                Dette er en demo-profil. I den ekte appen ville du blitt bedt om å logge inn eller registrere deg, og hvis du var innlogget ville du sett din egen profil her.
+                This is a demo profile. In a real app you would be asked to log in or register, and if signed in you would see your profile here.
               </td>
             </tr>
           </tbody>
