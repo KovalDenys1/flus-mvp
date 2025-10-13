@@ -13,17 +13,40 @@ export type Conversation = {
 // Temporary in-memory storage. Will be replaced by a database in production.
 const conversations: Conversation[] = [];
 
-// Demo job id used for synthetic demo conversations shown to users.
-export const DEMO_CONVERSATION_JOB_ID = "demo_job_1";
+// Demo job ids used for synthetic demo conversations shown to users.
+export const DEMO_CONVERSATION_JOB_IDS = ["j1", "j2", "j21", "j24"];
 
-export function makeDemoConversationForUser(userId: string): Conversation {
-  return {
-    id: `demo_conv_${userId}`,
-    jobId: DEMO_CONVERSATION_JOB_ID,
-    initiatorId: "demo_employer",
-    participantId: userId,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-  };
+export function makeDemoConversationsForUser(userId: string): Conversation[] {
+  return [
+    {
+      id: `demo_conv_${userId}_1`,
+      jobId: "j1", // Gressklipping
+      initiatorId: "u_employer_1",
+      participantId: userId,
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), // 5 days ago
+    },
+    {
+      id: `demo_conv_${userId}_2`,
+      jobId: "j2", // IT-hjelp
+      initiatorId: "u_employer_2",
+      participantId: userId,
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
+    },
+    {
+      id: `demo_conv_${userId}_3`,
+      jobId: "j21", // Vaske sykkel
+      initiatorId: "u_employer_3",
+      participantId: userId,
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(), // 1 day ago
+    },
+    {
+      id: `demo_conv_${userId}_4`,
+      jobId: "j24", // Rydde løv i hage
+      initiatorId: "u_employer_5",
+      participantId: userId,
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+    },
+  ];
 }
 
 /**
@@ -56,12 +79,10 @@ export function findOrCreateConversation(jobId: string, initiatorId: string, par
  */
 export function getConversationsForUser(userId: string): Conversation[] {
   const res = conversations.filter(c => c.initiatorId === userId || c.participantId === userId);
-  // Always include a demo conversation for the user (if not already present).
-  const hasDemo = res.some(c => c.jobId === DEMO_CONVERSATION_JOB_ID);
-  if (!hasDemo && userId) {
-    res.unshift(makeDemoConversationForUser(userId));
-  }
-  return res;
+  // Always include demo conversations for the user (if not already present).
+  const existingJobIds = new Set(res.map(c => c.jobId));
+  const demoConvs = makeDemoConversationsForUser(userId).filter(dc => !existingJobIds.has(dc.jobId));
+  return [...demoConvs, ...res];
 }
 
 /**

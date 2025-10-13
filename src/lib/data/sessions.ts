@@ -49,5 +49,6 @@ export async function getSession(): Promise<{ user: Omit<User, "passwordHash"> |
     return { user: null, session: null };
   }
   const { passwordHash, ...rest } = user;
+  void passwordHash;
   return { user: rest, session };
 }
