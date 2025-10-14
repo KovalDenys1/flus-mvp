@@ -1,103 +1,89 @@
-# FLUS – Prototype (Denys Koval)
+# FLUS — Prototype
 
-Dette prosjektet er en fungerende prototype for FLUS – en plattform som hjelper ungdommer med å finne sine første småjobber, bygge erfaring og etter hvert utvikle egne initiativ gjennom en **Gründer-modul**.
+This repository contains a working prototype for FLUS — a small-job platform focused on helping young people find local tasks, build experience, and eventually gain access to an entrepreneurship module.
 
-> Prosjektet er laget som et skolecase og representerer et teknisk konsept, ikke en kommersiell løsning.
-
----
-
-## 🎯 Formål
-
-Målet er å gi elever en trygg og enkel måte å finne lokale småjobber på, bygge en digital CV basert på gjennomførte oppdrag, og motta veiledning når de har opparbeidet nok erfaring.
+The project is a technical MVP and educational prototype. It is not a production-grade or commercial-ready system.
 
 ---
 
-## 🔧 Kjernefunksjoner
+## Quick summary
 
-### For elever (arbeidssøkere)
-- Registrering og innlogging med e-post og passord  
-- Se jobber i nærheten basert på geografisk avstand  
-- Søke på jobber med ett klikk  
-- Profil med CV, ferdigheter, prestasjoner og anmeldelser  
-- Prestasjonsnivåer og «achievements»  
-- Gründer-modul etter høy erfaring (f.eks. 150 oppdrag i én kategori)  
-- Personvern og trygg kommunikasjon (ingen direkte kontaktinfo før oppdrag er akseptert)
-
-### For arbeidsgivere
-- Registrering og innlogging  
-- Opprettelse av jobber (publisering koster én «kreditt» = 100 NOK)  
-- Motta og håndtere søknader  
-- Gi vurdering og tilbakemelding etter gjennomført oppdrag
+- Small-job listing and application flow
+- Demo chat between job posters and applicants (in-memory/demo data)
+- Simple authentication (mock sessions)
+- Mock data under `src/lib/data` used by API routes in `src/app/api`
 
 ---
 
-## 💡 Eksempler på jobbkategorier
+## Features implemented in this prototype
 
-- Gressklipping, snømåking, hagearbeid  
-- Flyttehjelp, rydding, enkel maling  
-- Hundelufting, barnevakt (16+)  
-- Enkel IT-hjelp (sette opp ruter, reinstallere PC, oppdatering osv.)  
-
----
-
-## 🧱 Teknologi
-
-- **Frontend:** Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui  
-- **Autentisering:** Credentials (mock i MVP, klar for Prisma/NextAuth)  
-- **Database (planlagt):** Prisma + PostgreSQL  
-- **Geolokasjon:** klientbasert (navigator.geolocation) – ingen lagring av nøyaktige brukerkoordinater  
-- **Datahåndtering:** mock JSON i MVP, REST API-endepunkter i `/api/*`
+- Job browsing with simple filtering and distance-based visibility
+- Job detail page with an interactive client component for applying
+- Conversations (chat) UI with demo conversations and demo messages
+- REST-style API routes for jobs, conversations, messages and auth
+- Basic profile and session mock helpers
 
 ---
 
-## 🔐 Personvern og trygghet
+## Tech stack
 
-- Ingen utveksling av telefon/e-post før oppdrag er akseptert  
-- Profil viser kun nødvendig informasjon (navn, alder, kommune, ferdigheter)  
-- Sosiale lenker kun fra godkjente domener (LinkedIn, GitHub)  
-- Filtrering og varsling ved deling av personlig informasjon i meldinger  
-- Anmeldelser modereres automatisk (PII-filtrering og språkfilter)  
-- Arbeidsgivere verifiseres med e-post og telefon før flere publiseringer  
-- Mulighet for foresatt-verifisering (guardian)  
-- Alle data lagres innenfor EØS (i produksjon)  
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui components
+- In-memory mock data for MVP located in `src/lib/data`
 
 ---
 
-## 🏗 Struktur
+## Developer setup
 
-.
-├─ app/
-│  ├─ (pages) login, register, jobber, profil, prestasjoner, grunder
-│  └─ api/
-│      ├─ auth/
-│      ├─ jobs/
-│      ├─ applications/
-│      ├─ achievements/
-│      └─ support/
-├─ lib/
-│  ├─ data/ (mock data)
-│  └─ utils/ (validering, sikkerhet, geo)
-├─ docs/
-│  ├─ arkitektur.md
-│  ├─ personvern.md
-│  └─ datamodell.md
-└─ README.md
+1. Install dependencies
 
----
+```bash
+npm install
+```
 
-## 🧩 Videre utvikling
+2. Run the dev server
 
-- Integrasjon med Prisma/PostgreSQL  
-- Push-varsler (ny jobb i nærheten)  
-- Chat med trygghetstiltak  
-- Mentor-/kuratorpanel for Gründer-modul  
-- Foreldreinnsyn og eksport av data  
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 to view the app.
+
+Notes:
+- The project uses mock session cookies and in-memory data (no real database). Demo conversations and messages are generated from `src/lib/data`.
 
 ---
 
-## 📜 Lisens
+## Developer notes
 
-Dette prosjektet er kun for utdanningsformål.  
-Koden kan gjenbrukes til ikke-kommersielle formål med kreditering.
+- Avoid making server-side HTTP requests to the same application (no localhost fetch from server routes); server routes should import local data or use real backend services.
+- Dynamic routes returning server components should `await params` when necessary before accessing `params.id`.
 
-© 2025 – Denys Koval
+---
+
+## Demo data and chat
+
+- Demo conversations and demo messages are defined under `src/lib/data` to make the chat UI interactive without a database. The demo data is lightweight and intended for exploration only.
+
+---
+
+## Privacy & safety (prototype)
+
+- No personal data is persisted in this MVP — data lives in-memory for demo purposes only.
+- The chat feature is a demo; do not use it for real PII in this prototype.
+
+---
+
+## Next steps (ideas)
+
+- Add a persistent backend (Prisma + PostgreSQL)
+- Harden auth and session handling (NextAuth/credentials setup)
+- Add server-side validation and PII filters for chat messages
+
+---
+
+## License
+
+Educational prototype. Reuse for non-commercial, educational purposes with attribution.
+
+© 2025 — Denys Koval
