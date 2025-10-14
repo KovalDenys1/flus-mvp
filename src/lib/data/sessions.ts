@@ -1,3 +1,7 @@
+import { cookies } from "next/headers";
+import { findUserById, User } from "./users";
+import { SESSION_COOKIE } from "../utils/cookies";
+
 export type Session = {
   token: string;
   userId: string;
@@ -26,4 +30,25 @@ export function deleteSession(token: string | undefined | null) {
     return true;
   }
   return false;
+}
+
+/**
+ * Retrieves the current session and user info from cookies.
+ * Convenience helper for API routes.
+ */
+export async function getSession(): Promise<{ user: Omit<User, "passwordHash"> | null; session: Session | null }> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const session = findSession(token);
+  if (!session) {
+    return { user: null, session: null };
+  }
+  const user = findUserById(session.userId);
+  if (!user) {
+    // This should not happen if data is consistent
+    return { user: null, session: null };
+  }
+  const { passwordHash, ...rest } = user;
+  void passwordHash;
+  return { user: rest, session };
 }

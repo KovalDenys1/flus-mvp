@@ -18,6 +18,10 @@ export function findUserByEmail(email: string) {
   return users.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
 }
 
+export function findUserById(id: string) {
+  return users.find(u => u.id === id) || null;
+}
+
 export function createUser(data: { email: string; password: string; role: Role; navn?: string; kommune?: string; fodselsdato?: string; }) {
   if (findUserByEmail(data.email)) {
     throw new Error("User already exists");

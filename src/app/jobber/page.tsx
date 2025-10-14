@@ -212,14 +212,14 @@ export default function Page() {
                 onClick={() => setOpenJob(job)}
                 className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0 cursor-pointer"
               >
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3 w-full">
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg font-semibold truncate">{job.title}</CardTitle>
+                      <CardTitle className="text-lg font-semibold break-words pr-2">{job.title}</CardTitle>
                     </div>
-                    <div className="flex items-center gap-2 sm:flex-col sm:items-end">
-                      <span className="text-sm font-medium">{job.payNok} NOK</span>
-                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs">
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-sm font-medium whitespace-nowrap">{job.payNok} NOK</span>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs whitespace-nowrap">
                         {minutesToHhMm(job.durationMinutes)}
                       </Badge>
                     </div>
