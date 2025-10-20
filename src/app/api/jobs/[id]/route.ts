@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSupabaseServer } from "@/lib/supabase/server";
 
 type Job = {
   id: string;
@@ -14,14 +15,35 @@ type Job = {
   status: "open" | "closed";
 };
 
-async function getJobById(id: string) {
-  const { jobs } = await import("@/lib/data/jobs");
-  return (jobs ?? []).find((j: Job) => j.id === id) ?? null;
-}
-
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const job = await getJobById(id);
-  if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("id,title,description,category,pay_nok,duration_minutes,area_name,lat,lng,created_at,status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    if (error.message?.toLowerCase().includes("relation") || (error as any).code === "42P01") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const job: Job = {
+    id: data.id,
+    title: data.title,
+    desc: data.description,
+    category: data.category,
+    payNok: data.pay_nok,
+    durationMinutes: data.duration_minutes,
+    areaName: data.area_name,
+    lat: data.lat,
+    lng: data.lng,
+    createdAt: data.created_at,
+    status: data.status,
+  };
   return NextResponse.json({ job });
 }

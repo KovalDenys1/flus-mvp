@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!url || !type) return NextResponse.json({ error: "url and type are required" }, { status: 400 });
     if (!isAllowedSocial(url)) return NextResponse.json({ error: "domain not allowed" }, { status: 400 });
 
-    console.log(`Adding social link: ${url} (type: ${type}, visible: ${visible})`);
+  // In a real implementation, insert this social link into a persistent store.
 
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {

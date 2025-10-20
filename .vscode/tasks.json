@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Dev quick API check",
+			"type": "shell",
+			"command": "node -e \"console.log('skip build in task; will curl endpoints manually')\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

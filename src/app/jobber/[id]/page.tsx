@@ -14,15 +14,20 @@ type Job = {
   status: "open" | "closed";
 };
 
-async function getJob(id: string): Promise<Job | null> {
-  const { jobs } = await import("@/lib/data/jobs");
-  return (jobs ?? []).find((j: Job) => j.id === id) ?? null;
+async function fetchJob(id: string): Promise<Job | null> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/jobs/${id}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const d = await res.json();
+    return d.job ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const job = await getJob(id);
-
+  const job = await fetchJob(id);
   return (
     <div>
       <JobDetailClient job={job as Job} />

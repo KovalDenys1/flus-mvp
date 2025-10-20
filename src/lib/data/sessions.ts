@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { findUserById, User } from "./users";
 import { SESSION_COOKIE } from "../utils/cookies";
+import { getSupabaseServer } from "@/lib/supabase/server";
 
 export type Session = {
   token: string;
@@ -36,19 +37,32 @@ export function deleteSession(token: string | undefined | null) {
  * Retrieves the current session and user info from cookies.
  * Convenience helper for API routes.
  */
-export async function getSession(): Promise<{ user: Omit<User, "passwordHash"> | null; session: Session | null }> {
+export async function getSession(): Promise<{ user: { id: string; email?: string; role?: string; navn?: string; kommune?: string } | null; session: Session | null }> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   const session = findSession(token);
   if (!session) {
     return { user: null, session: null };
   }
+  // Try Supabase first to resolve user info
+  try {
+    const supabase = getSupabaseServer();
+    const { data } = await supabase
+      .from("users")
+      .select("id, email, role, navn, kommune")
+      .eq("id", session.userId)
+      .maybeSingle();
+    if (data) {
+      return { user: data as any, session };
+    }
+  } catch {}
+
+  // Fallback to in-memory users (legacy)
   const user = findUserById(session.userId);
-  if (!user) {
-    // This should not happen if data is consistent
-    return { user: null, session: null };
+  if (user) {
+    const { passwordHash, ...rest } = user;
+    void passwordHash;
+    return { user: rest, session };
   }
-  const { passwordHash, ...rest } = user;
-  void passwordHash;
-  return { user: rest, session };
+  return { user: null, session };
 }

@@ -64,8 +64,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-3">
-                <Link className={linkClass} href="/login">Logg inn</Link>
-                <Link className={linkClass} href="/register">Registrer</Link>
+                <Link className={linkClass} href="/login">Logg inn med Vipps</Link>
               </div>
             )}
           </div>
@@ -90,8 +89,7 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/login">Logg inn</Link>
-                  <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/register">Registrer</Link>
+                  <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/login">Logg inn med Vipps</Link>
                 </>
               )}
             </div>
