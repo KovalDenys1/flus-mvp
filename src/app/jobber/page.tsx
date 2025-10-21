@@ -22,6 +22,12 @@ type Job = {
   lng: number;
   createdAt: string;
   status: "open" | "closed";
+  address?: string;
+  scheduleType?: "flexible" | "fixed" | "deadline";
+  startTime?: string;
+  endTime?: string;
+  paymentType?: "fixed" | "hourly";
+  requirements?: string;
 };
 
 export default function Page() {
@@ -216,12 +222,27 @@ export default function Page() {
                   <div className="flex items-start justify-between gap-3 w-full">
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-lg font-semibold break-words pr-2">{job.title}</CardTitle>
+                      {job.address && (
+                        <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                          <span>📍</span>
+                          <span className="truncate">{job.address}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-sm font-medium whitespace-nowrap">{job.payNok} NOK</span>
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {job.payNok} NOK{job.paymentType === "hourly" ? "/t" : ""}
+                      </span>
                       <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs whitespace-nowrap">
                         {minutesToHhMm(job.durationMinutes)}
                       </Badge>
+                      {job.scheduleType && (
+                        <Badge variant="outline" className="px-2 py-0.5 text-xs whitespace-nowrap">
+                          {job.scheduleType === "flexible" && "🕐 Fleksibel"}
+                          {job.scheduleType === "fixed" && "⏰ Fast tid"}
+                          {job.scheduleType === "deadline" && "📅 Frist"}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

@@ -9,14 +9,38 @@ type User = { id: string; email: string; role: "worker" | "employer" } | null;
 export default function Navbar() {
   const [user, setUser] = useState<User>(null);
   const [open, setOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"worker" | "employer">("worker");
 
   useEffect(() => {
-    fetch("/api/auth/me").then(r=>r.json()).then(d=>setUser(d.user ?? null)).catch(()=>{});
+    // Load saved view mode from localStorage
+    const savedMode = localStorage.getItem("viewMode");
+    if (savedMode === "worker" || savedMode === "employer") {
+      setViewMode(savedMode);
+    }
+
+    fetch("/api/auth/me")
+      .then(r=>r.json())
+      .then(d=>{
+        const userData = d.user ?? null;
+        setUser(userData);
+        // Set initial view mode based on user role only if not already set
+        if (userData?.role && !savedMode) {
+          setViewMode(userData.role);
+          localStorage.setItem("viewMode", userData.role);
+        }
+      })
+      .catch(()=>{});
   }, []);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
+  }
+
+  function toggleViewMode() {
+    const newMode = viewMode === "worker" ? "employer" : "worker";
+    setViewMode(newMode);
+    localStorage.setItem("viewMode", newMode);
   }
 
   const linkClass = "hover:text-gray-900/80 transition";
@@ -48,10 +72,20 @@ export default function Navbar() {
 
           {/* center: links (hidden on small) */}
           <div className="hidden sm:flex sm:items-center sm:gap-4 ml-6">
-            <Link className={`${linkClass} ${isActive('/jobber') ? 'nav-link-active' : ''}`} href="/jobber">Jobber</Link>
-            <Link className={`${linkClass} ${isActive('/prestasjoner') ? 'nav-link-active' : ''}`} href="/prestasjoner">Prestasjoner</Link>
-            {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Mine Samtaler</Link>}
-            <Link className={`${linkClass} ${isActive('/grunder') ? 'nav-link-active' : ''}`} href="/grunder">Gründer</Link>
+            {viewMode === "worker" ? (
+              <>
+                <Link className={`${linkClass} ${isActive('/jobber') ? 'nav-link-active' : ''}`} href="/jobber">Finn jobber</Link>
+                <Link className={`${linkClass} ${isActive('/prestasjoner') ? 'nav-link-active' : ''}`} href="/prestasjoner">Prestasjoner</Link>
+                <Link className={`${linkClass} ${isActive('/mine-soknader') ? 'nav-link-active' : ''}`} href="/mine-soknader">Mine søknader</Link>
+              </>
+            ) : (
+              <>
+                <Link className={`${linkClass} ${isActive('/mine-jobber') ? 'nav-link-active' : ''}`} href="/mine-jobber">Mine jobber</Link>
+                <Link className={`${linkClass} ${isActive('/jobber/ny') ? 'nav-link-active' : ''}`} href="/jobber/ny">+ Ny jobb</Link>
+                <Link className={`${linkClass} ${isActive('/statistikk') ? 'nav-link-active' : ''}`} href="/statistikk">Statistikk</Link>
+              </>
+            )}
+            {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Samtaler</Link>}
             <Link className={`${linkClass} ${isActive('/profil') ? 'nav-link-active' : ''}`} href="/profil">Profil</Link>
           </div>
 
@@ -59,6 +93,30 @@ export default function Navbar() {
           <div className="ml-auto flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
+                  {/* Role switcher */}
+                  <button
+                    onClick={toggleViewMode}
+                    className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 hover:bg-gray-50 transition-all font-medium text-sm"
+                    title={`Bytt til ${viewMode === 'worker' ? 'arbeidsgiver' : 'jobbsøker'} modus`}
+                  >
+                    {viewMode === "worker" ? (
+                      <>
+                        <span>👷</span>
+                        <span>Jobbsøker</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                      </>
+                    ) : (
+                      <>
+                        <span>💼</span>
+                        <span>Arbeidsgiver</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
                   <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-[12rem]">{user.email}</span>
                   <button onClick={logout} className="underline text-sm cursor-pointer">Logg ut</button>
               </div>
@@ -75,10 +133,45 @@ export default function Navbar() {
       {open && (
         <div className="sm:hidden border-t bg-white animate-slide-down">
           <div className="px-4 pt-2 pb-4 space-y-2">
-            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/jobber">Jobber</Link>
-            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/prestasjoner">Prestasjoner</Link>
-            {user && <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/samtaler">Mine Samtaler</Link>}
-            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/grunder">Gründer</Link>
+            {/* Mobile role switcher */}
+            {user && (
+              <button
+                onClick={toggleViewMode}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg border-2 bg-gray-50 font-medium text-sm mb-3"
+              >
+                <span className="flex items-center gap-2">
+                  {viewMode === "worker" ? (
+                    <>
+                      <span>👷</span>
+                      <span>Jobbsøker modus</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>💼</span>
+                      <span>Arbeidsgiver modus</span>
+                    </>
+                  )}
+                </span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </button>
+            )}
+
+            {viewMode === "worker" ? (
+              <>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/jobber">Finn jobber</Link>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/prestasjoner">Prestasjoner</Link>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/mine-soknader">Mine søknader</Link>
+              </>
+            ) : (
+              <>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/mine-jobber">Mine jobber</Link>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50 font-semibold text-orange-600" href="/jobber/ny">+ Ny jobb</Link>
+                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/statistikk">Statistikk</Link>
+              </>
+            )}
+            {user && <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/samtaler">Samtaler</Link>}
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/profil">Profil</Link>
 
             <div className="border-t pt-2">

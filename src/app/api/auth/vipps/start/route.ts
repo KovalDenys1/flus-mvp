@@ -12,13 +12,27 @@ export async function GET(req: NextRequest) {
 
   const supabase = getSupabaseServer();
   // Try to find existing user by email
-  const { data: existing, error: selErr } = await supabase
+  const { data: existing } = await supabase
     .from("users")
     .select("id, email, role, navn, kommune")
     .eq("email", email)
     .maybeSingle();
 
   let userId: string | null = existing?.id ?? null;
+  
+  // If user exists but role is different, update the role
+  if (userId && existing?.role !== role) {
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ role })
+      .eq("id", userId);
+    
+    if (updateError) {
+      console.error("Failed to update user role:", updateError);
+    }
+  }
+  
+  // If user doesn't exist, create new one
   if (!userId) {
     const { data: inserted, error } = await supabase
       .from("users")
@@ -26,6 +40,7 @@ export async function GET(req: NextRequest) {
       .select("id")
       .maybeSingle();
     if (error) {
+      console.error("Failed to create user:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     userId = inserted?.id ?? null;

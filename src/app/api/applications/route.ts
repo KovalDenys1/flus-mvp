@@ -68,9 +68,14 @@ export async function POST(req: NextRequest) {
       appId = inserted?.id ?? null;
     }
 
-    // For now, use in-memory conversation store to start a chat thread.
-    // We don't have employer id from Supabase yet; use a placeholder employer id.
-    const employerId = "u_employer_1"; // TODO: fetch from jobs.employer_id when available
+    // Fetch employer_id from job
+    const { data: jobData } = await supabase
+      .from("jobs")
+      .select("employer_id")
+      .eq("id", jobId)
+      .maybeSingle();
+    
+    const employerId = jobData?.employer_id || "u_employer_1";
     const conv = findOrCreateConversation(jobId, user.id, employerId);
 
     return NextResponse.json(

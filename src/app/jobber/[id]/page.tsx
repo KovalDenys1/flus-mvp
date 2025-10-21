@@ -12,6 +12,12 @@ type Job = {
   lng: number;
   createdAt: string;
   status: "open" | "closed";
+  address?: string;
+  scheduleType?: "flexible" | "fixed" | "deadline";
+  startTime?: string;
+  endTime?: string;
+  paymentType?: "fixed" | "hourly";
+  requirements?: string;
 };
 
 async function fetchJob(id: string): Promise<Job | null> {

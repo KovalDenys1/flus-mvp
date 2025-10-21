@@ -12,6 +12,14 @@ export type Job = {
   status: "open" | "closed";
   // ID of the user who created the job (employer)
   employerId: string;
+  
+  // New fields for enhanced job scheduling
+  address?: string; // Full address for the job location
+  scheduleType?: "flexible" | "fixed" | "deadline"; // Type of scheduling
+  startTime?: string; // ISO string for when job should start (optional for flexible)
+  endTime?: string; // ISO string for when job must be completed
+  paymentType?: "fixed" | "hourly"; // Fixed price or hourly rate
+  requirements?: string; // Any specific requirements or instructions
 };
 
 export const jobs: Job[] = [
@@ -28,6 +36,11 @@ export const jobs: Job[] = [
     createdAt: new Date().toISOString(),
     status: "open",
     employerId: "u_employer_1",
+    address: "Sofies gate 15, 0170 Oslo",
+    scheduleType: "deadline",
+    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+    paymentType: "fixed",
+    requirements: "Du kan begynne når som helst, men vær ferdig innen lørdag klokken 12:00",
   },
   {
     id: "j2",
@@ -42,6 +55,12 @@ export const jobs: Job[] = [
     createdAt: new Date().toISOString(),
     status: "open",
     employerId: "u_employer_2",
+    address: "Karl Johans gate 22, 0159 Oslo",
+    scheduleType: "fixed",
+    startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+    endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(), // Tomorrow + 2 hours
+    paymentType: "fixed",
+    requirements: "Du må jobbe fra 12:00-14:00 - nøyaktig",
   },
   {
     id: "j3",
@@ -56,6 +75,10 @@ export const jobs: Job[] = [
     createdAt: new Date().toISOString(),
     status: "open",
     employerId: "u_employer_1",
+    address: "Bygdøy allé 5, 0257 Oslo",
+    scheduleType: "flexible",
+    paymentType: "fixed",
+    requirements: "Start nå og bruk så lang tid du vil, men du får bare 220 kr",
   },
   // --- 15 extra jobs for students within 4km of Oslo (59.927336, 10.816307) ---
   {

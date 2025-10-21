@@ -19,6 +19,12 @@ export type Job = {
   lng: number;
   createdAt: string;
   status: "open" | "closed";
+  address?: string;
+  scheduleType?: "flexible" | "fixed" | "deadline";
+  startTime?: string;
+  endTime?: string;
+  paymentType?: "fixed" | "hourly";
+  requirements?: string;
 };
 
 export default function JobDetailClient({ job }: { job?: Job | null }) {
@@ -55,13 +61,90 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
 
   const mapSrc = googleMapsEmbedUrl(job.lat, job.lng, job.title);
 
+  const formatDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("no-NO", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getScheduleLabel = () => {
+    if (job.scheduleType === "flexible") return "🕐 Flexible timing";
+    if (job.scheduleType === "fixed") return "⏰ Fixed schedule";
+    if (job.scheduleType === "deadline") return "📅 Deadline";
+    return "🕐 Flexible";
+  };
+
   return (
     <div className="max-w-2xl mx-auto py-10 px-2 space-y-4">
       <h1 className="text-2xl font-bold">{job.title}</h1>
       <div className="text-sm text-gray-600">{job.areaName} • {job.category}</div>
-      <div className="text-sm">Pay: <b>{job.payNok} NOK</b> • Duration: {minutesToHhMm(job.durationMinutes)}</div>
-      <p className="text-sm leading-relaxed whitespace-pre-line">{job.desc}</p>
-      <div className="aspect-video w-full overflow-hidden rounded-lg border">
+      
+      {/* Payment and Duration */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
+          <span className="text-sm font-semibold text-green-700">{job.payNok} NOK</span>
+          {job.paymentType === "hourly" && <span className="text-xs text-green-600"> /time</span>}
+        </div>
+        <div className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+          <span className="text-sm text-blue-700">⏱️ {minutesToHhMm(job.durationMinutes)}</span>
+        </div>
+        <div className="px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
+          <span className="text-sm text-purple-700">{getScheduleLabel()}</span>
+        </div>
+      </div>
+
+      {/* Address */}
+      {job.address && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">📍</span>
+            <div>
+              <div className="text-xs text-gray-500 uppercase font-semibold">Location</div>
+              <div className="text-sm text-gray-900">{job.address}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Information */}
+      {(job.startTime || job.endTime) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <div className="text-xs text-amber-700 uppercase font-semibold mb-1">Schedule</div>
+          {job.startTime && (
+            <div className="text-sm text-amber-900">
+              <span className="font-medium">Start:</span> {formatDateTime(job.startTime)}
+            </div>
+          )}
+          {job.endTime && (
+            <div className="text-sm text-amber-900">
+              <span className="font-medium">{job.scheduleType === "deadline" ? "Deadline:" : "End:"}</span> {formatDateTime(job.endTime)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Requirements */}
+      {job.requirements && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="text-xs text-blue-700 uppercase font-semibold mb-1">Requirements</div>
+          <p className="text-sm text-blue-900 leading-relaxed">{job.requirements}</p>
+        </div>
+      )}
+
+      {/* Description */}
+      <div className="bg-white border border-gray-200 rounded-lg p-3">
+        <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Description</div>
+        <p className="text-sm leading-relaxed whitespace-pre-line text-gray-900">{job.desc}</p>
+      </div>
+
+      {/* Map */}
+      <div className="aspect-video w-full overflow-hidden rounded-lg border shadow-sm">
         <iframe src={mapSrc} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map" />
       </div>
       <div className="w-full flex gap-3 mt-4">

@@ -41,21 +41,30 @@ export async function getSession(): Promise<{ user: { id: string; email?: string
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   const session = findSession(token);
+  
   if (!session) {
     return { user: null, session: null };
   }
+  
   // Try Supabase first to resolve user info
   try {
     const supabase = getSupabaseServer();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("users")
       .select("id, email, role, navn, kommune")
       .eq("id", session.userId)
       .maybeSingle();
+    
     if (data) {
       return { user: data as any, session };
     }
-  } catch {}
+    
+    if (error) {
+      console.error("Error loading user from Supabase:", error);
+    }
+  } catch (e) {
+    console.error("Exception loading user from Supabase:", e);
+  }
 
   // Fallback to in-memory users (legacy)
   const user = findUserById(session.userId);
@@ -64,5 +73,6 @@ export async function getSession(): Promise<{ user: { id: string; email?: string
     void passwordHash;
     return { user: rest, session };
   }
+  
   return { user: null, session };
 }
