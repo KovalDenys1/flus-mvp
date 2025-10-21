@@ -55,6 +55,21 @@ This SQL will create:
 - ✅ Chat participants see only their messages
 - ✅ Photos visible only to application participants
 
+### 3.3 Execute flexible roles migration
+
+**New**: Users can now switch between worker and employer roles freely in the UI. Execute the SQL from `supabase/migrations/03_flexible_roles.sql`:
+
+```sql
+-- Allow flexible role switching
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('worker', 'employer'));
+
+-- Add default role for existing users
+UPDATE users SET role = 'worker' WHERE role IS NULL OR role NOT IN ('worker', 'employer');
+```
+
+This allows user registration without requiring real Supabase authentication.
+
 ---
 
 ## 📸 Step 4: Setup Storage for photos

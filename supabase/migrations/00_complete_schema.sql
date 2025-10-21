@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY DEFAULT ('u_' || substr(md5(random()::text), 1, 10)),
   email TEXT UNIQUE NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('worker', 'employer')),
+  role TEXT NOT NULL DEFAULT 'worker' CHECK (role IN ('worker', 'employer')),
   navn TEXT,
   kommune TEXT,
   telefon TEXT,

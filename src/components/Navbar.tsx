@@ -16,6 +16,10 @@ export default function Navbar() {
     const savedMode = localStorage.getItem("viewMode");
     if (savedMode === "worker" || savedMode === "employer") {
       setViewMode(savedMode);
+    } else {
+      // Default to worker mode if not set
+      setViewMode("worker");
+      localStorage.setItem("viewMode", "worker");
     }
 
     fetch("/api/auth/me")
@@ -23,11 +27,7 @@ export default function Navbar() {
       .then(d=>{
         const userData = d.user ?? null;
         setUser(userData);
-        // Set initial view mode based on user role only if not already set
-        if (userData?.role && !savedMode) {
-          setViewMode(userData.role);
-          localStorage.setItem("viewMode", userData.role);
-        }
+        // Don't override viewMode with user role - allow free switching
       })
       .catch(()=>{});
   }, []);

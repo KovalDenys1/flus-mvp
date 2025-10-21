@@ -20,7 +20,7 @@ FLUS er en MVP-plattform for småjobber hvor arbeidsgivere kan opprette jobber o
 
 - 📝 **Søk på jobber** - Send søknader direkte- The project now uses Supabase for persistent data (jobs, users, applications). See `SUPABASE_SETUP.md` for schema and seed SQL.
 
-- 💬 **Samtaler** - Chat med arbeidsgivere- Authentication in the app is Vipps-only (mocked for the demo). The mock Vipps flow creates or finds a user in Supabase and sets a session cookie.
+- 💬 **Samtaler** - Chat med arbeidsgivere- Authentication in the app is Vipps-only (real OAuth). Users are authenticated via Vipps and stored in Supabase with session cookies.
 
 - 🏆 **Prestasjoner** - Se dine oppnådde prestasjoner- The jobs endpoints (`/api/jobs`, `/api/jobs/[id]`) are backed by Supabase. A dev-only seed endpoint is available at `/api/admin/seed/jobs` to populate example jobs quickly.
 
@@ -48,7 +48,7 @@ FLUS er en MVP-plattform for småjobber hvor arbeidsgivere kan opprette jobber o
 
 - **Fleksibel tidsstyring** - Start når som helst- **Apply flow** that creates an application in Supabase and returns a conversation id for the chat UI
 
-- **Faste tider** - Spesifikt tidsrom (f.eks. 12:00-14:00)- **Vipps mock authentication** which creates/fetches users in Supabase and sets a session cookie
+- **Faste tider** - Spesifikt tidsrom (f.eks. 12:00-14:00)- **Real Vipps OAuth authentication** with user data fetched from Vipps API
 
 - **Frister** - Fullfør innen gitt tid- **Internationalization (i18n)**: Norwegian (default) and English language support
 
@@ -76,7 +76,7 @@ FLUS er en MVP-plattform for småjobber hvor arbeidsgivere kan opprette jobber o
 
 - **UI Components**: Radix UInpm install
 
-- **Authentication**: Mock Vipps (cookie-based sessions)```
+- **Authentication**: Real Vipps OAuth (cookie-based sessions)```
 
 - **Language**: TypeScript
 
@@ -130,7 +130,8 @@ Se `SUPABASE_SETUP.md` for detaljert informasjon om database-oppsett.
 
 Gå til Supabase Dashboard → SQL Editor og kjør:- POST /api/applications — creates an application (requires session) and returns a `conversationId` for the chat UI
 
-- GET /api/auth/vipps/start — mock Vipps start: creates/finds a user in Supabase and sets a session cookie; accepts `?email=` and `?role=` for testing
+- GET /api/auth/vipps/start — initiates Vipps OAuth flow, redirects to Vipps authorization URL
+- GET /api/auth/vipps/callback — handles OAuth callback, exchanges code for token, creates/finds user in Supabase
 
 ```sql- GET /api/auth/me — returns current user (reads from Supabase when possible)
 
@@ -138,7 +139,7 @@ Gå til Supabase Dashboard → SQL Editor og kjør:- POST /api/applications — 
 
 ```Notes:
 
-- The Vipps mock is intentionally simple for demos. For production, implement real OAuth with Vipps and secure token handling.
+- Real Vipps OAuth is implemented with secure token handling and user data from Vipps API.
 
 ### 4. Start dev server
 
@@ -164,7 +165,7 @@ curl -X POST http://localhost:3000/api/admin/seed/jobs
 
 ```
 
-Prosjektet bruker mock Vipps-autentisering for rask testing:
+Prosjektet bruker ekte Vipps OAuth for autentisering. Brukere kan fritt veksle mellom å søke jobber og opprette jobber i navigasjonslinjen.
 
 This endpoint will no-op if jobs already exist.
 
@@ -206,21 +207,15 @@ http://localhost:3000/login---
 
 
 
----## How to test the Vipps demo flow
+---## How to test the Vipps OAuth flow
 
+1. Start the dev server: `npm run dev`
+2. Open `http://localhost:3000/login`
+3. Click **Logg inn med Vipps**
+4. You will be redirected to Vipps for authentication
+5. After authenticating with Vipps, you'll be logged in and can switch between worker/employer modes using the toggle in the navbar
 
-
-## 📁 Prosjektstruktur1. Start the dev server.
-
-2. Open `/login` and click **Fortsett med Vipps**. You should be redirected to `/jobber` and have a session cookie set.
-
-```3. Inspect `/api/auth/me` to see the user record (from Supabase).
-
-src/4. To test different identities: `/api/auth/vipps/start?email=ola@nord.no&role=employer`.
-
-├── app/
-
-│   ├── api/                    # API routes---
+## 📁 Prosjektstruktur
 
 │   │   ├── jobs/              # Jobber (GET/POST)
 
@@ -275,7 +270,8 @@ src/4. To test different identities: `/api/auth/vipps/start?email=ola@nord.no&ro
 - `POST /api/applications` - Send søknad
 
 ### Auth
-- `GET /api/auth/vipps/start` - Mock Vipps login
+- `GET /api/auth/vipps/start` - Initiates Vipps OAuth flow
+- `GET /api/auth/vipps/callback` - Handles OAuth callback from Vipps
 - `GET /api/auth/me` - Hent current user
 - `POST /api/auth/logout` - Logg ut
 
@@ -315,7 +311,7 @@ Se `SUPABASE_SETUP.md` for fullstendig schema.
 
 ## ⚙️ Kjente Begrensninger
 
-1. **Mock Authentication** - Bruker forenklet Vipps mock for demo
+1. **Real Vipps OAuth** - Sikker autentisering via Vipps API
 2. **In-memory Conversations** - Chats lagres i minne (går tapt ved restart)
 3. **Ingen geocoding** - Koordinater er default Oslo-sentrum
 4. **Statistikk placeholder** - Viser 0 verdier (API ikke implementert)

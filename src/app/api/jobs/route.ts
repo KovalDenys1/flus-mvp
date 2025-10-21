@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get current user (employer) from our session system
+    // Get current user from our session system
     const { user } = await getSession();
     
     if (!user) {
@@ -77,13 +77,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if user is an employer
-    if (user.role !== "employer") {
-      return NextResponse.json(
-        { error: "Only employers can create jobs" },
-        { status: 403 }
-      );
-    }
+    // Any authenticated user can create jobs
 
     // Default coordinates (Oslo center) - in production, geocode the address
     const lat = 59.9139;
