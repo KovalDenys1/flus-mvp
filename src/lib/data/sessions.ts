@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { findUserById, User } from "./users";
+import { findUserById } from "./users";
 import { SESSION_COOKIE } from "../utils/cookies";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
@@ -56,7 +56,10 @@ export async function getSession(): Promise<{ user: { id: string; email?: string
       .maybeSingle();
     
     if (data) {
-      return { user: data as any, session };
+      return { 
+        user: data as { id: string; email?: string; role?: string; navn?: string; kommune?: string }, 
+        session 
+      };
     }
     
     if (error) {

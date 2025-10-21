@@ -1,338 +1,278 @@
-# FLUS — MVP Platform# FLUS — Prototype (Supabase edition)
+# FLUS — MVP Platform (Supabase Edition)
 
+**FLUS** is an MVP platform for small jobs where employers can create jobs and job seekers can apply for and complete local tasks. The project uses Supabase for persistent storage and Next.js for frontend/backend.
 
+This repository contains the FLUS MVP prototype — a small-job platform for discovering and applying to local tasks, with chat functionality and employer tools. The prototype uses Supabase for persistent data (jobs, users, applications, CV).
 
-FLUS er en MVP-plattform for småjobber hvor arbeidsgivere kan opprette jobber og jobbsøkere kan søke og utføre lokale oppgaver. Prosjektet bruker Supabase for persistent lagring og Next.js for frontend/backend.This repository contains the FLUS MVP prototype — a small-job platform for discovering and applying to local tasks, with a lightweight demo chat and a Gründer helper. The prototype uses Supabase for persistent data (jobs, users, applications) while keeping some demo features in-memory for quick exploration.
-
-
-
----This is an educational prototype, not production-ready. It is designed for demos and local development.
-
-
-
-## 🚀 Funksjoner---
-
-
-
-### For Jobbsøkere (Worker)## High level — what changed
-
-- 🔍 **Finn jobber** - Søk etter jobber med filtre (kategori, avstand, søk)
-
-- 📝 **Søk på jobber** - Send søknader direkte- The project now uses Supabase for persistent data (jobs, users, applications). See `SUPABASE_SETUP.md` for schema and seed SQL.
-
-- 💬 **Samtaler** - Chat med arbeidsgivere- Authentication in the app is Vipps-only (real OAuth). Users are authenticated via Vipps and stored in Supabase with session cookies.
-
-- 🏆 **Prestasjoner** - Se dine oppnådde prestasjoner- The jobs endpoints (`/api/jobs`, `/api/jobs/[id]`) are backed by Supabase. A dev-only seed endpoint is available at `/api/admin/seed/jobs` to populate example jobs quickly.
-
-- 📋 **Mine søknader** - Oversikt over sendte søknader- Applications are inserted into Supabase (`/api/applications`), and the existing chat flow still uses an in-memory conversation store for now (we plan to move chat to Supabase next).
-
-- 👤 **Profil** - Administrer din profil
+> ��� **Quick Start:** See [QUICK_START.md](./QUICK_START.md) for step-by-step setup guide!
 
 ---
 
-### For Arbeidsgivere (Employer)
+**Note:** This is an educational prototype, not production-ready. It is designed for demos and local development.
 
-- ➕ **Opprett jobber** - Publiser nye jobber med detaljert informasjon## Quick summary of implemented features
+---
 
-- 📋 **Mine jobber** - Oversikt over dine publiserte jobber
+## ✨ Key Features
 
-- 💬 **Samtaler** - Chat med søkere- **Jobs listing and detail pages** backed by Supabase
+### For Job Seekers (Worker)
+- ��� **Find Jobs** - Search and filter jobs by category, distance, and keywords
+- ��� **Apply** - Submit applications directly
+- ��� **Chat** - Communicate with employers
+- ��� **Achievements** - Track your completed jobs and earn achievements
+- ��� **My Applications** - Overview of submitted applications
+- ��� **Profile** - Manage your profile, work experience, and skills
 
-- 📊 **Statistikk** - Se statistikk over dine jobber- **Enhanced job scheduling**: Flexible timing, fixed schedules, deadlines
+### For Employers
+- ➕ **Create Jobs** - Publish new jobs with detailed information
+- ��� **My Jobs** - Overview of your published jobs
+- ��� **Chat** - Communicate with applicants
+- ��� **Statistics** - View statistics about your jobs
+- ��� **Profile** - Manage your profile
 
-- 👤 **Profil** - Administrer din profil- **Location tracking**: Full addresses, map integration
+### Enhanced Job Scheduling
+- **Flexible timing** - Start anytime
+- **Fixed times** - Specific time slots (e.g., 12:00-14:00)
+- **Deadlines** - Complete within given time
+- **Location** - Full address support
+- **Payment types** - Fixed price or hourly rate
+- **Requirements** - Specific instructions or qualifications
 
-- **Payment flexibility**: Fixed price or hourly rates
+---
 
-### Forbedret jobbplanlegging- **Job creation form** with all scheduling options at `/jobber/ny`
+## ���️ Tech Stack
 
-- **Fleksibel tidsstyring** - Start når som helst- **Apply flow** that creates an application in Supabase and returns a conversation id for the chat UI
-
-- **Faste tider** - Spesifikt tidsrom (f.eks. 12:00-14:00)- **Real Vipps OAuth authentication** with user data fetched from Vipps API
-
-- **Frister** - Fullfør innen gitt tid- **Internationalization (i18n)**: Norwegian (default) and English language support
-
-- **Lokasjon** - Fullstendig adresse- **Language switcher**: Toggle between NO/EN in navbar
-
-- **Betalingstyper** - Fast pris eller timepris- **Demo chat and conversations** remain partly in-memory for quick demo conversations
-
-- **Krav** - Spesifikke instruksjoner eller kvalifikasjoner- **Profile page** (demo data) and placeholders for CV; CV persistence will be added next
-
-
-
-------
-
-
-
-## 🛠️ Teknisk Stack## Developer setup
-
-
-
-- **Framework**: Next.js 15.5.4 (App Router, Turbopack)1. Install dependencies
-
+- **Framework**: Next.js 15.5.4 (App Router, Turbopack)
 - **Database**: Supabase (PostgreSQL)
-
-- **Styling**: Tailwind CSS 4.0```bash
-
-- **UI Components**: Radix UInpm install
-
-- **Authentication**: Real Vipps OAuth (cookie-based sessions)```
-
+- **Styling**: Tailwind CSS 4.0
+- **UI Components**: Radix UI
+- **Authentication**: Real Vipps OAuth (cookie-based sessions)
 - **Language**: TypeScript
 
-2. Create `.env.local` with Supabase envs (see `SUPABASE_SETUP.md`):
+---
+
+## ��� Quick Summary of Implemented Features
+
+- **Jobs listing and detail pages** backed by Supabase
+- **Enhanced job scheduling**: Flexible timing, fixed schedules, deadlines
+- **Location tracking**: Full addresses, map integration
+- **Payment flexibility**: Fixed price or hourly rates
+- **Job creation form** with all scheduling options at `/jobber/ny`
+- **Apply flow** that creates an application in Supabase and returns a conversation ID for the chat UI
+- **Real Vipps OAuth authentication** with user data fetched from Vipps API
+- **Internationalization (i18n)**: Norwegian (default) and English language support
+- **Language switcher**: Toggle between NO/EN in navbar
+- **Demo chat and conversations** remain partly in-memory for quick demo conversations
+- **Profile page** (demo data) and placeholders for CV; CV persistence is implemented
 
 ---
+
+## ��� Developer Setup
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure Supabase
+
+Create `.env.local` in the root folder with your Supabase credentials (see `SUPABASE_SETUP.md` for details):
 
 ```env
-
-## 📋 OppsettNEXT_PUBLIC_SUPABASE_URL=your-project-url
-
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-### 1. Installer avhengigheter# Optional: only for server-side admin tasks
-
+# Optional: only for server-side admin tasks
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-```bash```
-
-npm install
-
-```3. Run the dev server
-
-
-
-### 2. Konfigurer Supabase```bash
-
-npm run dev
-
-Opprett `.env.local` i root-mappen:```
-
-
-
-```envOpen http://localhost:3000 (or the port printed by Next.js) to view the app.
-
-NEXT_PUBLIC_SUPABASE_URL=din-supabase-url
-
-NEXT_PUBLIC_SUPABASE_ANON_KEY=din-anon-key---
-
 ```
 
-## Important API routes and dev helpers
+### 3. Run Migrations
 
-Se `SUPABASE_SETUP.md` for detaljert informasjon om database-oppsett.
+Go to Supabase Dashboard → SQL Editor and run the migrations from `supabase/migrations/`:
 
-- GET /api/jobs — lists jobs from Supabase
+```sql
+-- See supabase/migrations/ directory for all migration files
+-- Run them in order: 00, 01, 02, 03, 04
+```
 
-### 3. Kjør migrasjoner- GET /api/jobs/[id] — job detail
+### 4. Start Dev Server
 
-- POST /api/admin/seed/jobs — dev-only seed endpoint that inserts example jobs (no UI; use curl or Postman)
+```bash
+npm run dev
+```
 
-Gå til Supabase Dashboard → SQL Editor og kjør:- POST /api/applications — creates an application (requires session) and returns a `conversationId` for the chat UI
-
-- GET /api/auth/vipps/start — initiates Vipps OAuth flow, redirects to Vipps authorization URL
-- GET /api/auth/vipps/callback — handles OAuth callback, exchanges code for token, creates/finds user in Supabase
-
-```sql- GET /api/auth/me — returns current user (reads from Supabase when possible)
-
--- Se supabase/migrations/add_job_scheduling_fields.sql
-
-```Notes:
-
-- Real Vipps OAuth is implemented with secure token handling and user data from Vipps API.
-
-### 4. Start dev server
+Open http://localhost:3000 (or the port printed by Next.js) to view the app.
 
 ---
 
-```bash
+## ��� Authentication
 
-npm run dev## Seed jobs quickly (dev)
+The project uses real Vipps OAuth for authentication. Users can freely switch between seeking jobs and creating jobs using the toggle in the navbar.
 
-```
-
-If your Supabase project has no `jobs` rows yet, use the dev seed endpoint after starting the dev server:
-
-Åpne http://localhost:3000
-
-```bash
-
----# if Next runs on 3000
-
-curl -X POST http://localhost:3000/api/admin/seed/jobs
-
-## 🔐 Autentisering# or replace port with the one Next reports (3001 etc.)
-
-```
-
-Prosjektet bruker ekte Vipps OAuth for autentisering. Brukere kan fritt veksle mellom å søke jobber og opprette jobber i navigasjonslinjen.
-
-This endpoint will no-op if jobs already exist.
-
-### Logg inn som jobbsøker (worker):
-
-```---
-
-http://localhost:3000/login
-
-→ Velg "Jobbsøker" (👷)## Current limitations and next work
-
-→ Klikk "Logg inn med Vipps"
-
-```- CV persistence: the database schema includes `cv_entries` and `skills`, but the API/UI for saving CV items is not implemented yet. (Planned next.)
-
-- Chat persistence: conversations/messages are still in-memory for demo conversations; migrating chat to Supabase (with optional Realtime) is planned.
-
-### Logg inn som arbeidsgiver (employer):- Auth: current flow is a mocked Vipps flow. Replace with real Vipps OAuth for production.
-
-```
-
-http://localhost:3000/login---
-
-→ Velg "Arbeidsgiver" (💼)
-
-→ Klikk "Logg inn med Vipps"## Developer notes and guidelines
-
-```
-
-- Keep code comments in English. UI should be in Norwegian (as the app is targeted locally).
-
-### Custom brukere (for testing):- Avoid server-side calls to the app itself; prefer using Supabase or other external services from server routes.
-
-```- When changing server routes that return server components, `await params` before using `params.id` to avoid Next.js validator issues.
-
-/api/auth/vipps/start?email=test@example.com&role=employer
-
-```---
-
-
-
----## How to test the Vipps OAuth flow
+### How to Test the Vipps OAuth Flow
 
 1. Start the dev server: `npm run dev`
 2. Open `http://localhost:3000/login`
-3. Click **Logg inn med Vipps**
+3. Click **Logg inn med Vipps** (Log in with Vipps)
 4. You will be redirected to Vipps for authentication
 5. After authenticating with Vipps, you'll be logged in and can switch between worker/employer modes using the toggle in the navbar
 
-## 📁 Prosjektstruktur
+---
 
-│   │   ├── jobs/              # Jobber (GET/POST)
+## ��� Important API Routes
 
-│   │   ├── my-jobs/           # Mine jobber (employer)## Next steps (recommended)
+### Jobs
+- `GET /api/jobs` — Lists jobs from Supabase
+- `POST /api/jobs` — Creates a new job (requires session)
+- `GET /api/jobs/[id]` — Job detail
+- `GET /api/my-jobs` — Lists user's jobs (employer view)
 
-│   │   ├── applications/      # Søknader
+### Applications
+- `GET /api/applications` — Lists user's applications
+- `POST /api/applications` — Creates an application (requires session) and returns a `conversationId` for the chat UI
 
-│   │   ├── auth/              # Autentisering1. Implement CV API (`/api/cv`) and UI on `/profil` to persist CV entries and skills in Supabase.
+### CV
+- `GET /api/cv` — Returns user's CV entries and skills
+- `POST /api/cv` — Adds new CV entry or skill (requires auth)
 
-│   │   └── ...2. Migrate chat (conversations/messages) to Supabase and enable Realtime for live messaging.
+### Auth
+- `GET /api/auth/vipps/start` — Initiates Vipps OAuth flow, redirects to Vipps authorization URL
+- `GET /api/auth/vipps/callback` — Handles OAuth callback, exchanges code for token, creates/finds user in Supabase
+- `GET /api/auth/me` — Returns current user (reads from Supabase when possible)
+- `POST /api/auth/logout` — Logs out user
 
-│   ├── jobber/                # Job listing3. Harden auth and replace the mock Vipps flow with real OAuth in a secure server-side flow.
+### Dev Helpers
+- `POST /api/admin/seed/jobs` — Dev-only seed endpoint that inserts example jobs (no UI; use curl or Postman)
 
-│   │   └── ny/               # Opprett jobb (employer)
+---
 
-│   ├── mine-jobber/           # Mine jobber (employer)---
+## ���️ Seed Jobs Quickly (Dev)
 
-│   ├── mine-soknader/         # Mine søknader (worker)
+If your Supabase project has no `jobs` rows yet, use the dev seed endpoint after starting the dev server:
 
-│   ├── samtaler/              # Chat## License
+```bash
+# If Next runs on 3000
+curl -X POST http://localhost:3000/api/admin/seed/jobs
+# or replace port with the one Next reports (3001, etc.)
+```
 
-│   ├── prestasjoner/          # Prestasjoner
+This endpoint will no-op if jobs already exist.
 
-│   ├── statistikk/            # Statistikk (employer)Educational prototype. Reuse for non-commercial, educational purposes with attribution.
+---
 
-│   └── profil/                # Profil
+## ��� Role Management
 
-├── components/© 2025 — Denys Koval
-│   ├── Navbar.tsx             # Hovednavigasjon med rolebytte
-│   ├── JobDetailsDialog.tsx   # Job detaljer modal
-│   └── ui/                    # UI komponenter
+The system supports two roles:
+
+### Worker (Job Seeker)
+- Can apply for jobs
+- View my applications
+- Chat with employers
+- Earn achievements
+
+### Employer
+- Can create jobs
+- View my jobs
+- Chat with applicants
+- View statistics
+
+**Role Switching:** Use the button in the navbar to switch between roles (saved in localStorage).
+
+---
+
+## ��️ Database Schema
+
+### Tables
+- `users` — Users (id, email, role, navn, kommune)
+- `jobs` — Jobs with all fields including scheduling
+- `applications` — Applications (job_id, applicant_id)
+- `cv_entries` — Work experience (title, company, dates)
+- `skills` — Skills (skill_name, proficiency_level, years_experience)
+- `conversations` — (In-memory for now)
+
+See `SUPABASE_SETUP.md` for complete schema.
+
+---
+
+## ��� Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── jobs/              # Jobs (GET/POST)
+│   │   ├── my-jobs/           # My jobs (employer)
+│   │   ├── applications/      # Applications
+│   │   ├── cv/                # CV management
+│   │   ├── auth/              # Authentication
+│   │   └── ...
+│   ├── jobber/                # Job listing
+│   │   └── ny/                # Create job (employer)
+│   ├── mine-jobber/           # My jobs (employer)
+│   ├── mine-soknader/         # My applications (worker)
+│   ├── samtaler/              # Chat
+│   ├── prestasjoner/          # Achievements
+│   ├── statistikk/            # Statistics (employer)
+│   └── profil/                # Profile
+├── components/
+│   ├── Navbar.tsx             # Main navigation with role toggle
+│   ├── JobDetailsDialog.tsx   # Job details modal
+│   └── ui/                    # UI components
 └── lib/
-    ├── data/                  # Data håndtering
+    ├── data/                  # Data handling
     │   ├── sessions.ts        # Session management
     │   ├── users.ts           # User data
     │   └── jobs.ts            # Job data (mock)
-    └── utils/                 # Utility funksjoner
+    └── utils/                 # Utility functions
 ```
 
 ---
 
-## 🎯 API Endpoints
+## ⚙️ Known Limitations
 
-### Jobs
-- `GET /api/jobs` - Hent alle jobber
-- `POST /api/jobs` - Opprett ny jobb (krever employer-rolle)
-- `GET /api/jobs/[id]` - Hent spesifikk jobb
-- `GET /api/my-jobs` - Hent mine jobber (employer)
+1. **Real Vipps OAuth** — Secure authentication via Vipps API
+2. **In-memory Conversations** — Chats stored in memory (lost on restart)
+3. **No geocoding** — Coordinates default to Oslo center
+4. **Statistics placeholder** — Shows 0 values (API not implemented)
 
-### Applications
-- `GET /api/applications` - Hent mine søknader
-- `POST /api/applications` - Send søknad
+### ��� RLS Error Fix
 
-### Auth
-- `GET /api/auth/vipps/start` - Initiates Vipps OAuth flow
-- `GET /api/auth/vipps/callback` - Handles OAuth callback from Vipps
-- `GET /api/auth/me` - Hent current user
-- `POST /api/auth/logout` - Logg ut
+If you get error `"new row violates row-level security policy"` when creating jobs:
+1. Open Supabase SQL Editor
+2. Run SQL from `supabase/migrations/04_fix_rls_for_cookie_auth.sql`
+3. This makes RLS compatible with cookie-based auth
 
 ---
 
-## 🔄 Rollehåndtering
+## ��� Current Limitations and Next Work
 
-Systemet støtter to roller:
-
-### Worker (Jobbsøker)
-- Kan søke på jobber
-- Se mine søknader
-- Chatte med arbeidsgivere
-- Opptjene prestasjoner
-
-### Employer (Arbeidsgiver)
-- Kan opprette jobber
-- Se mine jobber
-- Chatte med søkere
-- Se statistikk
-
-**Rollebytte:** Bruk knappen i navbar for å bytte mellom roller (lagres i localStorage).
+- CV persistence: the database schema includes `cv_entries` and `skills`, and the API/UI for saving CV items is implemented.
+- Chat persistence: conversations/messages are still in-memory for demo conversations; migrating chat to Supabase (with optional Realtime) is planned.
+- Auth: current flow uses real Vipps OAuth. Ensure proper security for production use.
 
 ---
 
-## 🗄️ Database Schema
+## ��� Next Steps (Recommended)
 
-### Tables
-- `users` - Brukere (id, email, role, navn, kommune)
-- `jobs` - Jobber med alle felter inkl. scheduling
-- `applications` - Søknader (job_id, applicant_id)
-- `conversations` - (In-memory for nå)
-
-Se `SUPABASE_SETUP.md` for fullstendig schema.
-
----
-
-## ⚙️ Kjente Begrensninger
-
-1. **Real Vipps OAuth** - Sikker autentisering via Vipps API
-2. **In-memory Conversations** - Chats lagres i minne (går tapt ved restart)
-3. **Ingen geocoding** - Koordinater er default Oslo-sentrum
-4. **Statistikk placeholder** - Viser 0 verdier (API ikke implementert)
+- [ ] Migrate chat (conversations/messages) to Supabase and enable Realtime for live messaging
+- [ ] Add geocoding for addresses
+- [ ] Implement statistics API with real metrics
+- [ ] Add rating system for users
+- [ ] Add push notifications
+- [ ] Add image upload for jobs
 
 ---
 
-## 🚧 Planlagt Utvikling
+## ��� Developer Notes and Guidelines
 
-- [ ] Ekte Vipps OAuth integration
-- [ ] Persistente chat/messages i Supabase
-- [ ] Realtime chat med Supabase Realtime
-- [ ] Geocoding for adresser
-- [ ] Statistikk API med reelle metrikker
-- [ ] CV/Resume håndtering
-- [ ] Rating system for brukere
-- [ ] Push notifications
-- [ ] Bildeupplasting for jobber
+- Keep code comments in English. UI should be in Norwegian (as the app is targeted locally).
+- Avoid server-side calls to the app itself; prefer using Supabase or other external services from server routes.
+- When changing server routes that return server components, `await params` before using `params.id` to avoid Next.js validator issues.
 
 ---
 
-## 📄 Lisens
+## ��� License
 
-Educational prototype.  
+Educational prototype. Reuse for non-commercial, educational purposes with attribution.
+
 © 2025 — Denys Koval

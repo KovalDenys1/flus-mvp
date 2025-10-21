@@ -377,6 +377,73 @@ WHERE u.role = 'worker'
 GROUP BY u.id, u.email, u.navn;
 
 -- =============================================================================
+-- 9. CV ENTRIES TABLE (Work experience)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS cv_entries (
+  id TEXT PRIMARY KEY DEFAULT ('cv_' || substr(md5(random()::text), 1, 10)),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  description TEXT,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  current_job BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Constraint: if current_job is true, end_date must be null
+  CONSTRAINT cv_entry_dates_check CHECK (
+    (current_job = true AND end_date IS NULL) OR
+    (current_job = false AND end_date IS NOT NULL AND end_date >= start_date)
+  )
+);
+
+-- CV entries indexes
+CREATE INDEX IF NOT EXISTS idx_cv_entries_user_id ON cv_entries(user_id);
+CREATE INDEX IF NOT EXISTS idx_cv_entries_start_date ON cv_entries(start_date DESC);
+
+-- CV entries RLS
+ALTER TABLE cv_entries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view all CV entries"
+  ON cv_entries FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can manage own CV entries"
+  ON cv_entries FOR ALL
+  USING (user_id = auth.uid()::text);
+
+-- =============================================================================
+-- 10. SKILLS TABLE (User skills/competencies)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS skills (
+  id TEXT PRIMARY KEY DEFAULT ('skill_' || substr(md5(random()::text), 1, 10)),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  skill_name TEXT NOT NULL,
+  proficiency_level TEXT DEFAULT 'beginner' CHECK (proficiency_level IN ('beginner', 'intermediate', 'advanced', 'expert')),
+  years_experience INTEGER DEFAULT 0 CHECK (years_experience >= 0),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, skill_name)
+);
+
+-- Skills indexes
+CREATE INDEX IF NOT EXISTS idx_skills_user_id ON skills(user_id);
+CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(skill_name);
+
+-- Skills RLS
+ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view all skills"
+  ON skills FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can manage own skills"
+  ON skills FOR ALL
+  USING (user_id = auth.uid()::text);
+
+-- =============================================================================
 -- SCHEMA COMPLETE
 -- =============================================================================
 -- Next steps:

@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url, type, visible } = body as { url?: string; type?: string; visible?: boolean };
+    const { url, type } = body as { url?: string; type?: string; visible?: boolean };
     if (!url || !type) return NextResponse.json({ error: "url and type are required" }, { status: 400 });
     if (!isAllowedSocial(url)) return NextResponse.json({ error: "domain not allowed" }, { status: 400 });
 

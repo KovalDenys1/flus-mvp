@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // Decode state to get timestamp (no role needed)
-    const decodedState = JSON.parse(Buffer.from(state, 'base64').toString());
+    // const decodedState = JSON.parse(Buffer.from(state, 'base64').toString());
     // Default role is worker, users can switch in UI
 
     // Exchange authorization code for access token

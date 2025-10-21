@@ -1,346 +1,411 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Edit, Trash2 } from "lucide-react";
 
-type SocialLink = { type: "linkedin" | "github" | "website"; url: string; visible: boolean };
-type CvEntry = { id: string; title: string; category: string; date: string };
-type Review = { id: string; rating: number; text: string; date: string };
-type WorkerProfile = {
-  userId: string;
-  name: string;
-  ageRange: string;
-  kommune: string;
-  skills: string[];
-  cv: CvEntry[];
-  socials: SocialLink[];
-  achievements: Record<string, number>;
-  xp: number;
-  avatarUrl?: string;
+type CvEntry = {
+  id: string;
+  user_id: string;
+  title: string;
+  company: string;
+  description?: string;
+  start_date: string;
+  end_date?: string;
+  current_job: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type Skill = {
+  id: string;
+  user_id: string;
+  skill_name: string;
+  proficiency_level: string;
+  years_experience: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type User = {
+  id: string;
+  email: string;
+  role: string;
+  navn?: string;
+  kommune?: string;
+  telefon?: string;
 };
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<WorkerProfile|null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [aggregates, setAggregates] = useState<{avgRating:string; totalDone:number}|null>(null);
-  const [loading, setLoading] = useState(true); 
-  const [err, setErr] = useState<string|null>(null);
-  const [tab, setTab] = useState<"overview" | "cv" | "socials" | "reviews">("overview");
-  // Pagination for reviews
-  const [reviewPage, setReviewPage] = useState(0);
-  const REVIEWS_PER_PAGE = 3;
+  const [user, setUser] = useState<User | null>(null);
+  const [cvEntries, setCvEntries] = useState<CvEntry[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Form states
+  const [cvFormOpen, setCvFormOpen] = useState(false);
+  const [skillFormOpen, setSkillFormOpen] = useState(false);
+  const [cvForm, setCvForm] = useState({
+    title: "",
+    company: "",
+    description: "",
+    start_date: "",
+    end_date: "",
+    current_job: false
+  });
+  const [skillForm, setSkillForm] = useState({
+    skill_name: "",
+    proficiency_level: "beginner",
+    years_experience: 0
+  });
 
   useEffect(() => {
-    fetch("/api/profile")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((d) => {
-        setProfile(d.profile);
-        setReviews(d.reviews ?? []);
-        setAggregates(d.aggregates ?? null);
-      })
-      .catch((e) => setErr(String(e)))
-      .finally(() => setLoading(false));
+    loadProfile();
   }, []);
 
-  if (loading)
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+
+      // Get user info
+      const userRes = await fetch("/api/auth/me");
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        setUser(userData.user);
+      }
+
+      // Get CV data
+      const cvRes = await fetch("/api/cv");
+      if (cvRes.ok) {
+        const cvData = await cvRes.json();
+        setCvEntries(cvData.cv_entries || []);
+        setSkills(cvData.skills || []);
+      }
+    } catch (err) {
+      setError("Kunne ikke laste profil");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addCvEntry = async () => {
+    try {
+      const res = await fetch("/api/cv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "cv_entry",
+          data: cvForm
+        })
+      });
+
+      if (res.ok) {
+        setCvFormOpen(false);
+        setCvForm({
+          title: "",
+          company: "",
+          description: "",
+          start_date: "",
+          end_date: "",
+          current_job: false
+        });
+        loadProfile();
+      } else {
+        const error = await res.json();
+        alert("Feil: " + error.error);
+      }
+    } catch (err) {
+      alert("Kunne ikke legge til CV-oppføring");
+      console.error(err);
+    }
+  };
+
+  const addSkill = async () => {
+    try {
+      const res = await fetch("/api/cv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "skill",
+          data: skillForm
+        })
+      });
+
+      if (res.ok) {
+        setSkillFormOpen(false);
+        setSkillForm({
+          skill_name: "",
+          proficiency_level: "beginner",
+          years_experience: 0
+        });
+        loadProfile();
+      } else {
+        const error = await res.json();
+        alert("Feil: " + error.error);
+      }
+    } catch (err) {
+      alert("Kunne ikke legge til ferdighet");
+      console.error(err);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("no-NO", {
+      year: "numeric",
+      month: "short"
+    });
+  };
+
+  if (loading) {
     return (
-      <div className="max-w-2xl mx-auto mt-10 animate-pulse">
-        <div className="h-32 bg-gray-200 rounded-xl mb-6" />
-        <div className="h-8 bg-gray-200 rounded w-1/2 mb-3" />
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-3" />
-        <div className="h-6 bg-gray-200 rounded w-1/4" />
+      <div className="max-w-4xl mx-auto mt-10 p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
-  if (err) return <div className="text-red-600 max-w-2xl mx-auto mt-10">Error: {err}</div>;
-  if (!profile) return <div className="max-w-2xl mx-auto mt-10">Profile not found.</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto mt-10 p-4">
+        <div className="text-red-600">Feil: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto px-2 sm:px-0">
-      {/* Demo-informasjon */}
-      <div className="mb-6">
-        <table className="w-full border border-yellow-200 rounded-lg bg-yellow-50 text-yellow-900 text-sm shadow">
-          <tbody>
-            <tr>
-              <td className="p-3 font-semibold">Demo profile</td>
-              <td className="p-3">
-                This is a demo profile. In a real app you would be asked to log in or register, and if signed in you would see your profile here.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div className="max-w-4xl mx-auto mt-10 p-4 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Min profil</h1>
+        <Button onClick={loadProfile} variant="outline">
+          Oppdater
+        </Button>
       </div>
-      {/* HERO */}
-      <section className="relative bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          {profile.avatarUrl ? (
-            <Image
-              src={profile.avatarUrl}
-              alt={profile.name}
-              width={96}
-              height={96}
-              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
-              priority={true}
-            />
+
+      {/* User Info */}
+      {user && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Brukerinformasjon</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div><strong>Navn:</strong> {user.navn || "Ikke oppgitt"}</div>
+            <div><strong>E-post:</strong> {user.email}</div>
+            <div><strong>Telefon:</strong> {user.telefon || "Ikke oppgitt"}</div>
+            <div><strong>Kommune:</strong> {user.kommune || "Ikke oppgitt"}</div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CV Entries */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Arbeidserfaring</CardTitle>
+          <Dialog open={cvFormOpen} onOpenChange={setCvFormOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Legg til
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Legg til arbeidserfaring</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Stilling</Label>
+                  <Input
+                    id="title"
+                    value={cvForm.title}
+                    onChange={(e) => setCvForm({...cvForm, title: e.target.value})}
+                    placeholder="f.eks. Elektriker"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="company">Bedrift</Label>
+                  <Input
+                    id="company"
+                    value={cvForm.company}
+                    onChange={(e) => setCvForm({...cvForm, company: e.target.value})}
+                    placeholder="f.eks. Byggmester AS"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Beskrivelse</Label>
+                  <Textarea
+                    id="description"
+                    value={cvForm.description}
+                    onChange={(e) => setCvForm({...cvForm, description: e.target.value})}
+                    placeholder="Beskriv arbeidsoppgaver og ansvar..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="start_date">Startdato</Label>
+                    <Input
+                      id="start_date"
+                      type="date"
+                      value={cvForm.start_date}
+                      onChange={(e) => setCvForm({...cvForm, start_date: e.target.value})}
+                    />
+                  </div>
+                  {!cvForm.current_job && (
+                    <div>
+                      <Label htmlFor="end_date">Sluttdato</Label>
+                      <Input
+                        id="end_date"
+                        type="date"
+                        value={cvForm.end_date}
+                        onChange={(e) => setCvForm({...cvForm, end_date: e.target.value})}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="current_job"
+                    checked={cvForm.current_job}
+                    onChange={(e) => setCvForm({...cvForm, current_job: e.target.checked})}
+                  />
+                  <Label htmlFor="current_job">Nåværende stilling</Label>
+                </div>
+                <Button onClick={addCvEntry} className="w-full">
+                  Legg til
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {cvEntries.length === 0 ? (
+            <p className="text-gray-500">Ingen arbeidserfaring lagt til ennå.</p>
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-700 border-4 border-white shadow">
-              {profile.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
+            <div className="space-y-4">
+              {cvEntries.map((entry) => (
+                <div key={entry.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">{entry.title}</h3>
+                      <p className="text-gray-600">{entry.company}</p>
+                      <p className="text-sm text-gray-500">
+                        {formatDate(entry.start_date)} - {entry.current_job ? "nå" : entry.end_date ? formatDate(entry.end_date) : ""}
+                      </p>
+                      {entry.description && (
+                        <p className="mt-2 text-sm">{entry.description}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-600">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
-        {/* Main info */}
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{profile.name}</h1>
-          <div className="text-gray-600 mt-1 text-sm flex flex-wrap gap-x-3 gap-y-1">
-            <span>{profile.ageRange}</span>
-            <span>•</span>
-            <span>{profile.kommune}</span>
-            {aggregates && (
-              <>
-                <span>•</span>
-                <span>★ {aggregates.avgRating} ({aggregates.totalDone} oppdrag)</span>
-              </>
-            )}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {profile.skills.slice(0, 6).map((s) => (
-              <Badge key={s} variant="secondary">
-                {s}
-              </Badge>
-            ))}
-            {profile.skills.length > 6 && (
-              <span className="text-xs text-gray-500">+{profile.skills.length - 6} flere</span>
-            )}
-          </div>
-          <div className="mt-4 flex gap-2 flex-wrap">
-            <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
-              Rediger profil
-            </Button>
-            <Button size="sm" variant="default" className="bg-orange-500 hover:bg-orange-600">
-              Kontakt
-            </Button>
-          </div>
-        </div>
-        {/* XP / Achievements */}
-        <div className="flex flex-col items-center sm:items-end gap-2 min-w-[120px]">
-          <div className="text-xs text-gray-500">XP</div>
-          <div className="text-2xl font-bold text-gray-700">{profile.xp}</div>
-          <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-orange-500"
-              style={{ width: `${Math.min(100, (profile.xp % 1000) / 10)}%` }}
-            />
-          </div>
-          <div className="flex gap-1 mt-1 flex-wrap">
-            {Object.entries(profile.achievements)
-              .slice(0, 2)
-              .map(([k, v]) => (
-                <Badge key={k} variant="outline" className="text-xs border-gray-300 text-gray-700">
-                  {k}: {v}
+        </CardContent>
+      </Card>
+
+      {/* Skills */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Ferdigheter</CardTitle>
+          <Dialog open={skillFormOpen} onOpenChange={setSkillFormOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Legg til
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Legg til ferdighet</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="skill_name">Ferdighet</Label>
+                  <Input
+                    id="skill_name"
+                    value={skillForm.skill_name}
+                    onChange={(e) => setSkillForm({...skillForm, skill_name: e.target.value})}
+                    placeholder="f.eks. Elektroarbeid"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="proficiency_level">Nivå</Label>
+                  <Select
+                    value={skillForm.proficiency_level}
+                    onValueChange={(value) => setSkillForm({...skillForm, proficiency_level: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Nybegynner</SelectItem>
+                      <SelectItem value="intermediate">Middels</SelectItem>
+                      <SelectItem value="advanced">Avansert</SelectItem>
+                      <SelectItem value="expert">Ekspert</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="years_experience">Års erfaring</Label>
+                  <Input
+                    id="years_experience"
+                    type="number"
+                    min="0"
+                    value={skillForm.years_experience}
+                    onChange={(e) => setSkillForm({...skillForm, years_experience: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                <Button onClick={addSkill} className="w-full">
+                  Legg til
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {skills.length === 0 ? (
+            <p className="text-gray-500">Ingen ferdigheter lagt til ennå.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill) => (
+                <Badge key={skill.id} variant="secondary" className="flex items-center gap-2">
+                  {skill.skill_name}
+                  <span className="text-xs">
+                    ({skill.proficiency_level === "beginner" ? "Nybegynner" :
+                      skill.proficiency_level === "intermediate" ? "Middels" :
+                      skill.proficiency_level === "advanced" ? "Avansert" : "Ekspert"})
+                  </span>
+                  {skill.years_experience > 0 && (
+                    <span className="text-xs">• {skill.years_experience} år</span>
+                  )}
                 </Badge>
               ))}
-            {Object.keys(profile.achievements).length > 2 && (
-              <span className="text-xs text-gray-400">+{Object.keys(profile.achievements).length - 2}</span>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* TABS */}
-      <div className="flex gap-2 mb-4 border-b">
-        <button
-          className={cn(
-            "py-2 px-3 text-sm font-medium border-b-2 transition",
-            tab === "overview"
-              ? "border-orange-500 text-orange-700"
-              : "border-transparent text-gray-500 hover:text-orange-700"
+            </div>
           )}
-          onClick={() => setTab("overview")}
-        >
-          Oversikt
-        </button>
-        <button
-          className={cn(
-            "py-2 px-3 text-sm font-medium border-b-2 transition",
-            tab === "cv"
-              ? "border-orange-500 text-orange-700"
-              : "border-transparent text-gray-500 hover:text-orange-700"
-          )}
-          onClick={() => setTab("cv")}
-        >
-          CV
-        </button>
-        <button
-          className={cn(
-            "py-2 px-3 text-sm font-medium border-b-2 transition",
-            tab === "socials"
-              ? "border-orange-500 text-orange-700"
-              : "border-transparent text-gray-500 hover:text-orange-700"
-          )}
-          onClick={() => setTab("socials")}
-        >
-          Sosiale lenker
-        </button>
-        <button
-          className={cn(
-            "py-2 px-3 text-sm font-medium border-b-2 transition",
-            tab === "reviews"
-              ? "border-orange-500 text-orange-700"
-              : "border-transparent text-gray-500 hover:text-orange-700"
-          )}
-          onClick={() => setTab("reviews")}
-        >
-          Anmeldelser
-        </button>
-      </div>
-
-      {/* TAB CONTENT */}
-      <div>
-        {tab === "overview" && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Om</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700 text-sm">
-                {profile.skills.length > 0
-                  ? `Har erfaring med: ${profile.skills.join(", ")}.`
-                  : "Ingen ferdigheter oppgitt ennå."}
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                XP og prestasjoner vokser etter hvert som du fullfører oppdrag.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {tab === "cv" && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>CV</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {profile.cv.length === 0 ? (
-                <p className="text-sm text-gray-500">Ingen oppdrag ennå.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {profile.cv.map((e) => (
-                    <li key={e.id} className="p-3 border rounded flex flex-col sm:flex-row sm:items-center gap-2">
-                      <span className="font-medium">{e.title}</span>
-                      <span className="text-xs text-gray-500">{e.category}</span>
-                      <span className="text-xs text-gray-400 ml-auto">{e.date}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {tab === "socials" && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Sosiale lenker</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {profile.socials.length === 0 ? (
-                <p className="text-sm text-gray-500">Ingen synlige lenker.</p>
-              ) : (
-                <ul className="flex flex-wrap gap-3">
-                  {profile.socials.map((s) => (
-                    <li key={s.type} className="flex items-center gap-2">
-                      {s.type === "linkedin" && (
-                        <svg width="20" height="20" fill="currentColor" className="text-gray-400" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm15.5 11.268h-3v-5.604c0-1.337-.025-3.063-1.868-3.063-1.868 0-2.154 1.459-2.154 2.967v5.7h-3v-10h2.881v1.367h.041c.401-.761 1.379-1.563 2.841-1.563 3.039 0 3.6 2.001 3.6 4.601v5.595z"/></svg>
-                      )}
-                      {s.type === "github" && (
-                        <svg width="20" height="20" fill="currentColor" className="text-gray-400" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576 4.765-1.588 8.199-6.084 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                      )}
-                      {s.type === "website" && (
-                        <svg width="20" height="20" fill="currentColor" className="text-gray-400" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.514 0-10-4.486-10-10s4.486-10 10-10 10 4.486 10 10-4.486 10-10 10zm0-18c-4.411 0-8 3.589-8 8 0 4.411 3.589 8 8 8 4.411 0 8-3.589 8-8 0-4.411-3.589-8-8-8zm0 14c-3.309 0-6-2.691-6-6s2.691-6 6-6 6 2.691 6 6-2.691 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4z"/></svg>
-                      )}
-                      <a
-                        className="underline text-gray-700 hover:text-orange-600 text-sm"
-                        href={s.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {s.type}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="text-xs text-gray-500 mt-2">
-                Kun godkjente domener (LinkedIn, GitHub). Ikke del telefon/e-post offentlig.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {tab === "reviews" && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Anmeldelser</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {reviews.length === 0 ? (
-                <p className="text-sm text-gray-500">Ingen anmeldelser ennå.</p>
-              ) : (
-                <>
-                  <ul className="space-y-2">
-                    {reviews.slice(reviewPage * REVIEWS_PER_PAGE, (reviewPage + 1) * REVIEWS_PER_PAGE).map((r) => (
-                      <li key={r.id} className="border rounded p-3">
-                        <div className="text-sm text-gray-600">
-                          ★ {r.rating} — {r.date}
-                        </div>
-                        <p className="text-sm">{r.text}</p>
-                        <Button size="sm" variant="link" className="mt-2 p-0 h-auto">
-                          Svar
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex justify-between items-center mt-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-gray-300 text-gray-700"
-                      disabled={reviewPage === 0}
-                      onClick={() => setReviewPage((p) => Math.max(0, p - 1))}
-                    >
-                      Forrige
-                    </Button>
-                    <span className="text-xs text-gray-500">
-                      {reviewPage + 1} / {Math.ceil(reviews.length / REVIEWS_PER_PAGE)}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-gray-300 text-gray-700"
-                      disabled={(reviewPage + 1) * REVIEWS_PER_PAGE >= reviews.length}
-                      onClick={() => setReviewPage((p) => p + 1)}
-                    >
-                      Neste
-                    </Button>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

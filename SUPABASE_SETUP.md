@@ -48,6 +48,8 @@ This SQL will create:
 - ✅ **job_photos** - Work photos (before/after)
 - ✅ **achievements** - Achievements for gamification
 - ✅ **user_achievements** - Earned user achievements
+- ✅ **cv_entries** - User work experience entries
+- ✅ **skills** - User skills and competencies
 
 **Security policies (RLS):**
 - ✅ Workers see only their applications
@@ -69,6 +71,12 @@ UPDATE users SET role = 'worker' WHERE role IS NULL OR role NOT IN ('worker', 'e
 ```
 
 This allows user registration without requiring real Supabase authentication.
+
+### 3.4 Fix RLS for cookie-based authentication
+
+**Important**: Execute SQL from `supabase/migrations/04_fix_rls_for_cookie_auth.sql` in SQL Editor.
+
+This makes RLS policies work with cookie sessions. After running this, job creation will work correctly.
 
 ---
 

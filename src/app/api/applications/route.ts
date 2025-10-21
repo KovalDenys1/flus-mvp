@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ applications: [] });
   }
 
-  const applications = (data ?? []).map((a: any) => ({
+  const applications = (data ?? []).map((a: { id: string; job_id: string; applicant_id: string; created_at: string }) => ({
     id: a.id,
     jobId: a.job_id,
     workerId: a.applicant_id,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       .eq("job_id", jobId)
       .eq("applicant_id", user.id)
       .maybeSingle();
-    if (existErr && (existErr as any).code !== "PGRST116") {
+    if (existErr && (existErr as { code?: string }).code !== "PGRST116") {
       return NextResponse.json({ error: existErr.message }, { status: 500 });
     }
 
