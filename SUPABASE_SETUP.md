@@ -1,187 +1,237 @@
-# Supabase setup for FLUS
+# Полная инструкция по настройке Supabase для FLUS MVP
 
-This guide wires the app to Supabase for data (Jobs now; CV/Applications/Chat next). It includes env vars, full SQL schema, optional Row Level Security (RLS) policies, seed data, and tips for Realtime.
+## 📋 Пошаговая настройка новой базы данных
 
-## 1) Environment variables
-Create `.env.local` at the repo root (already git-ignored):
+### Шаг 1: Создай новый проект в Supabase
 
+1. Зайди на [supabase.com](https://supabase.com)
+2. Нажми **New Project**
+3. Заполни данные:
+   - **Name**: flus-mvp (или любое имя)
+   - **Database Password**: (запиши этот пароль!)
+   - **Region**: West EU (Copenhagen) - ближе к Норвегии
+4. Нажми **Create new project** и подожди 2-3 минуты
+
+### Шаг 2: Скопируй учетные данные
+
+1. После создания проекта перейди в **Settings** → **API**
+2. Скопируй:
+   - **Project URL** (типа `https://xxxxx.supabase.co`)
+   - **anon public key** (длинный токен)
+3. Создай файл `.env.local` в корне проекта:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=твой_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=твой_anon_key
 ```
-NEXT_PUBLIC_SUPABASE_URL=your-project-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-
-# Optional: used only on the server for admin tasks (never expose to the browser)
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-Restart the dev server after editing env.
-
-## 2) Database schema (SQL)
-Open the Supabase SQL editor and run the statements below. This creates tables for Jobs, Applications, CV, and Chat.
-
-Notes
-- Uses `gen_random_uuid()` (available in Supabase). If you prefer, you can use `uuid_generate_v4()`.
-- All timestamps are `timestamptz` with `now()` defaults.
-
-```sql
--- Users (optional if you use Supabase Auth; otherwise keep as a profile table)
-create table if not exists users (
-  id uuid primary key default gen_random_uuid(),
-  email text unique,
-  role text,               -- 'worker' | 'employer'
-  navn text,
-  kommune text,
-  fodselsdato text,
-  created_at timestamptz not null default now()
-);
-
--- Jobs
-create table if not exists jobs (
-  id uuid primary key default gen_random_uuid(),
-  title text not null,
-  description text not null,
-  category text not null,
-  pay_nok numeric not null,
-  duration_minutes integer not null,
-  area_name text not null,
-  lat double precision not null,
-  lng double precision not null,
-  created_at timestamptz not null default now(),
-  status text not null default 'open',
-  employer_id uuid references users(id)
-);
-
-create index if not exists jobs_created_idx on jobs(created_at desc);
-
--- Applications (a user applies to a job)
-create table if not exists applications (
-  id uuid primary key default gen_random_uuid(),
-  job_id uuid not null references jobs(id) on delete cascade,
-  applicant_id uuid references users(id),
-  created_at timestamptz not null default now()
-);
-create index if not exists applications_job_idx on applications(job_id);
-
--- CV entries (very simple MVP)
-create table if not exists cv_entries (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references users(id) on delete cascade,
-  title text not null,
-  category text not null,
-  date text not null,
-  created_at timestamptz not null default now()
-);
-create index if not exists cv_entries_user_idx on cv_entries(user_id);
-
--- Skills (MVP)
-create table if not exists skills (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references users(id) on delete cascade,
-  name text not null,
-  created_at timestamptz not null default now()
-);
-create index if not exists skills_user_idx on skills(user_id);
-
--- Conversations (chat)
-create table if not exists conversations (
-  id uuid primary key default gen_random_uuid(),
-  job_id uuid references jobs(id) on delete set null,
-  initiator_id uuid references users(id),     -- employer or worker
-  participant_id uuid references users(id),   -- the other one
-  created_at timestamptz not null default now()
-);
-create index if not exists conversations_participant_idx on conversations(initiator_id, participant_id, created_at desc);
-
--- Messages (chat)
-create table if not exists messages (
-  id uuid primary key default gen_random_uuid(),
-  conversation_id uuid not null references conversations(id) on delete cascade,
-  sender_id uuid references users(id),
-  text text not null,
-  created_at timestamptz not null default now(),
-  is_read boolean not null default false
-);
-create index if not exists messages_conversation_idx on messages(conversation_id, created_at asc);
-```
-
-## 3) Row Level Security (RLS) policies
-You have two good options depending on your demo needs:
-
-Option A — Demo-friendly (open read)
-- Enable RLS selectively and create permissive policies for public reads (useful for demos without auth).
-
-```sql
--- Jobs readable by anyone (demo)
-alter table jobs enable row level security;
-drop policy if exists "read all jobs" on jobs;
-create policy "read all jobs" on jobs for select using (true);
-```
-
-Option B — Auth-aware (recommended for real users)
-- If you adopt Supabase Auth, limit reads/writes by `auth.uid()`.
-  Example for CV tables (only owner can read/write):
-
-```sql
-alter table cv_entries enable row level security;
-drop policy if exists "cv read own" on cv_entries;
-drop policy if exists "cv write own" on cv_entries;
-create policy "cv read own" on cv_entries for select using (user_id = auth.uid());
-create policy "cv write own" on cv_entries for insert with check (user_id = auth.uid());
-create policy "cv update own" on cv_entries for update using (user_id = auth.uid());
-create policy "cv delete own" on cv_entries for delete using (user_id = auth.uid());
-
-alter table skills enable row level security;
-drop policy if exists "skills read own" on skills;
-drop policy if exists "skills write own" on skills;
-create policy "skills read own" on skills for select using (user_id = auth.uid());
-create policy "skills write own" on skills for insert with check (user_id = auth.uid());
-create policy "skills update own" on skills for update using (user_id = auth.uid());
-create policy "skills delete own" on skills for delete using (user_id = auth.uid());
-```
-
-For `applications`, `conversations`, and `messages`, choose policies based on your auth model. For a public demo, consider allowing reads and restricting writes to a safe subset or using Service Role from the server only.
-
-## 4) Seed some demo data (Jobs)
-Option A — via API (pulls from local demo data)
-
-After running the schema, you can seed jobs by calling the dev-only endpoint:
-
-- Start the dev server
-- POST to `/api/admin/seed/jobs`
-
-This uses `src/lib/data/jobs.ts` and maps fields to the Supabase `jobs` table.
-It will no-op if the table already has rows.
-
-Option B — via SQL (manual insert)
-
-Run the following to see jobs in the UI quickly:
-
-```sql
-insert into jobs (title, description, category, pay_nok, duration_minutes, area_name, lat, lng)
-values
-('Hagearbeid – klipping', 'Trenger hjelp til å klippe hekken i bakgården.', 'hage', 350, 120, 'Oslo', 59.9139, 10.7522),
-('Flyttehjelp', 'Bære esker fra 3. etasje og inn i varebil.', 'flytting', 400, 180, 'Bergen', 60.3913, 5.3221);
-```
-
-## 5) Realtime (optional for chat)
-If/when you move chat to Supabase:
-- In the Supabase dashboard → Database → Replication → Configure, enable Realtime for the `messages` table.
-- Subscribe to the `messages` table in the client to receive inserts in real-time.
-
-## 6) App integration status
-- Env vars: already wired (`.env.local`).
-- API:
-  - `GET /api/jobs` and `GET /api/jobs/[id]` now query Supabase.
-  - If the `jobs` table doesn’t exist yet, the list endpoint falls back to an empty array (no 500s during setup).
-
-## 7) Test locally
-- Start dev: `npm run dev`
-- Visit `/jobber` to see the jobs list.
-- API checks: `/api/jobs` and `/api/jobs/<id>`.
-
-## 8) Troubleshooting
-- Error 42P01 (relation does not exist): run the SQL schema above to create tables.
-- Empty list on `/jobber`: seed the `jobs` table.
-- Auth-related RLS failures: use the demo-friendly policies or set up Supabase Auth and switch to auth-aware policies.
 
 ---
-When you’re ready, we can migrate Applications, CV, and Chat to Supabase using the same pattern (server-side Supabase client in API routes, and optional RLS based on your auth choice).
+
+## 🗄️ Шаг 3: Создай схему базы данных
+
+### 3.1 Открой SQL Editor
+
+1. В Supabase Dashboard перейди в **SQL Editor** (иконка `</>`)
+2. Нажми **New query**
+
+### 3.2 Выполни основной SQL
+
+Скопируй **весь** SQL из файла `supabase/migrations/00_complete_schema.sql` и выполни его.
+
+Этот SQL создаст:
+
+- ✅ **users** - Пользователи (работники и работодатели)
+- ✅ **jobs** - Вакансии с расширенными полями (адрес, расписание, требования)
+- ✅ **applications** - Заявки на работу + статусы выполнения
+- ✅ **conversations** - Чаты между работником и работодателем
+- ✅ **messages** - Сообщения в чате (текст + фото + системные события)
+- ✅ **job_photos** - Фотографии работы (до/после)
+- ✅ **achievements** - Достижения для геймификации
+- ✅ **user_achievements** - Заработанные достижения пользователей
+
+**Политики безопасности (RLS):**
+- ✅ Работники видят только свои заявки
+- ✅ Работодатели видят только свои вакансии и заявки на них
+- ✅ Участники чата видят только свои сообщения
+- ✅ Фото видны только участникам заявки
+
+---
+
+## 📸 Шаг 4: Настрой Storage для фотографий
+
+### 4.1 Создай Storage Bucket
+
+1. Перейди в **Storage** в Supabase Dashboard
+2. Нажми **New bucket**
+3. Настройки:
+   - **Name**: `job-photos`
+   - **Public bucket**: ✅ **ДА** (чтобы ссылки работали без авторизации)
+   - **File size limit**: `5MB`
+   - **Allowed MIME types**: `image/jpeg, image/png, image/webp`
+4. Нажми **Create bucket**
+
+### 4.2 Настрой Storage Policies
+
+После создания bucket, выполни SQL из `supabase/migrations/01_storage_policies.sql`:
+
+```sql
+-- Разрешить загрузку фото в свою папку
+CREATE POLICY "Users can upload photos to own folder"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'job-photos' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Разрешить просмотр всех фото (для участников заявки)
+CREATE POLICY "Users can view photos from their applications"
+ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'job-photos');
+
+-- Разрешить удаление своих фото
+CREATE POLICY "Users can delete own photos"
+ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'job-photos' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+```
+
+---
+
+## 🎯 Шаг 5: Проверь настройку
+
+### 5.1 Проверь таблицы
+
+В **Table Editor** должны появиться все таблицы:
+- users
+- jobs
+- applications
+- conversations
+- messages
+- job_photos
+- achievements
+- user_achievements
+
+### 5.2 Проверь Storage
+
+В **Storage** должен быть bucket `job-photos` с настроенными политиками.
+
+### 5.3 Проверь RLS
+
+Все таблицы должны иметь включенный RLS (в Table Editor будет зеленый щит 🛡️).
+
+---
+
+## 🚀 Шаг 6: Запусти приложение
+
+```bash
+npm run dev
+```
+
+Открой http://localhost:3000
+
+### Тестовый сценарий:
+
+#### Как работодатель:
+1. Зайди на `/login`
+2. Выбери **Arbeidsgiver** (💼)
+3. Нажми **Logg inn med Vipps**
+4. Перейди в `/jobber/ny`
+5. Создай тестовую работу с:
+   - Адресом
+   - Типом расписания (Fleksibel/Frist/Fast tid)
+   - Требованиями
+
+#### Как работник:
+1. Открой другой браузер/профиль
+2. Зайди на `/login`
+3. Выбери **Jobbsøker** (👷)
+4. Нажми **Logg inn med Vipps**
+5. Найди работу в `/jobber`
+6. Подай заявку
+7. В чате отправь "Начинаю работу"
+8. **Загрузи фото "до" работы**
+9. После выполнения **загрузи фото "после"**
+10. Отметь работу как выполненную
+
+#### Как работодатель (проверка):
+1. Вернись в первый браузер
+2. Перейди в `/samtaler`
+3. Открой чат с работником
+4. **Посмотри фото "до" и "после"**
+5. Подтверди выполнение работы
+
+---
+
+## 📁 Структура хранения фотографий
+
+```
+job-photos/
+  └── {worker_user_id}/
+      └── {application_id}/
+          ├── before_timestamp.jpg
+          ├── before_timestamp_2.jpg
+          ├── after_timestamp.jpg
+          └── after_timestamp_2.jpg
+```
+
+**Пример:**
+```
+job-photos/u_abc123def/a_xyz789abc/before_1729520000.jpg
+```
+
+---
+
+## 🔧 Полезные SQL запросы для отладки
+
+### Посмотреть все заявки с фото:
+```sql
+SELECT 
+  a.id,
+  j.title as job_title,
+  u.email as worker_email,
+  a.status,
+  COUNT(jp.id) as photo_count
+FROM applications a
+JOIN jobs j ON a.job_id = j.id
+JOIN users u ON a.applicant_id = u.id
+LEFT JOIN job_photos jp ON a.id = jp.application_id
+GROUP BY a.id, j.title, u.email, a.status;
+```
+
+### Посмотреть статистику работника:
+```sql
+SELECT * FROM worker_statistics 
+WHERE worker_id = 'u_xxx';
+```
+
+### Посмотреть статистику работодателя:
+```sql
+SELECT * FROM job_statistics 
+WHERE employer_id = 'u_xxx';
+```
+
+---
+
+## ⚠️ Важные замечания
+
+1. **RLS включен на всех таблицах** - данные защищены
+2. **Storage bucket публичный** - ссылки на фото работают без авторизации
+3. **Фото нельзя удалить после подтверждения работы** - защита от мошенничества
+4. **Работодатель должен подтвердить** работу, чтобы статус изменился на `completed`
+5. **Системные сообщения** создаются автоматически при изменении статуса работы
+
+---
+
+## 📞 Следующие шаги
+
+После настройки базы данных нужно:
+
+1. ✅ Реализовать API для загрузки фото
+2. ✅ Создать UI для загрузки фото в чате
+3. ✅ Добавить галерею фото в чате
+4. ✅ Реализовать подтверждение работы работодателем
+5. ✅ Добавить уведомления о новых фото
+
+Готов помочь с реализацией любого из этих пунктов! 🚀
