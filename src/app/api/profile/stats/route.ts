@@ -65,7 +65,7 @@ export async function GET() {
         
         // Calculate total earnings from completed jobs
         const completedApps = applications.filter(a => a.status === "accepted");
-        stats.totalEarnings = completedApps.reduce((sum, app: any) => {
+        stats.totalEarnings = completedApps.reduce((sum, app) => {
           const job = Array.isArray(app.jobs) ? app.jobs[0] : app.jobs;
           return sum + (job?.pay_nok || 0);
         }, 0);

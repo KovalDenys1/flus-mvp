@@ -45,11 +45,11 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
               <ul className="list-disc list-inside text-red-700 space-y-1 text-sm">
                 <li>The Supabase database has not been set up yet</li>
                 <li>The job was deleted</li>
-                <li>You don't have permission to view this job</li>
+                <li>You don&apos;t have permission to view this job</li>
               </ul>
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
                 <p className="text-sm text-yellow-800">
-                  <strong>⚡ Quick Fix:</strong> If you're the developer, please run the SQL migrations in Supabase.
+                  <strong>⚡ Quick Fix:</strong> If you&apos;re the developer, please run the SQL migrations in Supabase.
                   See <code className="bg-yellow-100 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instructions.
                 </p>
               </div>
