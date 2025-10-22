@@ -1,260 +1,161 @@
-# Complete Supabase Setup Guide for FLUS MVP
+# Supabase Setup Guide
 
-## 📋 Step-by-Step Database Setup
+Complete step-by-step guide to set up Supabase from scratch for the FLUS MVP platform.
 
-### Step 1: Create a new Supabase project
+---
 
-1. Go to [supabase.com](https://supabase.com)
-2. Click **New Project**
-3. Fill in the details:
-   - **Name**: flus-mvp (or any name)
-   - **Database Password**: (save this password!)
-   - **Region**: West EU (Copenhagen) - closest to Norway
-4. Click **Create new project** and wait 2-3 minutes
+## Prerequisites
 
-### Step 2: Copy your credentials
+- Supabase account (free tier works fine)
+- Project created at [supabase.com](https://supabase.com)
 
-1. After project creation, go to **Settings** → **API**
-2. Copy:
-   - **Project URL** (like `https://xxxxx.supabase.co`)
-   - **anon public key** (long token)
-3. Create `.env.local` file in project root:
+---
+
+## Step 1: Create a Supabase Project
+
+1. Go to [supabase.com/dashboard](https://supabase.com/dashboard)
+2. Click **"New Project"**
+3. Fill in project details:
+   - **Name**: `flus-mvp` (or any name you prefer)
+   - **Database Password**: Choose a strong password (save it!)
+   - **Region**: Choose closest to your users (e.g., `Europe West (London)`)
+4. Click **"Create new project"**
+5. Wait 2-3 minutes for project to be provisioned
+
+---
+
+## Step 2: Get Your API Keys
+
+1. In your project dashboard, click **Settings** (gear icon in sidebar)
+2. Navigate to **API** section
+3. Copy these values:
+   - **Project URL** (e.g., `https://xxxxx.supabase.co`)
+   - **anon/public key** (long string starting with `eyJ...`)
+
+---
+
+## Step 3: Configure Environment Variables
+
+Create `.env.local` in your project root:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Vipps OAuth
+VIPPS_CLIENT_ID=your-vipps-client-id
+VIPPS_CLIENT_SECRET=your-vipps-client-secret
+VIPPS_SUBSCRIPTION_KEY=your-vipps-subscription-key
+VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
+VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
 ```
 
 ---
 
-## 🗄️ Step 3: Create database schema
+## Step 4: Run Database Migrations
 
-### 3.1 Open SQL Editor
+### 4.1 Main Schema (Required)
 
-1. In Supabase Dashboard go to **SQL Editor** (icon `</>`)
-2. Click **New query**
+1. Open Supabase Dashboard → **SQL Editor**
+2. Click **"New Query"**
+3. Copy entire content of `supabase/migrations/01_init_schema.sql`
+4. Paste into editor and click **"Run"**
+5. Success: ✅ **"Success. No rows returned"**
 
-### 3.2 Execute main SQL
+Creates all tables, indexes, RLS policies, triggers, and views.
 
-Copy **all** SQL from file `supabase/migrations/00_complete_schema.sql` and execute it.
+### 4.2 Storage Policies (Required)
 
-This SQL will create:
+1. **First create storage bucket** (see Step 5)
+2. Then run `supabase/migrations/02_storage_policies.sql` in SQL Editor
 
-- ✅ **users** - Users (workers and employers)
-- ✅ **jobs** - Jobs with enhanced fields (address, schedule, requirements)
-- ✅ **applications** - Job applications + completion status tracking
-- ✅ **conversations** - Chats between worker and employer
-- ✅ **messages** - Chat messages (text + photos + system events)
-- ✅ **job_photos** - Work photos (before/after)
-- ✅ **achievements** - Achievements for gamification
-- ✅ **user_achievements** - Earned user achievements
-- ✅ **cv_entries** - User work experience entries
-- ✅ **skills** - User skills and competencies
+### 4.3 Seed Demo Jobs (Optional)
 
-**Security policies (RLS):**
-- ✅ Workers see only their applications
-- ✅ Employers see only their jobs and applications
-- ✅ Chat participants see only their messages
-- ✅ Photos visible only to application participants
-
-### 3.3 Execute flexible roles migration
-
-**New**: Users can now switch between worker and employer roles freely in the UI. Execute the SQL from `supabase/migrations/03_flexible_roles.sql`:
-
-```sql
--- Allow flexible role switching
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
-ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('worker', 'employer'));
-
--- Add default role for existing users
-UPDATE users SET role = 'worker' WHERE role IS NULL OR role NOT IN ('worker', 'employer');
-```
-
-This allows user registration without requiring real Supabase authentication.
-
-### 3.4 Fix RLS for cookie-based authentication
-
-**Important**: Execute SQL from `supabase/migrations/04_fix_rls_for_cookie_auth.sql` in SQL Editor.
-
-This makes RLS policies work with cookie sessions. After running this, job creation will work correctly.
+Run `supabase/migrations/03_seed_demo_jobs.sql` to add 8 sample jobs.
+Requires: you've logged in at least once.
 
 ---
 
-## 📸 Step 4: Setup Storage for photos
+## Step 5: Create Storage Bucket
 
-### 4.1 Create Storage Bucket
-
-1. Go to **Storage** in Supabase Dashboard
-2. Click **New bucket**
-3. Settings:
-   - **Name**: `job-photos`
-   - **Public bucket**: ✅ **YES** (so URLs work without auth)
-   - **File size limit**: `5MB`
-   - **Allowed MIME types**: `image/jpeg, image/png, image/webp`
-4. Click **Create bucket**
-
-### 4.2 Setup Storage Policies
-
-After creating the bucket, execute SQL from `supabase/migrations/01_storage_policies.sql`:
-
-```sql
--- Allow users to upload photos to their own folder
-CREATE POLICY "Users can upload photos to own folder"
-ON storage.objects FOR INSERT TO authenticated
-WITH CHECK (
-  bucket_id = 'job-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-
--- Allow viewing all photos (for application participants)
-CREATE POLICY "Users can view photos from their applications"
-ON storage.objects FOR SELECT TO authenticated
-USING (bucket_id = 'job-photos');
-
--- Allow deleting own photos
-CREATE POLICY "Users can delete own photos"
-ON storage.objects FOR DELETE TO authenticated
-USING (
-  bucket_id = 'job-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-```
+1. Go to **Storage** → **"Create a new bucket"**
+2. Configure:
+   - Name: `job-photos`
+   - Public: ✅ YES
+   - File size: 5 MB
+   - MIME types: image/png, image/jpeg, image/jpg, image/webp
+3. Click **"Create bucket"**
 
 ---
 
-## 🎯 Step 5: Verify setup
+## Step 6: Verify Setup
 
-### 5.1 Check tables
+### Tables (Table Editor)
+✅ users, jobs, applications, conversations, messages  
+✅ cv_entries, skills, reviews, achievements  
+✅ user_achievements, job_photos
 
-In **Table Editor** you should see all tables:
-- users
-- jobs
-- applications
-- conversations
-- messages
-- job_photos
-- achievements
-- user_achievements
-
-### 5.2 Check Storage
-
-In **Storage** you should have bucket `job-photos` with configured policies.
-
-### 5.3 Check RLS
-
-All tables should have RLS enabled (green shield 🛡️ in Table Editor).
+### Storage
+✅ job-photos bucket (Public)
 
 ---
 
-## 🚀 Step 6: Run the application
+## Step 7: Test Your Setup
 
 ```bash
+npm install
 npm run dev
 ```
 
-Open http://localhost:3000
-
-### Test scenario:
-
-#### As employer:
-1. Go to `/login`
-2. Select **Arbeidsgiver** (💼)
-3. Click **Logg inn med Vipps**
-4. Go to `/jobber/ny`
-5. Create test job with:
-   - Address
-   - Schedule type (Fleksibel/Frist/Fast tid)
-   - Requirements
-
-#### As worker:
-1. Open another browser/profile
-2. Go to `/login`
-3. Select **Jobbsøker** (👷)
-4. Click **Logg inn med Vipps**
-5. Find job in `/jobber`
-6. Submit application
-7. In chat send "Starting work"
-8. **Upload "before" photos**
-9. After completion **upload "after" photos**
-10. Mark work as completed
-
-#### As employer (verification):
-1. Return to first browser
-2. Go to `/samtaler`
-3. Open chat with worker
-4. **View "before" and "after" photos**
-5. Approve work completion
+1. Open `http://localhost:3000/login`
+2. Login with Vipps
+3. Switch to Arbeidsgiver mode
+4. Create a test job
+5. Check Supabase Table Editor → jobs table
 
 ---
 
-## 📁 Photo storage structure
+## Common Issues
 
-```
-job-photos/
-  └── {worker_user_id}/
-      └── {application_id}/
-          ├── before_timestamp.jpg
-          ├── before_timestamp_2.jpg
-          ├── after_timestamp.jpg
-          └── after_timestamp_2.jpg
-```
+### ❌ "Failed to fetch"
+- Check `.env.local` has correct credentials
+- Restart dev server
 
-**Example:**
-```
-job-photos/u_abc123def/a_xyz789abc/before_1729520000.jpg
-```
+### ❌ "RLS policy violation"
+- Verify you ran `01_init_schema.sql`
+- Check policies exist in Dashboard → Database → Policies
+
+### ❌ "Job not found"
+- Run `03_seed_demo_jobs.sql`
+- Or create job manually
 
 ---
 
-## 🔧 Useful SQL queries for debugging
+## Database Schema
 
-### View all applications with photos:
-```sql
-SELECT 
-  a.id,
-  j.title as job_title,
-  u.email as worker_email,
-  a.status,
-  COUNT(jp.id) as photo_count
-FROM applications a
-JOIN jobs j ON a.job_id = j.id
-JOIN users u ON a.applicant_id = u.id
-LEFT JOIN job_photos jp ON a.id = jp.application_id
-GROUP BY a.id, j.title, u.email, a.status;
-```
+### users
+id, email, role, navn, bio, social links, company info
 
-### View worker statistics:
-```sql
-SELECT * FROM worker_statistics 
-WHERE worker_id = 'u_xxx';
-```
+### jobs  
+id, employer_id, title, category, pay_nok, schedule_type, payment_type
 
-### View employer statistics:
-```sql
-SELECT * FROM job_statistics 
-WHERE employer_id = 'u_xxx';
-```
+### applications
+id, job_id, applicant_id, status, message
+
+### cv_entries
+id, user_id, title, company, dates
+
+### skills
+id, user_id, skill_name, proficiency_level (1-5)
+
+### reviews
+id, reviewer_id, reviewee_id, rating (1-5), comment
 
 ---
 
-## ⚠️ Important notes
-
-1. **RLS enabled on all tables** - data is protected
-2. **Storage bucket is public** - photo URLs work without auth
-3. **Photos cannot be deleted after work approval** - fraud protection
-4. **Employer must approve** work for status to change to `completed`
-5. **System messages** are created automatically on work status changes
+**Full documentation:** See file for complete field list and constraints.
 
 ---
 
-## 📞 Next steps
-
-After database setup, you need to:
-
-1. ✅ Implement API for photo uploads
-2. ✅ Create UI for photo uploads in chat
-3. ✅ Add photo gallery in chat
-4. ✅ Implement work approval by employer
-5. ✅ Add notifications for new photos
-
-Ready to help with implementation of any of these features! 🚀
+**Happy coding! ���**

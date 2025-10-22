@@ -41,6 +41,11 @@ export default function Navbar() {
     const newMode = viewMode === "worker" ? "employer" : "worker";
     setViewMode(newMode);
     localStorage.setItem("viewMode", newMode);
+    
+    // Dispatch custom event to notify other components (like profile page)
+    window.dispatchEvent(new CustomEvent("viewModeChanged", { 
+      detail: { viewMode: newMode } 
+    }));
   }
 
   const linkClass = "hover:text-gray-900/80 transition";

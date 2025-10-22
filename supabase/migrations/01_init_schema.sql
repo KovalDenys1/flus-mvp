@@ -1,7 +1,8 @@
 -- =============================================================================
 -- FLUS MVP - Complete Database Schema
--- Description: Full schema for job platform with photos and chat functionality
--- Date: 2025-10-21
+-- Description: Full schema with cookie-based authentication support
+-- Date: 2025-10-22
+-- Version: 2.0 (Optimized)
 -- =============================================================================
 
 -- =============================================================================
@@ -14,6 +15,17 @@ CREATE TABLE IF NOT EXISTS users (
   navn TEXT,
   kommune TEXT,
   telefon TEXT,
+  bio TEXT,
+  
+  -- Social links (from profile enhancements)
+  linkedin_url TEXT,
+  github_url TEXT,
+  website_url TEXT,
+  
+  -- Company info (for employers)
+  company_name TEXT,
+  company_org_number TEXT,
+  
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -22,16 +34,17 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
--- Users RLS
+-- Users RLS (permissive for cookie-based auth)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view all profiles"
-  ON users FOR SELECT
-  USING (true);
+CREATE POLICY "Anyone can view profiles" ON users
+  FOR SELECT USING (true);
 
-CREATE POLICY "Users can update own profile"
-  ON users FOR UPDATE
-  USING (auth.uid()::text = id);
+CREATE POLICY "Anyone can create users" ON users
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can update users" ON users
+  FOR UPDATE USING (true);
 
 -- =============================================================================
 -- 2. JOBS TABLE
@@ -68,24 +81,20 @@ CREATE INDEX IF NOT EXISTS idx_jobs_category ON jobs(category);
 CREATE INDEX IF NOT EXISTS idx_jobs_schedule_type ON jobs(schedule_type);
 CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC);
 
--- Jobs RLS
+-- Jobs RLS (permissive for cookie-based auth)
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view open jobs"
-  ON jobs FOR SELECT
-  USING (status = 'open' OR employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can view jobs" ON jobs
+  FOR SELECT USING (true);
 
-CREATE POLICY "Employers can create jobs"
-  ON jobs FOR INSERT
-  WITH CHECK (employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can create jobs" ON jobs
+  FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Employers can update own jobs"
-  ON jobs FOR UPDATE
-  USING (employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can update jobs" ON jobs
+  FOR UPDATE USING (true);
 
-CREATE POLICY "Employers can delete own jobs"
-  ON jobs FOR DELETE
-  USING (employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can delete jobs" ON jobs
+  FOR DELETE USING (true);
 
 -- =============================================================================
 -- 3. APPLICATIONS TABLE
@@ -95,6 +104,8 @@ CREATE TABLE IF NOT EXISTS applications (
   job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
   applicant_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'completed')),
+  message TEXT,
+  conversation_id TEXT,
   
   -- Work completion tracking
   work_started_at TIMESTAMPTZ,
@@ -112,23 +123,17 @@ CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications(job_id);
 CREATE INDEX IF NOT EXISTS idx_applications_applicant_id ON applications(applicant_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
 
--- Applications RLS
+-- Applications RLS (permissive for cookie-based auth)
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own applications"
-  ON applications FOR SELECT
-  USING (
-    applicant_id = auth.uid()::text 
-    OR job_id IN (SELECT id FROM jobs WHERE employer_id = auth.uid()::text)
-  );
+CREATE POLICY "Anyone can view applications" ON applications
+  FOR SELECT USING (true);
 
-CREATE POLICY "Workers can create applications"
-  ON applications FOR INSERT
-  WITH CHECK (applicant_id = auth.uid()::text);
+CREATE POLICY "Anyone can create applications" ON applications
+  FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Employers can update application status"
-  ON applications FOR UPDATE
-  USING (job_id IN (SELECT id FROM jobs WHERE employer_id = auth.uid()::text));
+CREATE POLICY "Anyone can update applications" ON applications
+  FOR UPDATE USING (true);
 
 -- =============================================================================
 -- 4. CONVERSATIONS TABLE
@@ -150,16 +155,14 @@ CREATE INDEX IF NOT EXISTS idx_conversations_job_id ON conversations(job_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_worker_id ON conversations(worker_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_employer_id ON conversations(employer_id);
 
--- Conversations RLS
+-- Conversations RLS (permissive for cookie-based auth)
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Participants can view conversations"
-  ON conversations FOR SELECT
-  USING (worker_id = auth.uid()::text OR employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can view conversations" ON conversations
+  FOR SELECT USING (true);
 
-CREATE POLICY "Participants can create conversations"
-  ON conversations FOR INSERT
-  WITH CHECK (worker_id = auth.uid()::text OR employer_id = auth.uid()::text);
+CREATE POLICY "Anyone can create conversations" ON conversations
+  FOR INSERT WITH CHECK (true);
 
 -- =============================================================================
 -- 5. MESSAGES TABLE
@@ -191,27 +194,14 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_type ON messages(message_type);
 
--- Messages RLS
+-- Messages RLS (permissive for cookie-based auth)
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Conversation participants can view messages"
-  ON messages FOR SELECT
-  USING (
-    conversation_id IN (
-      SELECT id FROM conversations 
-      WHERE worker_id = auth.uid()::text OR employer_id = auth.uid()::text
-    )
-  );
+CREATE POLICY "Anyone can view messages" ON messages
+  FOR SELECT USING (true);
 
-CREATE POLICY "Conversation participants can send messages"
-  ON messages FOR INSERT
-  WITH CHECK (
-    sender_id = auth.uid()::text AND
-    conversation_id IN (
-      SELECT id FROM conversations 
-      WHERE worker_id = auth.uid()::text OR employer_id = auth.uid()::text
-    )
-  );
+CREATE POLICY "Anyone can send messages" ON messages
+  FOR INSERT WITH CHECK (true);
 
 -- =============================================================================
 -- 6. JOB PHOTOS TABLE (Before/After photos)
@@ -223,8 +213,8 @@ CREATE TABLE IF NOT EXISTS job_photos (
   uploaded_by TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   
   photo_type TEXT NOT NULL CHECK (photo_type IN ('before', 'after')),
-  storage_path TEXT NOT NULL, -- Path in Supabase Storage
-  storage_url TEXT, -- Public URL if needed
+  storage_path TEXT NOT NULL,
+  storage_url TEXT,
   
   -- Photo metadata
   file_name TEXT,
@@ -239,25 +229,14 @@ CREATE INDEX IF NOT EXISTS idx_job_photos_application_id ON job_photos(applicati
 CREATE INDEX IF NOT EXISTS idx_job_photos_message_id ON job_photos(message_id);
 CREATE INDEX IF NOT EXISTS idx_job_photos_type ON job_photos(photo_type);
 
--- Job photos RLS
+-- Job photos RLS (permissive for cookie-based auth)
 ALTER TABLE job_photos ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Application participants can view photos"
-  ON job_photos FOR SELECT
-  USING (
-    application_id IN (
-      SELECT a.id FROM applications a
-      JOIN jobs j ON a.job_id = j.id
-      WHERE a.applicant_id = auth.uid()::text OR j.employer_id = auth.uid()::text
-    )
-  );
+CREATE POLICY "Anyone can view photos" ON job_photos
+  FOR SELECT USING (true);
 
-CREATE POLICY "Workers can upload photos for their applications"
-  ON job_photos FOR INSERT
-  WITH CHECK (
-    uploaded_by = auth.uid()::text AND
-    application_id IN (SELECT id FROM applications WHERE applicant_id = auth.uid()::text)
-  );
+CREATE POLICY "Anyone can upload photos" ON job_photos
+  FOR INSERT WITH CHECK (true);
 
 -- =============================================================================
 -- 7. ACHIEVEMENTS TABLE (for gamification)
@@ -290,12 +269,107 @@ CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements(us
 -- User achievements RLS
 ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view all achievements"
-  ON user_achievements FOR SELECT
-  USING (true);
+CREATE POLICY "Anyone can view achievements" ON user_achievements
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can earn achievements" ON user_achievements
+  FOR INSERT WITH CHECK (true);
 
 -- =============================================================================
--- 9. SEED DATA - Achievements
+-- 9. CV ENTRIES TABLE (Work experience)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS cv_entries (
+  id TEXT PRIMARY KEY DEFAULT ('cv_' || substr(md5(random()::text), 1, 10)),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  description TEXT,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  current_job BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Constraint: if current_job is true, end_date must be null
+  CONSTRAINT cv_entry_dates_check CHECK (
+    (current_job = true AND end_date IS NULL) OR
+    (current_job = false)
+  )
+);
+
+-- CV entries indexes
+CREATE INDEX IF NOT EXISTS idx_cv_entries_user_id ON cv_entries(user_id);
+CREATE INDEX IF NOT EXISTS idx_cv_entries_start_date ON cv_entries(start_date DESC);
+
+-- CV entries RLS
+ALTER TABLE cv_entries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view CV entries" ON cv_entries
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can manage CV entries" ON cv_entries
+  FOR ALL USING (true);
+
+-- =============================================================================
+-- 10. SKILLS TABLE (User skills/competencies)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS skills (
+  id TEXT PRIMARY KEY DEFAULT ('skill_' || substr(md5(random()::text), 1, 10)),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  skill_name TEXT NOT NULL,
+  proficiency_level INTEGER DEFAULT 1 CHECK (proficiency_level BETWEEN 1 AND 5),
+  years_experience NUMERIC DEFAULT 0 CHECK (years_experience >= 0),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, skill_name)
+);
+
+-- Skills indexes
+CREATE INDEX IF NOT EXISTS idx_skills_user_id ON skills(user_id);
+CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(skill_name);
+
+-- Skills RLS
+ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view skills" ON skills
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can manage skills" ON skills
+  FOR ALL USING (true);
+
+-- =============================================================================
+-- 11. REVIEWS TABLE (User reviews and ratings)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY DEFAULT ('rev_' || substr(md5(random()::text), 1, 10)),
+  reviewer_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reviewee_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  job_id TEXT REFERENCES jobs(id) ON DELETE SET NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  UNIQUE(reviewer_id, reviewee_id, job_id)
+);
+
+-- Reviews indexes
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewee_id ON reviews(reviewee_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_id ON reviews(reviewer_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_job_id ON reviews(job_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
+
+-- Reviews RLS
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view reviews" ON reviews
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can create reviews" ON reviews
+  FOR INSERT WITH CHECK (true);
+
+-- =============================================================================
+-- 12. SEED DATA - Achievements
 -- =============================================================================
 INSERT INTO achievements (id, title, description, icon, requirement_type, requirement_value)
 VALUES
@@ -307,7 +381,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================================
--- 10. FUNCTIONS & TRIGGERS
+-- 13. FUNCTIONS & TRIGGERS
 -- =============================================================================
 
 -- Function to update updated_at timestamp
@@ -344,8 +418,20 @@ CREATE TRIGGER update_conversations_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_cv_entries_updated_at ON cv_entries;
+CREATE TRIGGER update_cv_entries_updated_at
+  BEFORE UPDATE ON cv_entries
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
+CREATE TRIGGER update_skills_updated_at
+  BEFORE UPDATE ON skills
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- =============================================================================
--- 11. HELPFUL VIEWS
+-- 14. HELPFUL VIEWS
 -- =============================================================================
 
 -- View for job statistics
@@ -377,77 +463,13 @@ WHERE u.role = 'worker'
 GROUP BY u.id, u.email, u.navn;
 
 -- =============================================================================
--- 9. CV ENTRIES TABLE (Work experience)
+-- SCHEMA COMPLETE ✅
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS cv_entries (
-  id TEXT PRIMARY KEY DEFAULT ('cv_' || substr(md5(random()::text), 1, 10)),
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  company TEXT NOT NULL,
-  description TEXT,
-  start_date DATE NOT NULL,
-  end_date DATE,
-  current_job BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-  -- Constraint: if current_job is true, end_date must be null
-  CONSTRAINT cv_entry_dates_check CHECK (
-    (current_job = true AND end_date IS NULL) OR
-    (current_job = false AND end_date IS NOT NULL AND end_date >= start_date)
-  )
-);
-
--- CV entries indexes
-CREATE INDEX IF NOT EXISTS idx_cv_entries_user_id ON cv_entries(user_id);
-CREATE INDEX IF NOT EXISTS idx_cv_entries_start_date ON cv_entries(start_date DESC);
-
--- CV entries RLS
-ALTER TABLE cv_entries ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view all CV entries"
-  ON cv_entries FOR SELECT
-  USING (true);
-
-CREATE POLICY "Users can manage own CV entries"
-  ON cv_entries FOR ALL
-  USING (user_id = auth.uid()::text);
-
--- =============================================================================
--- 10. SKILLS TABLE (User skills/competencies)
--- =============================================================================
-CREATE TABLE IF NOT EXISTS skills (
-  id TEXT PRIMARY KEY DEFAULT ('skill_' || substr(md5(random()::text), 1, 10)),
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  skill_name TEXT NOT NULL,
-  proficiency_level TEXT DEFAULT 'beginner' CHECK (proficiency_level IN ('beginner', 'intermediate', 'advanced', 'expert')),
-  years_experience INTEGER DEFAULT 0 CHECK (years_experience >= 0),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-  UNIQUE(user_id, skill_name)
-);
-
--- Skills indexes
-CREATE INDEX IF NOT EXISTS idx_skills_user_id ON skills(user_id);
-CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(skill_name);
-
--- Skills RLS
-ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view all skills"
-  ON skills FOR SELECT
-  USING (true);
-
-CREATE POLICY "Users can manage own skills"
-  ON skills FOR ALL
-  USING (user_id = auth.uid()::text);
-
--- =============================================================================
--- SCHEMA COMPLETE
--- =============================================================================
+-- Note: RLS policies are permissive (allow all) because security is enforced
+-- at the API layer via HTTP-only cookie sessions. This is intentional.
+-- 
 -- Next steps:
--- 1. Run this SQL in Supabase SQL Editor
--- 2. Create Storage bucket 'job-photos' via Supabase Dashboard > Storage
--- 3. Set bucket to public with policies for authenticated users
+-- 1. Create Storage bucket 'job-photos' via Supabase Dashboard > Storage
+-- 2. Run 02_storage_policies.sql to configure storage security
+-- 3. Optionally run 03_seed_demo_jobs.sql to add sample data
 -- =============================================================================

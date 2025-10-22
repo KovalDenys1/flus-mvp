@@ -31,8 +31,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .maybeSingle();
 
   if (error) {
+    console.error("Error fetching job:", error);
     if (error.message?.toLowerCase().includes("relation") || (error as {code?: string}).code === "42P01") {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ 
+        error: "Database not configured. Please run the Supabase migrations first. See SUPABASE_SETUP.md" 
+      }, { status: 503 });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

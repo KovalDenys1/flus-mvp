@@ -73,7 +73,12 @@ export default function CreateJobPage() {
       if (!res.ok) throw new Error(data.error || "Kunne ikke opprette jobb");
 
       toast.success("Jobb opprettet!");
-      router.push("/jobber");
+      // Redirect to the newly created job's detail page
+      if (data.job?.id) {
+        router.push(`/jobber/${data.job.id}`);
+      } else {
+        router.push("/mine-jobber");
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error(msg);

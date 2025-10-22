@@ -33,9 +33,34 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
 
   if (!job) {
     return (
-      <div className="max-w-2xl mx-auto py-10 px-2">
-        <p className="text-gray-500">Job not found.</p>
-        <Link href="/jobber" className="underline">Back to jobs</Link>
+      <div className="max-w-2xl mx-auto py-10 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">⚠️</span>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-red-900 mb-2">Job not found</h2>
+              <p className="text-red-700 mb-4">
+                This job could not be loaded. This usually happens if:
+              </p>
+              <ul className="list-disc list-inside text-red-700 space-y-1 text-sm">
+                <li>The Supabase database has not been set up yet</li>
+                <li>The job was deleted</li>
+                <li>You don't have permission to view this job</li>
+              </ul>
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                <p className="text-sm text-yellow-800">
+                  <strong>⚡ Quick Fix:</strong> If you're the developer, please run the SQL migrations in Supabase.
+                  See <code className="bg-yellow-100 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instructions.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-6">
+          <Link href="/jobber" className="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+            ← Back to jobs
+          </Link>
+        </div>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Building2 } from "lucide-react";
 
 type CvEntry = {
   id: string;
@@ -43,12 +44,25 @@ type User = {
   telefon?: string;
 };
 
+type Stats = {
+  role: string;
+  totalJobsCreated: number;
+  activeJobs: number;
+  completedJobs: number;
+  totalApplications: number;
+  acceptedApplications: number;
+  totalEarnings: number;
+};
+
 export default function ProfilePage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [cvEntries, setCvEntries] = useState<CvEntry[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"worker" | "employer" | null>(null);
 
   // Form states
   const [cvFormOpen, setCvFormOpen] = useState(false);
@@ -68,8 +82,51 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
+    // Read viewMode from localStorage (same as Navbar)
+    const savedMode = localStorage.getItem("viewMode");
+    if (savedMode === "worker" || savedMode === "employer") {
+      setViewMode(savedMode);
+    } else {
+      // Default to worker if not set
+      setViewMode("worker");
+    }
+    
     loadProfile();
+
+    // Listen for changes to viewMode in localStorage (when Navbar changes it)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "viewMode" && (e.newValue === "worker" || e.newValue === "employer")) {
+        setViewMode(e.newValue);
+      }
+    };
+
+    // Listen for custom event (for same-tab changes)
+    const handleViewModeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ viewMode: "worker" | "employer" }>;
+      if (customEvent.detail?.viewMode) {
+        setViewMode(customEvent.detail.viewMode);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("viewModeChanged", handleViewModeChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("viewModeChanged", handleViewModeChange);
+    };
   }, []);
+
+  useEffect(() => {
+    // Redirect based on viewMode from navbar
+    if (viewMode && user) {
+      if (viewMode === "worker") {
+        router.push("/profil/worker");
+      } else if (viewMode === "employer") {
+        router.push("/profil/employer");
+      }
+    }
+  }, [viewMode, user, router]);
 
   const loadProfile = async () => {
     try {
@@ -80,6 +137,13 @@ export default function ProfilePage() {
       if (userRes.ok) {
         const userData = await userRes.json();
         setUser(userData.user);
+      }
+
+      // Get statistics
+      const statsRes = await fetch("/api/profile/stats");
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData.stats);
       }
 
       // Get CV data
@@ -185,6 +249,18 @@ export default function ProfilePage() {
     );
   }
 
+  // While loading or redirecting, show loading state
+  if (!viewMode) {
+    return (
+      <div className="max-w-4xl mx-auto mt-10 p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto mt-10 p-4 space-y-6">
       {/* Header */}
@@ -206,6 +282,70 @@ export default function ProfilePage() {
             <div><strong>E-post:</strong> {user.email}</div>
             <div><strong>Telefon:</strong> {user.telefon || "Ikke oppgitt"}</div>
             <div><strong>Kommune:</strong> {user.kommune || "Ikke oppgitt"}</div>
+            <div>
+              <strong>Rolle:</strong>{" "}
+              <Badge variant="secondary">
+                {user.role === "employer" ? "Arbeidsgiver" : user.role === "worker" ? "Arbeidstaker" : "Begge"}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Statistics for Employer */}
+      {stats && (stats.role === "employer" || stats.role === "both") && (
+        <Card>
+          <CardHeader>
+            <CardTitle>📊 Statistikk som arbeidsgiver</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-3xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
+                <div className="text-sm text-gray-600 mt-1">Totale jobber opprettet</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-3xl font-bold text-green-600">{stats.activeJobs}</div>
+                <div className="text-sm text-gray-600 mt-1">Aktive jobber</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
+                <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-3xl font-bold text-orange-600">{stats.totalApplications}</div>
+                <div className="text-sm text-gray-600 mt-1">Totale søknader mottatt</div>
+              </div>
+              <div className="text-center p-4 bg-teal-50 rounded-lg">
+                <div className="text-3xl font-bold text-teal-600">{stats.acceptedApplications}</div>
+                <div className="text-sm text-gray-600 mt-1">Godkjente søknader</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Statistics for Worker */}
+      {stats && (stats.role === "worker" || stats.role === "both") && (
+        <Card>
+          <CardHeader>
+            <CardTitle>💼 Statistikk som arbeidstaker</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-3xl font-bold text-blue-600">{stats.totalApplications}</div>
+                <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
+                <div className="text-sm text-gray-600 mt-1">Godkjente jobber</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
+                <div className="text-sm text-gray-600 mt-1">Total inntjening</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
