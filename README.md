@@ -60,9 +60,10 @@ npm install
 
 Quick steps:
 1. Create Supabase project
-2. Run `supabase/migrations/01_init_schema.sql`
-3. Create `job-photos` storage bucket
+2. Run `supabase/migrations/01_init_schema.sql` (includes all security fixes)
+3. Create `job-photos` storage bucket (Public: YES, 5MB limit)
 4. Run `supabase/migrations/02_storage_policies.sql`
+5. (Optional) Run `supabase/migrations/03_seed_demo_jobs.sql` for test data
 
 ### 3. Environment Variables
 

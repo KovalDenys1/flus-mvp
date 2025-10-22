@@ -304,10 +304,7 @@ CREATE INDEX IF NOT EXISTS idx_cv_entries_start_date ON cv_entries(start_date DE
 -- CV entries RLS
 ALTER TABLE cv_entries ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view CV entries" ON cv_entries
-  FOR SELECT USING (true);
-
-CREATE POLICY "Anyone can manage CV entries" ON cv_entries
+CREATE POLICY "cv_entries_all_policy" ON cv_entries
   FOR ALL USING (true);
 
 -- =============================================================================
@@ -332,10 +329,7 @@ CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(skill_name);
 -- Skills RLS
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view skills" ON skills
-  FOR SELECT USING (true);
-
-CREATE POLICY "Anyone can manage skills" ON skills
+CREATE POLICY "skills_all_policy" ON skills
   FOR ALL USING (true);
 
 -- =============================================================================
@@ -380,18 +374,37 @@ VALUES
   ('ach_five_1000', 'Fem Tusen', 'Tjen 5000 NOK totalt', '💵', 'total_earnings', 5000)
 ON CONFLICT (id) DO NOTHING;
 
+-- Enable RLS on achievements
+ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "achievements_select_policy" ON achievements
+  FOR SELECT USING (true);
+
+CREATE POLICY "achievements_insert_policy" ON achievements
+  FOR INSERT WITH CHECK (false);
+
+CREATE POLICY "achievements_update_policy" ON achievements
+  FOR UPDATE USING (false);
+
+CREATE POLICY "achievements_delete_policy" ON achievements
+  FOR DELETE USING (false);
+
 -- =============================================================================
 -- 13. FUNCTIONS & TRIGGERS
 -- =============================================================================
 
--- Function to update updated_at timestamp
+-- Function to update updated_at timestamp (with fixed search_path)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Apply updated_at trigger to relevant tables
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
@@ -434,8 +447,9 @@ CREATE TRIGGER update_skills_updated_at
 -- 14. HELPFUL VIEWS
 -- =============================================================================
 
--- View for job statistics
-CREATE OR REPLACE VIEW job_statistics AS
+-- View for job statistics (with security_invoker for proper RLS)
+CREATE OR REPLACE VIEW job_statistics 
+WITH (security_invoker = true) AS
 SELECT 
   j.employer_id,
   COUNT(DISTINCT j.id) as total_jobs,
@@ -447,8 +461,9 @@ FROM jobs j
 LEFT JOIN applications a ON j.id = a.job_id
 GROUP BY j.employer_id;
 
--- View for worker statistics
-CREATE OR REPLACE VIEW worker_statistics AS
+-- View for worker statistics (with security_invoker for proper RLS)
+CREATE OR REPLACE VIEW worker_statistics
+WITH (security_invoker = true) AS
 SELECT 
   u.id as worker_id,
   u.email,
@@ -463,10 +478,41 @@ WHERE u.role = 'worker'
 GROUP BY u.id, u.email, u.navn;
 
 -- =============================================================================
+-- 15. GRANT PERMISSIONS (Security fix)
+-- =============================================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON SCHEMA public TO service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
+
+-- Set default privileges for future objects
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated;
+
+-- Grant permissions on views
+GRANT SELECT ON job_statistics TO anon, authenticated, service_role;
+GRANT SELECT ON worker_statistics TO anon, authenticated, service_role;
+
+-- =============================================================================
 -- SCHEMA COMPLETE ✅
 -- =============================================================================
 -- Note: RLS policies are permissive (allow all) because security is enforced
 -- at the API layer via HTTP-only cookie sessions. This is intentional.
+-- 
+-- All security fixes applied:
+-- ✅ Proper schema permissions
+-- ✅ Fixed function search_path
+-- ✅ Views with security_invoker
+-- ✅ Single policies per action (no duplicates)
+-- ✅ RLS enabled on all tables
 -- 
 -- Next steps:
 -- 1. Create Storage bucket 'job-photos' via Supabase Dashboard > Storage

@@ -42,20 +42,24 @@ Create `.env.local` in your project root:
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 # Vipps OAuth
 VIPPS_CLIENT_ID=your-vipps-client-id
 VIPPS_CLIENT_SECRET=your-vipps-client-secret
 VIPPS_SUBSCRIPTION_KEY=your-vipps-subscription-key
-VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
+VIPPS_MSN=your-merchant-serial-number
 ```
+
+**Important:** 
+- Get `SUPABASE_SERVICE_ROLE_KEY` from Settings → API → `service_role` key
+- This key is required for user registration to work properly
 
 ---
 
 ## Step 4: Run Database Migrations
 
-### 4.1 Main Schema (Required)
+### 4.1 Main Schema (Required) ⭐
 
 1. Open Supabase Dashboard → **SQL Editor**
 2. Click **"New Query"**
@@ -63,7 +67,16 @@ VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
 4. Paste into editor and click **"Run"**
 5. Success: ✅ **"Success. No rows returned"**
 
-Creates all tables, indexes, RLS policies, triggers, and views.
+**This migration includes:**
+- ✅ All tables (users, jobs, applications, cv_entries, skills, reviews, etc.)
+- ✅ All RLS policies (optimized, no duplicates)
+- ✅ All indexes and triggers
+- ✅ Views with proper security settings
+- ✅ Schema permissions (security fix)
+- ✅ Fixed function search_path
+- ✅ Achievement seed data
+
+**Note:** This is a consolidated migration that includes all security and performance fixes.
 
 ### 4.2 Storage Policies (Required)
 
@@ -72,8 +85,8 @@ Creates all tables, indexes, RLS policies, triggers, and views.
 
 ### 4.3 Seed Demo Jobs (Optional)
 
-Run `supabase/migrations/03_seed_demo_jobs.sql` to add 8 sample jobs.
-Requires: you've logged in at least once.
+Run `supabase/migrations/03_seed_demo_jobs.sql` to add 8 sample jobs for testing.
+Requires: you've logged in at least once via Vipps.
 
 ---
 
