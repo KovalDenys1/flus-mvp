@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import JobDetailClient from "@/components/JobDetailClient";
 
 type Job = {
@@ -20,23 +23,58 @@ type Job = {
   requirements?: string;
 };
 
-async function fetchJob(id: string): Promise<Job | null> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/jobs/${id}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    const d = await res.json();
-    return d.job ?? null;
-  } catch {
-    return null;
-  }
-}
+export default function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [id, setId] = useState<string>("");
 
-export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const job = await fetchJob(id);
+  useEffect(() => {
+    async function init() {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+    }
+    init();
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    async function fetchJob() {
+      try {
+        console.log("Fetching job from client:", id);
+        const res = await fetch(`/api/jobs/${id}`, { cache: "no-store" });
+        console.log("Response status:", res.status);
+        
+        if (res.ok) {
+          const d = await res.json();
+          console.log("Job data received:", d.job);
+          setJob(d.job ?? null);
+        } else {
+          console.error("Failed to fetch job:", res.status);
+          setJob(null);
+        }
+      } catch (error) {
+        console.error("Error fetching job:", error);
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchJob();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto py-10 px-4">
+        <div className="text-center">Загружается...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <JobDetailClient job={job as Job} />
+      <JobDetailClient job={job} />
     </div>
   );
 }
