@@ -44,7 +44,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
       .then(res => res.json())
       .then(data => {
         if (data.user) setCurrentUserId(data.user.id);
-        else setError("You must be signed in to view this conversation.");
+        else setError("Du må være logget inn for å se denne samtalen.");
       });
   }, []);
 
@@ -57,7 +57,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           fetch(`/api/conversations`),
         ]);
         
-        if (!messagesRes.ok) throw new Error(`Failed to fetch messages: ${messagesRes.status}`);
+        if (!messagesRes.ok) throw new Error(`Kunne ikke hente meldinger: ${messagesRes.status}`);
         const messagesData = await messagesRes.json();
         setMessages(messagesData.messages || []);
         
@@ -73,7 +73,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           }
         }
       } catch {
-        setError("An unknown error occurred.");
+        setError("En ukjent feil oppstod.");
       } finally {
         setLoading(false);
       }
@@ -93,12 +93,12 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: newMessage }),
       });
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) throw new Error("Kunne ikke sende melding");
       const data = await res.json();
       setMessages(prev => [...prev, data.message]);
       setNewMessage("");
     } catch {
-      toast.error("Could not send message.");
+      toast.error("Kunne ikke sende melding.");
     } finally {
       setSending(false);
     }

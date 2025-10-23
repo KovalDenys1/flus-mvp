@@ -38,19 +38,19 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           <div className="flex items-start gap-3">
             <span className="text-3xl">⚠️</span>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-red-900 mb-2">Job not found</h2>
+              <h2 className="text-xl font-bold text-red-900 mb-2">Jobben ikke funnet</h2>
               <p className="text-red-700 mb-4">
-                This job could not be loaded. This usually happens if:
+                Denne jobben kunne ikke lastes. Dette skjer vanligvis hvis:
               </p>
               <ul className="list-disc list-inside text-red-700 space-y-1 text-sm">
-                <li>The Supabase database has not been set up yet</li>
-                <li>The job was deleted</li>
-                <li>You don&apos;t have permission to view this job</li>
+                <li>Supabase-databasen ikke er satt opp ennå</li>
+                <li>Jobben ble slettet</li>
+                <li>Du har ikke tillatelse til å se denne jobben</li>
               </ul>
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
                 <p className="text-sm text-yellow-800">
-                  <strong>⚡ Quick Fix:</strong> If you&apos;re the developer, please run the SQL migrations in Supabase.
-                  See <code className="bg-yellow-100 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instructions.
+                  <strong>⚡ Hurtigløsning:</strong> Hvis du er utvikler, kjør SQL-migrasjonene i Supabase.
+                  Se <code className="bg-yellow-100 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instruksjoner.
                 </p>
               </div>
             </div>
@@ -58,7 +58,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
         </div>
         <div className="mt-6">
           <Link href="/jobber" className="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
-            ← Back to jobs
+            ← Tilbake til jobber
           </Link>
         </div>
       </div>
@@ -99,10 +99,10 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
   };
 
   const getScheduleLabel = () => {
-    if (job.scheduleType === "flexible") return "🕐 Flexible timing";
-    if (job.scheduleType === "fixed") return "⏰ Fixed schedule";
-    if (job.scheduleType === "deadline") return "📅 Deadline";
-    return "🕐 Flexible";
+    if (job.scheduleType === "flexible") return "🕐 Fleksibel";
+    if (job.scheduleType === "fixed") return "⏰ Fast tid";
+    if (job.scheduleType === "deadline") return "📅 Frist";
+    return "🕐 Fleksibel";
   };
 
   return (
@@ -130,7 +130,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           <div className="flex items-start gap-2">
             <span className="text-lg">📍</span>
             <div>
-              <div className="text-xs text-gray-500 uppercase font-semibold">Location</div>
+              <div className="text-xs text-gray-500 uppercase font-semibold">Sted</div>
               <div className="text-sm text-gray-900">{job.address}</div>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       {/* Schedule Information */}
       {(job.startTime || job.endTime) && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-          <div className="text-xs text-amber-700 uppercase font-semibold mb-1">Schedule</div>
+          <div className="text-xs text-amber-700 uppercase font-semibold mb-1">Tidspunkt</div>
           {job.startTime && (
             <div className="text-sm text-amber-900">
               <span className="font-medium">Start:</span> {formatDateTime(job.startTime)}
@@ -148,7 +148,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           )}
           {job.endTime && (
             <div className="text-sm text-amber-900">
-              <span className="font-medium">{job.scheduleType === "deadline" ? "Deadline:" : "End:"}</span> {formatDateTime(job.endTime)}
+              <span className="font-medium">{job.scheduleType === "deadline" ? "Frist:" : "Slutt:"}</span> {formatDateTime(job.endTime)}
             </div>
           )}
         </div>
@@ -157,14 +157,14 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       {/* Requirements */}
       {job.requirements && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="text-xs text-blue-700 uppercase font-semibold mb-1">Requirements</div>
+          <div className="text-xs text-blue-700 uppercase font-semibold mb-1">Krav</div>
           <p className="text-sm text-blue-900 leading-relaxed">{job.requirements}</p>
         </div>
       )}
 
       {/* Description */}
       <div className="bg-white border border-gray-200 rounded-lg p-3">
-        <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Description</div>
+        <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Beskrivelse</div>
         <p className="text-sm leading-relaxed whitespace-pre-line text-gray-900">{job.desc}</p>
       </div>
 
@@ -177,14 +177,14 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           href="/jobber"
           className="flex-1 px-6 py-2 rounded-lg border border-orange-300 text-orange-700 text-base font-medium shadow hover:bg-orange-100 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
         >
-          ← Back
+          ← Tilbake
         </Link>
         <button
           onClick={handleApply}
           disabled={applying}
           className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:bg-orange-300"
         >
-          {applying ? "Starting conversation..." : "Apply"}
+          {applying ? "Starter samtale..." : "Søk"}
         </button>
       </div>
     </div>

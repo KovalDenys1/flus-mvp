@@ -67,7 +67,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto py-10 px-4">
-        <div className="text-center">Загружается...</div>
+        <div className="text-center">Laster...</div>
       </div>
     );
   }

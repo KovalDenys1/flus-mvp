@@ -32,7 +32,7 @@ export default function ConversationsPage() {
         ]);
         
         if (!convRes.ok || !jobsRes.ok) {
-          throw new Error("Failed to fetch data");
+          throw new Error("Kunne ikke hente data");
         }
         
         const convData = await convRes.json();
