@@ -7,8 +7,9 @@ export async function GET() {
   const { data, error } = await supabase
     .from("jobs")
     .select(
-      "id,title,description,category,pay_nok,duration_minutes,area_name,lat,lng,created_at,status,address,schedule_type,start_time,end_time,payment_type,requirements"
+      "id,title,description,category,pay_nok,duration_minutes,area_name,lat,lng,created_at,status,employer_id,selected_worker_id,address,schedule_type,start_time,end_time,payment_type,requirements"
     )
+    .eq("status", "open")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -29,6 +30,8 @@ export async function GET() {
     lng: j.lng,
     createdAt: j.created_at,
     status: j.status,
+    employerId: j.employer_id,
+    selectedWorkerId: j.selected_worker_id,
     address: j.address,
     scheduleType: j.schedule_type,
     startTime: j.start_time,

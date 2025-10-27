@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
+import { Camera, CheckCircle } from "lucide-react";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -20,6 +22,9 @@ type Job = {
   payNok: number;
   durationMinutes: number;
   areaName: string;
+  status: "open" | "assigned" | "completed" | "cancelled";
+  selectedWorkerId?: string;
+  employerId: string;
 };
 
 type Conversation = {
@@ -38,6 +43,8 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   const [sending, setSending] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [job, setJob] = useState<Job | null>(null);
+  const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -70,6 +77,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           const convData = await convRes.json();
           const currentConv = (convData.conversations || []).find((c: Conversation) => c.id === conversationId);
           if (currentConv) {
+            setConversation(currentConv);
             const jobRes = await fetch(`/api/jobs/${currentConv.job_id}`);
             if (jobRes.ok) {
               const jobData = await jobRes.json();
@@ -141,6 +149,111 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     }
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    if (uploadingPhoto) return;
+
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      const uploadRes = await fetch("/api/upload/photo", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Kunne ikke laste opp bilde");
+      }
+
+      const uploadData = await uploadRes.json();
+
+      // Send photo message
+      const messageRes = await fetch(`/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photoUrl: uploadData.photoUrl,
+          caption: "Bilde fra arbeid"
+        }),
+      });
+
+      if (!messageRes.ok) {
+        throw new Error("Kunne ikke sende bilde");
+      }
+
+      const messageData = await messageRes.json();
+      setMessages(prev => [...prev, messageData.message]);
+      toast.success("Bilde sendt!");
+    } catch (error) {
+      console.error("Photo upload error:", error);
+      toast.error("Kunne ikke sende bilde");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handlePhotoUpload(file);
+    }
+    // Reset input
+    e.target.value = "";
+  };
+
+  const handleCompleteWork = async () => {
+    try {
+      const res = await fetch(`/api/jobs/${job?.id}/complete`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        toast.success("Arbeid markert som fullført!");
+        // Reload job data
+        if (conversation) {
+          const jobRes = await fetch(`/api/jobs/${conversation.job_id}`);
+          if (jobRes.ok) {
+            const jobData = await jobRes.json();
+            setJob(jobData.job || null);
+          }
+        }
+      } else {
+        const error = await res.json();
+        toast.error(`Feil: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Complete work error:", error);
+      toast.error("Kunne ikke markere arbeid som fullført");
+    }
+  };
+
+  const handleConfirmCompletion = async () => {
+    try {
+      const res = await fetch(`/api/jobs/${job?.id}/confirm-completion`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        toast.success("Arbeid godkjent!");
+        // Reload job data
+        if (conversation) {
+          const jobRes = await fetch(`/api/jobs/${conversation.job_id}`);
+          if (jobRes.ok) {
+            const jobData = await jobRes.json();
+            setJob(jobData.job || null);
+          }
+        }
+      } else {
+        const error = await res.json();
+        toast.error(`Feil: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Confirm completion error:", error);
+      toast.error("Kunne ikke godkjenne arbeid");
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto py-10 px-4">
@@ -176,6 +289,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <span>📍 {job.areaName}</span>
                   <span>💰 {job.payNok} NOK</span>
+                  <span>📊 {job.status === "assigned" ? "Pågår" : job.status === "completed" ? "Fullført" : "Åpen"}</span>
                 </div>
               </div>
               <Link href={`/jobber/${job.id}`}>
@@ -184,6 +298,54 @@ export default function ChatClient({ conversationId }: { conversationId: string 
             </>
           )}
         </div>
+
+        {/* Action buttons based on job status and user role */}
+        {job && conversation && currentUserId && (
+          <div className="flex gap-2 mt-3 pt-3 border-t">
+            {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
+              <Button
+                onClick={handleCompleteWork}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Marker som fullført
+              </Button>
+            )}
+
+            {job.status === "completed" && currentUserId === job.employerId && (
+              <Button
+                onClick={handleConfirmCompletion}
+                size="sm"
+                className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Godkjenn arbeid
+              </Button>
+            )}
+
+            {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={uploadingPhoto}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-1"
+                  disabled={uploadingPhoto}
+                >
+                  <Camera className="w-4 h-4" />
+                  {uploadingPhoto ? "Laster opp..." : "Send bilde"}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Messages - Scrollable Area */}
@@ -199,6 +361,37 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           <div className="space-y-3">
             {messages.map((msg) => {
               const isOwn = msg.sender_id === currentUserId;
+              const isSystem = msg.message_type === 'system';
+
+              if (isSystem) {
+                // System message
+                let systemText = "";
+                switch (msg.system_event) {
+                  case 'work_started':
+                    systemText = "🔄 Arbeid startet";
+                    break;
+                  case 'work_completed':
+                    systemText = "✅ Arbeid fullført av arbeider";
+                    break;
+                  case 'work_approved':
+                    systemText = "🎉 Arbeid godkjent av arbeidsgiver";
+                    break;
+                  case 'work_rejected':
+                    systemText = "❌ Arbeid avvist av arbeidsgiver";
+                    break;
+                  default:
+                    systemText = "Systemhendelse";
+                }
+
+                return (
+                  <div key={msg.id} className="flex justify-center">
+                    <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs">
+                      {systemText}
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
                   {!isOwn && (
@@ -206,12 +399,32 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                       👤
                     </div>
                   )}
+
                   <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
-                    <p className="text-sm break-words">{msg.text_content}</p>
+                    {msg.message_type === 'photo' && msg.photo_url ? (
+                      <div className="space-y-2">
+                        <div className="relative w-full max-w-xs h-48 rounded-lg overflow-hidden">
+                          <Image
+                            src={msg.photo_url}
+                            alt="Arbeidsbilde"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 320px) 100vw, 320px"
+                          />
+                        </div>
+                        {msg.text_content && (
+                          <p className="text-sm break-words">{msg.text_content}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm break-words">{msg.text_content}</p>
+                    )}
+
                     <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
                       {new Date(msg.created_at).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
+
                   {isOwn && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
                       Du

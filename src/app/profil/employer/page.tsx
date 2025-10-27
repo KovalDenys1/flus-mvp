@@ -50,9 +50,30 @@ type Job = {
   title: string;
   category: string;
   payNok: number;
-  status: string;
+  status: "open" | "assigned" | "completed" | "cancelled";
   areaName: string;
   createdAt: string;
+  selectedWorkerId?: string;
+  applicationsCount?: number;
+};
+
+type Application = {
+  id: string;
+  jobId: string;
+  workerId: string;
+  status: "sendt" | "akseptert" | "avslatt" | "completed";
+  createdAt: string;
+  updatedAt?: string;
+  worker: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    bio?: string;
+    skills?: string[];
+    rating?: number;
+    completedJobs?: number;
+  } | null;
 };
 
 export default function EmployerProfilePage() {
@@ -61,6 +82,9 @@ export default function EmployerProfilePage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
+  const [selectedJobApplications, setSelectedJobApplications] = useState<Application[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [loadingApplications, setLoadingApplications] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   
@@ -137,6 +161,46 @@ export default function EmployerProfilePage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadApplications = async (jobId: string) => {
+    try {
+      setLoadingApplications(true);
+      const res = await fetch(`/api/jobs/${jobId}/applications`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedJobApplications(data.applications || []);
+        setSelectedJobId(jobId);
+      }
+    } catch (err) {
+      console.error("Error loading applications:", err);
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
+  const selectCandidate = async (jobId: string, workerId: string) => {
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/select-candidate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workerId }),
+      });
+
+      if (res.ok) {
+        // Reload jobs and applications
+        loadProfile();
+        if (selectedJobId === jobId) {
+          loadApplications(jobId);
+        }
+      } else {
+        const error = await res.json();
+        alert(`Feil: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error selecting candidate:", err);
+      alert("Det oppstod en feil ved valg av kandidat");
     }
   };
 
@@ -424,12 +488,155 @@ export default function EmployerProfilePage() {
                         className="mt-1 text-xs"
                       >
                         {job.status === "open" ? "Åpen" : 
-                         job.status === "in_progress" ? "Pågår" : "Fullført"}
+                         job.status === "assigned" ? "Tildelt" : 
+                         job.status === "completed" ? "Fullført" : "Avbrutt"}
                       </Badge>
                     </div>
                   </div>
                 </Link>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Job Applications Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="w-5 h-5" />
+            Søknadsadministrasjon
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentJobs.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">Ingen jobber å administrere.</p>
+              <Link href="/jobber/ny">
+                <Button>Opprett jobb</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentJobs.filter(job => job.status === "open").map((job) => (
+                <div key={job.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{job.title}</h3>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                        <Badge variant="outline" className="text-xs">{job.category}</Badge>
+                        <span>•</span>
+                        <span>{job.areaName}</span>
+                        <span>•</span>
+                        <span>{job.payNok} kr</span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => loadApplications(job.id)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Se søknader
+                    </Button>
+                  </div>
+
+                  {selectedJobId === job.id && (
+                    <div className="mt-4 space-y-3">
+                      <h4 className="font-medium text-sm">Søknader:</h4>
+                      {loadingApplications ? (
+                        <div className="text-center py-4">Laster søknader...</div>
+                      ) : selectedJobApplications.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">
+                          Ingen søknader ennå
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {selectedJobApplications.map((application) => (
+                            <div key={application.id} className="border rounded p-3 bg-gray-50">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-medium">
+                                      {application.worker?.name || "Ukjent bruker"}
+                                    </span>
+                                    <Badge
+                                      variant={
+                                        application.status === "sendt" ? "default" :
+                                        application.status === "akseptert" ? "default" :
+                                        application.status === "avslatt" ? "destructive" : "secondary"
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {application.status === "sendt" ? "Sendt" :
+                                       application.status === "akseptert" ? "Akseptert" :
+                                       application.status === "avslatt" ? "Avslått" : "Fullført"}
+                                    </Badge>
+                                  </div>
+
+                                  {application.worker && (
+                                    <div className="text-sm text-gray-600 space-y-1">
+                                      {application.worker.email && (
+                                        <div>E-post: {application.worker.email}</div>
+                                      )}
+                                      {application.worker.phone && (
+                                        <div>Telefon: {application.worker.phone}</div>
+                                      )}
+                                      {application.worker.bio && (
+                                        <div className="mt-2">
+                                          <strong>Bio:</strong> {application.worker.bio}
+                                        </div>
+                                      )}
+                                      {application.worker.completedJobs !== undefined && (
+                                        <div>Fullførte jobber: {application.worker.completedJobs}</div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {application.status === "sendt" && (
+                                  <Button
+                                    onClick={() => selectCandidate(job.id, application.workerId)}
+                                    size="sm"
+                                    className="ml-3"
+                                  >
+                                    Velg kandidat
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {recentJobs.filter(job => job.status !== "open").length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-3">Fullførte jobber:</h4>
+                  <div className="space-y-2">
+                    {recentJobs.filter(job => job.status !== "open").map((job) => (
+                      <div key={job.id} className="border rounded p-3 bg-green-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{job.title}</span>
+                            <Badge variant="secondary" className="ml-2 text-xs">
+                              {job.status === "assigned" ? "Tildelt" : 
+                               job.status === "completed" ? "Fullført" : "Avbrutt"}
+                            </Badge>
+                          </div>
+                          <Link href={`/samtaler/${job.id}`}>
+                            <Button variant="outline" size="sm">
+                              Åpne samtale
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

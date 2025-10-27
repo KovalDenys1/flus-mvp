@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/data/sessions";
-import { getMessagesForConversation, createMessage, isUserInConversation } from "@/lib/chat-db";
+import { getMessagesForConversation, createMessage, createPhotoMessage, isUserInConversation } from "@/lib/chat-db";
 
 // Helper to extract the conversation id from the request URL.
 function extractConversationId(req: NextRequest) {
@@ -68,14 +68,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { text } = await req.json();
-    if (!text || typeof text !== "string" || text.trim() === "") {
-      return NextResponse.json({ error: "Message text is required" }, { status: 400 });
+    const { text, photoUrl, caption } = await req.json();
+
+    if (photoUrl) {
+      // Photo message
+      if (!photoUrl || typeof photoUrl !== "string") {
+        return NextResponse.json({ error: "Photo URL is required" }, { status: 400 });
+      }
+      const message = await createPhotoMessage(conversationId, session.user.id, photoUrl, caption);
+      return NextResponse.json({ message }, { status: 201 });
+    } else {
+      // Text message
+      if (!text || typeof text !== "string" || text.trim() === "") {
+        return NextResponse.json({ error: "Message text is required" }, { status: 400 });
+      }
+      const message = await createMessage(conversationId, session.user.id, text.trim());
+      return NextResponse.json({ message }, { status: 201 });
     }
-
-    const message = await createMessage(conversationId, session.user.id, text.trim());
-
-    return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
     console.error(`Failed to send message for conversation ${conversationId}:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

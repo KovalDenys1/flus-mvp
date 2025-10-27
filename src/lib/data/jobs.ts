@@ -9,10 +9,13 @@ export type Job = {
   lat: number;
   lng: number;
   createdAt: string;
-  status: "open" | "closed";
+  status: "open" | "assigned" | "completed" | "cancelled";
   // ID of the user who created the job (employer)
   employerId: string;
-  
+
+  // Worker assigned to this job (when status is 'assigned' or 'completed')
+  selectedWorkerId?: string;
+
   // New fields for enhanced job scheduling
   address?: string; // Full address for the job location
   scheduleType?: "flexible" | "fixed" | "deadline"; // Type of scheduling

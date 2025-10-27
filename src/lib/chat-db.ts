@@ -19,6 +19,7 @@ export type Message = {
   sender_id: string
   message_type: 'text' | 'photo' | 'system'
   text_content?: string
+  photo_url?: string
   system_event?: 'work_started' | 'work_completed' | 'work_approved' | 'work_rejected'
   created_at: string
 }
@@ -129,6 +130,63 @@ export async function createMessage(conversationId: string, senderId: string, te
 
   if (error) {
     throw new Error(`Failed to create message: ${error.message}`)
+  }
+
+  // Обновляем updated_at для разговора
+  await supabase
+    .from('conversations')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', conversationId)
+
+  return data
+}
+
+/**
+ * Создает сообщение с фото
+ */
+export async function createPhotoMessage(conversationId: string, senderId: string, photoUrl: string, caption?: string): Promise<Message> {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_id: senderId,
+      message_type: 'photo',
+      photo_url: photoUrl,
+      text_content: caption
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to create photo message: ${error.message}`)
+  }
+
+  // Обновляем updated_at для разговора
+  await supabase
+    .from('conversations')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', conversationId)
+
+  return data
+}
+
+/**
+ * Создает системное сообщение
+ */
+export async function createSystemMessage(conversationId: string, systemEvent: 'work_started' | 'work_completed' | 'work_approved' | 'work_rejected'): Promise<Message> {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_id: 'system',
+      message_type: 'system',
+      system_event: systemEvent
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to create system message: ${error.message}`)
   }
 
   // Обновляем updated_at для разговора
