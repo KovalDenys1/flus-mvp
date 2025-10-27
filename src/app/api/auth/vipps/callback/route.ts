@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Create session and redirect
-    const session = createSession(userId);
+    const session = await createSession(userId);
     const res = NextResponse.redirect(new URL("/jobber", req.url));
     res.cookies.set(SESSION_COOKIE, session.token, COOKIE_OPTIONS);
     return res;

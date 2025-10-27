@@ -8,7 +8,7 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
-  const sess = findSession(token);
+  const sess = await findSession(token);
   if (!sess) return NextResponse.json({ user: null });
 
   // Try Supabase first
