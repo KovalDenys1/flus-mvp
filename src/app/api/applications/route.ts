@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/data/sessions";
-import { findOrCreateConversation } from "@/lib/data/conversations";
+import { findOrCreateConversation } from "@/lib/chat-db";
 
 // GET: return applications for the current user (worker)
 export async function GET() {
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
     
     const employerId = jobData?.employer_id || "u_employer_1";
-    const conv = findOrCreateConversation(jobId, user.id, employerId);
+    const conv = await findOrCreateConversation(jobId, user.id, employerId);
 
     return NextResponse.json(
       {

@@ -68,14 +68,20 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
   const handleApply = async () => {
     setApplying(true);
     try {
-      const res = await fetch("/api/applications", {
+      // First create/find conversation
+      const convRes = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: job.id }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not start conversation");
-      router.push(`/samtaler/${data.conversationId}`);
+
+      if (!convRes.ok) {
+        const convData = await convRes.json();
+        throw new Error(convData.error || "Could not create conversation");
+      }
+
+      const convData = await convRes.json();
+      router.push(`/samtaler/${convData.conversation.id}`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error(msg);

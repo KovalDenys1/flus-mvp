@@ -1,41 +1,94 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import { getConversationsForUser } from "@/lib/data/conversations";
-import { getSession, findSession } from "@/lib/data/sessions";
-import { SESSION_COOKIE } from "@/lib/utils/cookies";
+import { getConversationsForUser, findOrCreateConversation } from "@/lib/chat-db";
+import { getSession } from "@/lib/data/sessions";
 
 /**
  * GET /api/conversations
  * Returns a list of all conversations for the current user.
  */
-export async function GET(req: NextRequest) {
-  // Try to read token directly from incoming request cookies first. This is
-  // more reliable for client-initiated requests where server cookie helpers
-  // might not have the same context.
-  const token = req.cookies.get(SESSION_COOKIE)?.value;
-  const session = token ? findSession(token) : null;
+export async function GET() {
+  const session = await getSession();
 
-  // Fallback to the helper which returns { user, session } and is used
-  // by other routes. We only need the user id to fetch conversations.
-  let userId: string | null = null;
-  if (session) {
-    userId = session.userId;
-  } else {
-    const helper = await getSession();
-    userId = helper.user?.id ?? null;
-  }
-
-  if (!userId) {
-    // If there's no authenticated user, provide demo conversations so the
-    // front-end can show sample chats. Use a placeholder demo user id.
-    userId = "demo_user";
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const conversations = getConversationsForUser(userId);
+    const conversations = await getConversationsForUser(session.user.id);
     return NextResponse.json({ conversations });
   } catch (error) {
     console.error("Failed to fetch conversations:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/conversations
+ * Creates or finds a conversation for a job application.
+ */
+export async function POST(req: NextRequest) {
+  const session = await getSession();
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { jobId } = await req.json();
+
+    if (!jobId || typeof jobId !== "string") {
+      return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
+    }
+
+    // Получаем информацию о работе, чтобы узнать employer_id
+    const jobRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/jobs?id=eq.${jobId}&select=employer_id`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      }
+    });
+
+    if (!jobRes.ok) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    const jobs = await jobRes.json();
+    if (!jobs || jobs.length === 0) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    const employerId = jobs[0].employer_id;
+
+    // Определяем роли: текущий пользователь - worker, employer - владелец работы
+    const workerId = session.user.id;
+
+    // Создаем или находим разговор
+    const conversation = await findOrCreateConversation(jobId, workerId, employerId);
+
+    // Создаем заявку на работу
+    const appRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/applications`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        job_id: jobId,
+        applicant_id: workerId,
+        status: 'sendt'
+      })
+    });
+
+    if (!appRes.ok) {
+      console.error('Failed to create application:', await appRes.text());
+      // Не прерываем процесс, если заявка не создалась
+    }
+
+    return NextResponse.json({ conversation }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create conversation:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

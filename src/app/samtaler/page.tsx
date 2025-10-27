@@ -3,9 +3,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Conversation, DEMO_CONVERSATION_JOB_IDS } from "@/lib/data/conversations";
+import { Conversation } from "@/lib/chat-db";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 type Job = {
   id: string;
@@ -46,7 +45,7 @@ export default function ConversationsPage() {
         });
         setJobs(jobsMap);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "An unknown error occurred.";
+        const message = err instanceof Error ? err.message : "En ukjent feil oppstod.";
         setError(message);
       } finally {
         setLoading(false);
@@ -111,8 +110,7 @@ export default function ConversationsPage() {
       ) : (
         <div className="space-y-4">
           {conversations.map((convo) => {
-            const job = jobs[convo.jobId];
-            const isDemo = DEMO_CONVERSATION_JOB_IDS.includes(convo.jobId);
+            const job = jobs[convo.job_id];
             return (
               <Link key={convo.id} href={`/samtaler/${convo.id}`} className="block">
                 <Card className="hover:shadow-lg hover:border-orange-300 transition-all duration-200 cursor-pointer border border-gray-200 bg-white">
@@ -124,11 +122,8 @@ export default function ConversationsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-lg truncate">
-                            {job?.title || `Jobb #${convo.jobId}`}
+                            {job?.title || `Jobb #${convo.job_id}`}
                           </h3>
-                          {isDemo && (
-                            <Badge variant="outline" className="text-xs">Demo</Badge>
-                          )}
                         </div>
                         <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                           {job?.desc || "Ingen beskrivelse tilgjengelig"}
@@ -137,7 +132,7 @@ export default function ConversationsPage() {
                           <span>📍 {job?.areaName || "Ukjent"}</span>
                           <span>💰 {job?.payNok || "?"} NOK</span>
                           <span className="ml-auto">
-                            {new Date(convo.createdAt).toLocaleDateString("no-NO", { day: "numeric", month: "short" })}
+                            {new Date(convo.created_at).toLocaleDateString("no-NO", { day: "numeric", month: "short" })}
                           </span>
                         </div>
                       </div>

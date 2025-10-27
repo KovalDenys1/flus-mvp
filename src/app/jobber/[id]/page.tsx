@@ -41,20 +41,15 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
     async function fetchJob() {
       try {
-        console.log("Fetching job from client:", id);
         const res = await fetch(`/api/jobs/${id}`, { cache: "no-store" });
-        console.log("Response status:", res.status);
         
         if (res.ok) {
           const d = await res.json();
-          console.log("Job data received:", d.job);
           setJob(d.job ?? null);
         } else {
-          console.error("Failed to fetch job:", res.status);
           setJob(null);
         }
-      } catch (error) {
-        console.error("Error fetching job:", error);
+      } catch {
         setJob(null);
       } finally {
         setLoading(false);

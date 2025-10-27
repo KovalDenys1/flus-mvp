@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Message } from "@/lib/data/messages";
+import { createClient } from '@supabase/supabase-js'
+import { Message } from "@/lib/chat-db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 type Job = {
   id: string;
@@ -19,10 +24,10 @@ type Job = {
 
 type Conversation = {
   id: string;
-  jobId: string;
-  initiatorId: string;
-  participantId: string;
-  createdAt: string;
+  job_id: string;
+  worker_id: string;
+  employer_id: string;
+  created_at: string;
 };
 
 export default function ChatClient({ conversationId }: { conversationId: string }) {
@@ -65,7 +70,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           const convData = await convRes.json();
           const currentConv = (convData.conversations || []).find((c: Conversation) => c.id === conversationId);
           if (currentConv) {
-            const jobRes = await fetch(`/api/jobs/${currentConv.jobId}`);
+            const jobRes = await fetch(`/api/jobs/${currentConv.job_id}`);
             if (jobRes.ok) {
               const jobData = await jobRes.json();
               setJob(jobData.job || null);
@@ -80,6 +85,38 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     }
     fetchData();
   }, [conversationId, currentUserId]);
+
+  // Realtime subscription for new messages
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`messages:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          setMessages(prev => {
+            // Check if message is already in the list
+            if (prev.some(msg => msg.id === newMessage.id)) return prev;
+            return [...prev, newMessage].sort((a, b) =>
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
 
   useEffect(() => scrollToBottom(), [messages]);
 
@@ -161,7 +198,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         ) : (
           <div className="space-y-3">
             {messages.map((msg) => {
-              const isOwn = msg.senderId === currentUserId;
+              const isOwn = msg.sender_id === currentUserId;
               return (
                 <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
                   {!isOwn && (
@@ -170,9 +207,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                     </div>
                   )}
                   <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
-                    <p className="text-sm break-words">{msg.text}</p>
+                    <p className="text-sm break-words">{msg.text_content}</p>
                     <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
-                      {new Date(msg.createdAt).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(msg.created_at).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
                   {isOwn && (
