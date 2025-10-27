@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Star, Briefcase, TrendingUp, ExternalLink, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 type User = {
   id: string;
@@ -61,7 +62,7 @@ type Application = {
   id: string;
   jobId: string;
   workerId: string;
-  status: "sendt" | "akseptert" | "avslatt" | "completed";
+  status: "sendt" | "akseptert" | "avslatt" | "completed" | "approved" | "pending";
   createdAt: string;
   updatedAt?: string;
   worker: {
@@ -87,6 +88,11 @@ export default function EmployerProfilePage() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  
+  const [employerSettings, setEmployerSettings] = useState({
+    autoApproveApplications: false
+  });
+  const [loadingSettings, setLoadingSettings] = useState(false);
   
   const [profileForm, setProfileForm] = useState({
     navn: "",
@@ -157,6 +163,13 @@ export default function EmployerProfilePage() {
         const jobsData = await jobsRes.json();
         setRecentJobs((jobsData.jobs || []).slice(0, 5));
       }
+
+      // Get employer settings
+      const settingsRes = await fetch("/api/profile/settings");
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json();
+        setEmployerSettings(settingsData.settings);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -201,6 +214,30 @@ export default function EmployerProfilePage() {
     } catch (err) {
       console.error("Error selecting candidate:", err);
       alert("Det oppstod en feil ved valg av kandidat");
+    }
+  };
+
+  const updateEmployerSettings = async (autoApproveApplications: boolean) => {
+    try {
+      setLoadingSettings(true);
+      const res = await fetch("/api/profile/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autoApproveApplications }),
+      });
+
+      if (res.ok) {
+        setEmployerSettings({ autoApproveApplications });
+        toast.success("Innstillinger oppdatert");
+      } else {
+        const error = await res.json();
+        toast.error(`Feil: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Error updating settings:", err);
+      toast.error("Kunne ikke oppdatere innstillinger");
+    } finally {
+      setLoadingSettings(false);
     }
   };
 
@@ -443,6 +480,38 @@ export default function EmployerProfilePage() {
         </Card>
       )}
 
+      {/* Employer Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="w-5 h-5" />
+            Arbeidsgiverinnstillinger
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <h3 className="font-medium">Automatisk godkjenning av søknader</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Når aktivert, blir alle søknader automatisk godkjent. Når deaktivert, må du manuelt godkjenne hver søknad.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => updateEmployerSettings(!employerSettings.autoApproveApplications)}
+                  disabled={loadingSettings}
+                  variant={employerSettings.autoApproveApplications ? "default" : "outline"}
+                  size="sm"
+                >
+                  {loadingSettings ? "Lagrer..." : employerSettings.autoApproveApplications ? "Aktivert" : "Deaktivert"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Recent Jobs */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -563,12 +632,16 @@ export default function EmployerProfilePage() {
                                       variant={
                                         application.status === "sendt" ? "default" :
                                         application.status === "akseptert" ? "default" :
+                                        application.status === "approved" ? "default" :
+                                        application.status === "pending" ? "secondary" :
                                         application.status === "avslatt" ? "destructive" : "secondary"
                                       }
                                       className="text-xs"
                                     >
                                       {application.status === "sendt" ? "Sendt" :
                                        application.status === "akseptert" ? "Akseptert" :
+                                       application.status === "approved" ? "Godkjent" :
+                                       application.status === "pending" ? "Venter på godkjenning" :
                                        application.status === "avslatt" ? "Avslått" : "Fullført"}
                                     </Badge>
                                   </div>
@@ -593,7 +666,7 @@ export default function EmployerProfilePage() {
                                   )}
                                 </div>
 
-                                {application.status === "sendt" && (
+                                {application.status === "pending" && (
                                   <Button
                                     onClick={() => selectCandidate(job.id, application.workerId)}
                                     size="sm"

@@ -46,9 +46,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Decode state to get timestamp (no role needed)
-    // const decodedState = JSON.parse(Buffer.from(state, 'base64').toString());
-    // Default role is worker, users can switch in UI
+    // Decode state to get role and birthYear
+    const decodedState = JSON.parse(Buffer.from(state, 'base64').toString());
+    const role = decodedState.role || 'worker';
+    const birthYear = decodedState.birthYear;
 
     // Exchange authorization code for access token
     const tokenResponse = await fetch(VIPPS_TOKEN_URL, {
@@ -105,15 +106,16 @@ export async function GET(req: NextRequest) {
 
     let userId: string | null = existing?.id ?? null;
 
-    // If user doesn't exist, create new one with default role
+    // If user doesn't exist, create new one with selected role and birth year
     if (!userId) {
       const { data: inserted, error } = await supabase
         .from("users")
         .insert({
           email,
-          role: "worker", // Default role, users can switch in UI
+          role,
           navn: userInfo.name,
           telefon: userInfo.phone_number,
+          birth_year: birthYear ? parseInt(birthYear) : null,
         })
         .select("id")
         .maybeSingle();
@@ -124,6 +126,17 @@ export async function GET(req: NextRequest) {
       }
 
       userId = inserted?.id ?? null;
+    } else {
+      // Update existing user with new role and birth year if provided
+      const updateData: Record<string, string | number> = { role };
+      if (birthYear) {
+        updateData.birth_year = parseInt(birthYear);
+      }
+      
+      await supabase
+        .from("users")
+        .update(updateData)
+        .eq("id", userId);
     }
 
     if (!userId) {

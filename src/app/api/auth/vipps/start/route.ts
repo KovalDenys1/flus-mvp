@@ -4,8 +4,24 @@ import { NextRequest, NextResponse } from "next/server";
 const VIPPS_AUTH_URL = "https://api.vipps.no/access-management-1.0/access/oauth2/auth";
 
 export async function GET(req: NextRequest) {
-  // No role selection needed - users can switch roles in the UI
-  const state = JSON.stringify({ timestamp: Date.now() });
+  const { searchParams } = new URL(req.url);
+  const role = searchParams.get('role') || 'worker';
+  const birthYear = searchParams.get('birthYear');
+
+  // Validate age if provided
+  if (birthYear) {
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - parseInt(birthYear);
+    if (age < 18) {
+      return NextResponse.redirect(new URL('/register?error=age', req.url));
+    }
+  }
+
+  const state = JSON.stringify({ 
+    timestamp: Date.now(),
+    role,
+    birthYear: birthYear || null
+  });
 
   // Vipps authorization URL parameters
   const params = new URLSearchParams({

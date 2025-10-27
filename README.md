@@ -2,10 +2,6 @@
 
 **FLUS** is a Norwegian job platform MVP connecting employers with workers for small local tasks. Built with Next.js 15, Supabase (PostgreSQL), and real Vipps OAuth authentication.
 
-> **Quick Start:** See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for complete setup guide!
-
----
-
 ## Features
 
 ### For Workers (Jobbsøker)
@@ -30,8 +26,6 @@
 - Photo uploads
 - Job categories
 
----
-
 ## Tech Stack
 
 - **Framework**: Next.js 15.5.4 (App Router, Turbopack)
@@ -41,8 +35,6 @@
 - **UI**: Radix UI
 - **Language**: TypeScript
 - **Sessions**: HTTP-only cookies
-
----
 
 ## Quick Start
 
@@ -90,8 +82,6 @@ npm run dev
 
 Open http://localhost:3000
 
----
-
 ## ✅ Features Implemented
 
 **Complete:**
@@ -109,8 +99,6 @@ Open http://localhost:3000
 - ⚠️ Chat (in-memory, migration ready)
 - ⚠️ Statistics (basic)
 - ⚠️ Achievements (demo data)
-
----
 
 ## API Routes
 
@@ -140,8 +128,6 @@ Open http://localhost:3000
 - `POST /api/cv` - Add entry
 - `DELETE /api/cv` - Remove
 
----
-
 ## Role System
 
 Switch modes with navbar toggle:
@@ -150,8 +136,6 @@ Switch modes with navbar toggle:
 **Employer:** Create jobs, view applicants, statistics
 
 Real-time sync - profile updates instantly when switching!
-
----
 
 ## Database
 
@@ -165,8 +149,6 @@ Real-time sync - profile updates instantly when switching!
 - job-photos bucket (5MB)
 
 See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md#database-schema) for details.
-
----
 
 ## Project Structure
 
@@ -185,8 +167,6 @@ flus-mvp/
 └── .env.local
 ```
 
----
-
 ## Troubleshooting
 
 **"Failed to fetch":** Check `.env.local`, restart server
@@ -197,53 +177,11 @@ flus-mvp/
 
 More help: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md#common-issues)
 
----
-
-## Roadmap
-
-**High Priority:**
-- Migrate chat to Supabase + Realtime
-- Add geocoding
-- Image optimization
-- Enhanced statistics
-
-**Medium:**
-- Email notifications
-- Push notifications
-- Vipps payments
-- Advanced filters
-
-**Nice to Have:**
-- Dark mode
-- Language switcher
-- Export CV as PDF
-- Job recommendations
-
----
-
-## Contributing
-
-1. Fork repository
-2. Create branch (`git checkout -b feature/name`)
-3. Commit (`git commit -m 'Add feature'`)
-4. Push (`git push origin feature/name`)
-5. Open Pull Request
-
----
-
-## Acknowledgments
-
-Special thanks to **Ayanle** and **Alexander** for their invaluable help with database design and implementation.
-
----
-
 ## License
 
 MIT License - Educational prototype
 
 (c) 2025 Denys Koval
-
----
 
 ## Support
 

@@ -2,10 +2,43 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function Page() {
   const [role, setRole] = useState<"worker" | "employer">("worker");
-  const vippsHref = `/api/auth/vipps/start?role=${role}`;
+  const [birthYear, setBirthYear] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!birthYear) {
+      toast.error("Vennligst oppgi fødselsår");
+      return;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - parseInt(birthYear);
+
+    if (age < 18) {
+      toast.error("Du må være minst 18 år gammel for å bruke FLUS");
+      return;
+    }
+
+    if (!acceptTerms) {
+      toast.error("Du må godta vilkårene for å registrere deg");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const vippsHref = `/api/auth/vipps/start?role=${role}&birthYear=${birthYear}`;
+      window.location.href = vippsHref;
+    } catch (error) {
+      toast.error("Noe gikk galt. Prøv igjen.");
+      setLoading(false);
+    }
+  };
   
   return (
     <div className="max-w-md mx-auto py-10 px-4">
@@ -51,11 +84,45 @@ export default function Page() {
           </div>
         </div>
 
-        <a href={vippsHref}>
-          <Button className="w-full h-11 text-base font-semibold">
-            Fortsett med Vipps som {role === "employer" ? "arbeidsgiver" : "jobbsøker"}
-          </Button>
-        </a>
+        {/* Age Verification */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-700">
+            Fødselsår * <span className="text-xs text-gray-500">(Du må være minst 18 år)</span>
+          </label>
+          <Input
+            type="number"
+            value={birthYear}
+            onChange={(e) => setBirthYear(e.target.value)}
+            placeholder="2005"
+            min="1900"
+            max={new Date().getFullYear()}
+            required
+          />
+        </div>
+
+        {/* Terms and Conditions */}
+        <div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-1 w-4 h-4"
+            />
+            <div className="text-sm text-gray-700">
+              Jeg godtar <a href="#" className="text-orange-600 hover:underline">vilkårene for bruk</a> og 
+              <a href="#" className="text-orange-600 hover:underline ml-1">personvernerklæringen</a>
+            </div>
+          </label>
+        </div>
+
+        <Button 
+          onClick={handleRegister} 
+          disabled={loading}
+          className="w-full h-11 text-base font-semibold"
+        >
+          {loading ? "Registrerer..." : `Fortsett med Vipps som ${role === "employer" ? "arbeidsgiver" : "jobbsøker"}`}
+        </Button>
         
         <p className="text-xs text-gray-500 text-center">
           Demo: ved klikk opprettes/finnes en bruker med valgt rolle og økten settes.

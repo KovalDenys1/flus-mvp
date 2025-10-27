@@ -125,6 +125,26 @@ export default function Page() {
     }
   }
 
+  async function quickApply(jobId: string) {
+    if (!isLoggedIn) {
+      toast.error("Du må være innlogget for å søke på jobber.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setAppliedJobIds((prev) => new Set(prev).add(jobId));
+      toast.success("Jobb hentet! 📦 Du kan nå starte arbeidet når du er klar.");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast.error("Kunne ikke hente jobb: " + errorMessage);
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto py-10 px-2 space-y-8 bg-gray-50 rounded-2xl">
       <header className="flex flex-col items-center gap-3 mb-4">
@@ -256,10 +276,24 @@ export default function Page() {
                       <Badge variant="outline" className="truncate px-2 py-0.5 text-xs">{job.areaName}</Badge>
                       {dist && <span className="text-xs text-gray-400">{dist}</span>}
                     </div>
-                    <div className="ml-0 sm:ml-auto w-full sm:w-auto">
+                    <div className="ml-0 sm:ml-auto w-full sm:w-auto flex gap-2">
                       <Button
-                        className="w-full sm:w-auto rounded-lg"
+                        className="flex-1 sm:flex-none rounded-lg bg-green-500 hover:bg-green-600 text-white"
                         size="sm"
+                        onClick={(e) => { e.stopPropagation(); quickApply(job.id); }}
+                        disabled={appliedJobIds.has(job.id) || !isLoggedIn}
+                        title={!isLoggedIn ? "Du må være innlogget for å søke" : "Hent jobb med ett klikk"}
+                      >
+                        {appliedJobIds.has(job.id)
+                          ? "✓ Søkt"
+                          : !isLoggedIn
+                          ? "Logg inn"
+                          : "⚡ Hent"}
+                      </Button>
+                      <Button
+                        className="flex-1 sm:flex-none rounded-lg"
+                        size="sm"
+                        variant="outline"
                         onClick={(e) => { e.stopPropagation(); apply(job.id); }}
                         disabled={appliedJobIds.has(job.id) || !isLoggedIn}
                         title={!isLoggedIn ? "Du må være innlogget for å søke" : ""}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/data/sessions";
+import { containsInappropriateContent } from "@/lib/content-moderation";
 
 export async function GET() {
   try {
@@ -71,6 +72,15 @@ export async function POST(req: NextRequest) {
     if (subject.length < 5 || message.length < 10) {
       return NextResponse.json(
         { error: "Subject must be at least 5 characters and message at least 10 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Content moderation - check for inappropriate content
+    const contentToCheck = `${subject} ${message}`;
+    if (containsInappropriateContent(contentToCheck)) {
+      return NextResponse.json(
+        { error: "Message contains inappropriate content. Please review and remove any offensive language." },
         { status: 400 }
       );
     }

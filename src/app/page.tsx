@@ -24,7 +24,6 @@ export default function HomePage() {
 
   useEffect(() => {
     if (user) {
-      // User is logged in - redirect to appropriate mode
       const savedMode = localStorage.getItem("viewMode");
       if (savedMode === "employer") {
         router.push("/mine-jobber");

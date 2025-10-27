@@ -3,7 +3,6 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/data/sessions";
 import { findOrCreateConversation } from "@/lib/chat-db";
 
-// GET: return applications for the current user (worker)
 export async function GET() {
   const { user } = await getSession();
   if (!user) return NextResponse.json({ applications: [] });
@@ -19,7 +18,6 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    // If table missing or RLS prevents read, return empty list gracefully in demo
     return NextResponse.json({ applications: [] });
   }
 
@@ -53,6 +51,18 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseServer();
 
+    // Fetch employer_id from job first
+    const { data: jobData } = await supabase
+      .from("jobs")
+      .select("employer_id")
+      .eq("id", jobId)
+      .maybeSingle();
+
+    const employerId = jobData?.employer_id;
+    if (!employerId) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
     // Ensure we don't duplicate application for same job+user
     const { data: existing, error: existErr } = await supabase
       .from("applications")
@@ -66,9 +76,23 @@ export async function POST(req: NextRequest) {
 
     let appId: string | null = existing?.id ?? null;
     if (!appId) {
+      // Check employer's auto-approval setting
+      const { data: employerData } = await supabase
+        .from("users")
+        .select("auto_approve_applications")
+        .eq("id", employerId)
+        .single();
+
+      const autoApprove = employerData?.auto_approve_applications ?? false;
+      const initialStatus = autoApprove ? "approved" : "pending";
+
       const { data: inserted, error } = await supabase
         .from("applications")
-        .insert({ job_id: jobId, applicant_id: user.id })
+        .insert({
+          job_id: jobId,
+          applicant_id: user.id,
+          status: initialStatus
+        })
         .select("id")
         .maybeSingle();
       if (error) {
@@ -76,16 +100,16 @@ export async function POST(req: NextRequest) {
       }
       appId = inserted?.id ?? null;
     }
-
-    // Fetch employer_id from job
-    const { data: jobData } = await supabase
-      .from("jobs")
-      .select("employer_id")
-      .eq("id", jobId)
-      .maybeSingle();
-    
-    const employerId = jobData?.employer_id || "u_employer_1";
     const conv = await findOrCreateConversation(jobId, user.id, employerId);
+
+    // Get the actual status from the database
+    const { data: appData } = await supabase
+      .from("applications")
+      .select("status")
+      .eq("id", appId)
+      .single();
+
+    const actualStatus = appData?.status || "pending";
 
     return NextResponse.json(
       {
@@ -94,7 +118,7 @@ export async function POST(req: NextRequest) {
           id: appId ?? "",
           jobId,
           workerId: user.id,
-          status: "sendt" as const,
+          status: actualStatus,
           createdAt: new Date().toISOString(),
         },
         conversationId: conv.id,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/data/sessions";
+import { containsInappropriateContent } from "@/lib/content-moderation";
 
 export async function GET() {
   const supabase = getSupabaseServer();
@@ -14,7 +15,6 @@ export async function GET() {
 
   if (error) {
     console.error("Supabase jobs error:", error);
-    // Return empty list in demo to avoid breaking the page; see SUPABASE_SETUP.md to create table/policies
     return NextResponse.json({ jobs: [] });
   }
 
@@ -70,7 +70,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get current user from our session system
+    // Content moderation - check for inappropriate content
+    const contentToCheck = `${title} ${description} ${requirements || ""}`;
+    if (containsInappropriateContent(contentToCheck)) {
+      return NextResponse.json(
+        { error: "Job description contains inappropriate content. Please review and remove any offensive language." },
+        { status: 400 }
+      );
+    }
+
     const { user } = await getSession();
     
     if (!user) {
@@ -80,9 +88,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Any authenticated user can create jobs
-
-    // Default coordinates (Oslo center) - in production, geocode the address
     const lat = 59.9139;
     const lng = 10.7522;
 

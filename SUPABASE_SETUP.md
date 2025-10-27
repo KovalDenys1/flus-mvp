@@ -83,10 +83,9 @@ VIPPS_MSN=your-merchant-serial-number
 1. **First create storage bucket** (see Step 5)
 2. Then run `supabase/migrations/02_storage_policies.sql` in SQL Editor
 
-### 4.3 Seed Demo Jobs (Optional)
+### 4.4 Add Birth Year Field (Required for Age Verification)
 
-Run `supabase/migrations/03_seed_demo_jobs.sql` to add 8 sample jobs for testing.
-Requires: you've logged in at least once via Vipps.
+Run `supabase/migrations/04_add_birth_year.sql` to add birth_year field to users table for age verification.
 
 ---
 

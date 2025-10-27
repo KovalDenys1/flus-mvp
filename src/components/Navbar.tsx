@@ -12,12 +12,10 @@ export default function Navbar() {
   const [viewMode, setViewMode] = useState<"worker" | "employer">("worker");
 
   useEffect(() => {
-    // Load saved view mode from localStorage
     const savedMode = localStorage.getItem("viewMode");
     if (savedMode === "worker" || savedMode === "employer") {
       setViewMode(savedMode);
     } else {
-      // Default to worker mode if not set
       setViewMode("worker");
       localStorage.setItem("viewMode", "worker");
     }
@@ -27,7 +25,6 @@ export default function Navbar() {
       .then(d=>{
         const userData = d.user ?? null;
         setUser(userData);
-        // Don't override viewMode with user role - allow free switching
       })
       .catch(()=>{});
   }, []);
