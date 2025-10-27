@@ -6,8 +6,12 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import AuthGuard from "@/components/AuthGuard";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function CreateJobPage() {
   const router = useRouter();
@@ -15,11 +19,14 @@ export default function CreateJobPage() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "Hagearbeid",
+    category: "",
     payNok: "",
     durationMinutes: "",
-    areaName: "Oslo",
+    areaName: "",
     address: "",
+    postalCode: "",
+    lat: null as number | null,
+    lng: null as number | null,
     scheduleType: "flexible",
     startTime: "",
     endTime: "",
@@ -41,13 +48,62 @@ export default function CreateJobPage() {
     "Dugnad",
   ];
 
+  const calculateProgress = () => {
+    const requiredFields = [form.title, form.description, form.category, form.payNok, form.durationMinutes];
+    const filledRequired = requiredFields.filter(field => field && field.toString().trim()).length;
+    return Math.round((filledRequired / requiredFields.length) * 100);
+  };
+
+  const progress = calculateProgress();
+
+  const areas = [
+    "Oslo",
+    "Oslo - Sentrum",
+    "Oslo - Øst",
+    "Oslo - Vest",
+    "Oslo - Nord",
+    "Oslo - Sør",
+    "Bergen",
+    "Trondheim",
+    "Stavanger",
+    "Kristiansand",
+    "Tromsø",
+    "Bodø",
+    "Ålesund",
+    "Tønsberg",
+    "Moss",
+    "Sandefjord",
+    "Arendal",
+    "Haugesund",
+    "Molde",
+    "Kristiansund",
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!form.title || !form.description || !form.payNok || !form.durationMinutes) {
-      toast.error("Vennligst fyll ut alle obligatoriske felt");
+    if (!form.title.trim() || !form.description.trim() || !form.category) {
+      toast.error("Vennligst fyll ut alle påkrevde felt");
       return;
     }
+
+    const payNok = parseInt(form.payNok);
+    const durationMinutes = parseInt(form.durationMinutes);
+
+    if (isNaN(payNok) || payNok < 50) {
+      toast.error("Betaling må være minst 50 kr");
+      return;
+    }
+
+    if (isNaN(durationMinutes) || durationMinutes < 15) {
+      toast.error("Varighet må være minst 15 minutter");
+      return;
+    }
+
+    // Combine address with postal code
+    const fullAddress = form.address.trim()
+      ? `${form.address.trim()}${form.postalCode ? `, ${form.postalCode} ${form.areaName}` : ''}`
+      : '';
 
     setLoading(true);
     try {
@@ -55,18 +111,20 @@ export default function CreateJobPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: form.title,
-          description: form.description,
+          title: form.title.trim(),
+          description: form.description.trim(),
           category: form.category,
-          payNok: parseInt(form.payNok),
-          durationMinutes: parseInt(form.durationMinutes),
+          payNok,
+          durationMinutes,
           areaName: form.areaName,
-          address: form.address || null,
+          address: fullAddress || null,
+          lat: form.lat,
+          lng: form.lng,
           scheduleType: form.scheduleType,
           startTime: form.startTime || null,
           endTime: form.endTime || null,
           paymentType: form.paymentType,
-          requirements: form.requirements || null,
+          requirements: form.requirements.trim() || null,
         }),
       });
 
@@ -91,8 +149,25 @@ export default function CreateJobPage() {
   return (
     <AuthGuard requireAuth={true}>
       <div className="max-w-3xl mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold mb-6">Opprett ny jobb</h1>
-        
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Opprett ny jobb</h1>
+          <p className="text-gray-600 mt-1">Fyll ut skjemaet nedenfor for å opprette en ny jobbannonse</p>
+          
+          {/* Progress Bar */}
+          <div className="mt-4">
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>Fremgang</span>
+              <span>{progress}% fullført</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <Card>
@@ -124,28 +199,39 @@ export default function CreateJobPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Kategori *</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    required
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Område *</label>
-                  <Input
-                    value={form.areaName}
-                    onChange={(e) => setForm({ ...form, areaName: e.target.value })}
-                    placeholder="Oslo"
-                    required
-                  />
+                  <label className="block text-sm font-medium mb-1">Område {form.areaName ? "(automatisk fylt)" : ""}</label>
+                  <Select 
+                    value={form.areaName} 
+                    onValueChange={(value) => setForm({ ...form, areaName: value })}
+                    disabled={!!form.address} // Disable if address was selected (area auto-filled)
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg område eller la oss finne det automatisk" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas.map((area) => (
+                        <SelectItem key={area} value={area}>
+                          {area}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {!form.areaName && <p className="text-xs text-gray-500 mt-1">Område fylles automatisk når du velger adresse</p>}
                 </div>
               </div>
             </CardContent>
@@ -156,16 +242,54 @@ export default function CreateJobPage() {
             <CardHeader>
               <CardTitle>📍 Sted</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div>
-                <label className="block text-sm font-medium mb-1">Adresse</label>
-                <Input
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  placeholder="F.eks. Sofies gate 15, 0170 Oslo"
-                />
-                <p className="text-xs text-gray-500 mt-1">Full adresse eller firma-navn</p>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Tips:</strong> Bare skriv inn adressen din (f.eks. Furuset alle 19B). 
+                  Vi finner automatisk riktig område for deg!
+                </p>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Adresse</label>
+                  <AddressAutocomplete
+                    value={form.address}
+                    onChange={(value) => setForm({ ...form, address: value })}
+                    placeholder="F.eks. Karl Johans gate 22, Furuset alle 19B"
+                    onSelect={(address, lat, lng, area) => {
+                      setForm({ 
+                        ...form, 
+                        address, 
+                        lat: lat || null, 
+                        lng: lng || null,
+                        areaName: area || form.areaName // Auto-fill area if detected
+                      });
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Gatenavn og husnummer</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Postnummer</label>
+                  <Input
+                    value={form.postalCode}
+                    onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+                    placeholder="0170"
+                    maxLength={4}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">4 siffer, f.eks. 0170</p>
+                </div>
+              </div>
+
+              {form.address && (
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    ✅ <strong>Valgt adresse:</strong> {form.address}
+                    {form.postalCode && `, ${form.postalCode} ${form.areaName}`}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -178,15 +302,15 @@ export default function CreateJobPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Betalingstype *</label>
-                  <select
-                    value={form.paymentType}
-                    onChange={(e) => setForm({ ...form, paymentType: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    required
-                  >
-                    <option value="fixed">Fast pris</option>
-                    <option value="hourly">Timepris</option>
-                  </select>
+                  <Select value={form.paymentType} onValueChange={(value) => setForm({ ...form, paymentType: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fast pris</SelectItem>
+                      <SelectItem value="hourly">Timepris</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -326,7 +450,6 @@ export default function CreateJobPage() {
               <Textarea
                 value={form.requirements}
                 onChange={(e) => setForm({ ...form, requirements: e.target.value })}
-                placeholder="F.eks. 'Ta med egne hansker' eller 'Må ha erfaring med Excel'"
                 rows={3}
               />
             </CardContent>
@@ -338,11 +461,67 @@ export default function CreateJobPage() {
               type="button"
               variant="outline"
               onClick={() => router.back()}
-              className="flex-1"
             >
               Avbryt
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" disabled={progress < 50}>
+                  👁️ Forhåndsvisning
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Forhåndsvisning av jobb</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-xl font-bold">{form.title || "Jobbtittel"}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline">{form.category || "Kategori"}</Badge>
+                      <span className="text-sm text-gray-500">📍 {form.areaName || "Område"}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-2">Beskrivelse</h4>
+                    <p className="text-gray-700">{form.description || "Ingen beskrivelse enda..."}</p>
+                  </div>
+
+                  {form.address && (
+                    <div>
+                      <h4 className="font-semibold mb-2">📍 Adresse</h4>
+                      <p className="text-gray-700">
+                        {form.address}
+                        {form.postalCode && `, ${form.postalCode} ${form.areaName}`}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">💰 Betaling</h4>
+                      <p className="text-2xl font-bold text-green-600">
+                        {form.payNok ? `${form.payNok} kr` : "0 kr"}
+                        {form.paymentType === "hourly" && "/time"}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">⏱️ Varighet</h4>
+                      <p className="text-lg">{form.durationMinutes ? `${form.durationMinutes} min` : "0 min"}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2">📋 Krav og instruksjoner</h4>
+                    <p className="text-gray-700">{form.requirements || "Ingen spesielle krav"}</p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button type="submit" disabled={loading || progress < 100} className="flex-1 bg-orange-600 hover:bg-orange-700">
               {loading ? "Oppretter..." : "Opprett jobb"}
             </Button>
           </div>

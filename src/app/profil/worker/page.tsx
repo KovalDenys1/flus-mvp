@@ -141,7 +141,7 @@ export default function WorkerProfilePage() {
         setSkills(cvData.skills || []);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Feil ved lasting av profil:", err);
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ export default function WorkerProfilePage() {
         loadProfile();
       }
     } catch (err) {
-      console.error(err);
+      console.error("Feil ved lagring av profil:", err);
     }
   };
 

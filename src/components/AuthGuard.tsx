@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 type User = { id: string; email: string; role: string } | null;
@@ -20,11 +20,7 @@ export default function AuthGuard({
   const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/me");
       const data = await response.json();
@@ -38,7 +34,7 @@ export default function AuthGuard({
         }
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      console.error("Autentiseringssjekk feilet:", error);
       setUser(null);
       if (requireAuth) {
         router.push(redirectTo);
@@ -46,7 +42,11 @@ export default function AuthGuard({
     } finally {
       setLoading(false);
     }
-  };
+  }, [requireAuth, redirectTo, router]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   if (loading) {
     return (

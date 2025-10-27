@@ -2,7 +2,7 @@
 
 import { JobDetailsDialog } from "@/components/JobDetailsDialog";
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +49,7 @@ export default function Page() {
     fetch("/api/jobs")
       .then((r) => r.json())
       .then((d) => setJobs(d.jobs ?? []))
-      .catch((e) => console.error("Failed to fetch jobs:", e))
+      .catch((e) => console.error("Kunne ikke hente jobber:", e))
       .finally(() => setLoading(false));
   }, []);
 
@@ -125,193 +125,227 @@ export default function Page() {
     }
   }
 
-  async function quickApply(jobId: string) {
-    if (!isLoggedIn) {
-      toast.error("Du må være innlogget for å søke på jobber.");
-      return;
-    }
-    try {
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setAppliedJobIds((prev) => new Set(prev).add(jobId));
-      toast.success("Jobb hentet! 📦 Du kan nå starte arbeidet når du er klar.");
-    } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      toast.error("Kunne ikke hente jobb: " + errorMessage);
-    }
-  }
-
   return (
-    <div className="max-w-2xl mx-auto py-10 px-2 space-y-8 bg-gray-50 rounded-2xl">
-      <header className="flex flex-col items-center gap-3 mb-4">
-        <h1 className="text-3xl font-bold text-gray-900 text-center">Ledige jobber</h1>
-        <p className="text-gray-500 text-center max-w-lg leading-relaxed">
-          Søk blant småjobber i ditt område eller filtrer etter kategori og avstand.
-        </p>
-        <div className="w-full flex gap-2 mt-2">
-          <Input
-            value={query}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-            placeholder="Søk i tittel, beskrivelse eller område"
-            className="bg-white/90 border-0 rounded-lg shadow-sm"
-          />
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="text-center mb-8">
+          <div className="inline-block bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            🚀 {visible.length} ledige jobber
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Finn din neste <span className="text-orange-600">småjobb</span>
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Søk blant hundrevis av småjobber i ditt område. Filtrer etter kategori og avstand.
+          </p>
+        </header>
+
+        {/* Search Bar */}
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="relative">
+            <svg
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <Input
+              value={query}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+              placeholder="Søk i tittel, beskrivelse eller område..."
+              className="pl-12 pr-4 py-6 text-lg border-2 border-gray-200 focus:border-orange-400 rounded-2xl shadow-sm bg-white"
+            />
+          </div>
         </div>
-      </header>
 
-      <div className="flex flex-wrap items-center gap-2 justify-center">
-        <button
-          className={`px-3 py-1 rounded-lg font-medium transition ${category === null ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"}`}
-          onClick={() => setCategory(null)}
-        >
-          Alle
-        </button>
-        {categories.map((c) => (
-          <button
-            key={c}
-            className={`px-3 py-1 rounded-lg font-medium transition ${category === c ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"}`}
-            onClick={() => setCategory(category === c ? null : c)}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 justify-center">
-        <label className="flex items-center gap-2 text-sm">
-          Avstand:
-          <select
-            value={radius}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRadius(parseInt(e.target.value))}
-            className="border rounded px-2 py-1 bg-white"
-          >
-            {[1, 3, 5, 10].map((km) => (
-              <option key={km} value={km}>
-                {km} km
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex items-center gap-2 text-sm">
-          Kategori:
-          <select
-            value={category ?? ""}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value || null)}
-            className="border rounded px-2 py-1 bg-white"
-          >
-            <option value="">Alle</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {geoStatus === "unsupported" && (
-          <span className="text-sm text-gray-400">Geolokasjon støttes ikke.</span>
-        )}
-        {geoStatus === "denied" && (
-          <span className="text-sm text-gray-400">Posisjon ble ikke gitt — viser alle jobber.</span>
-        )}
-      </div>
-
-      {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl bg-white/80 p-4 animate-pulse h-36 shadow-sm" />
-          ))}
-        </div>
-      ) : visible.length === 0 ? (
-        <div className="py-12 text-center text-gray-500">Ingen jobber funnet.</div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
-          {visible.map((job) => {
-            const dist = pos ? distanceKm(pos, { lat: job.lat, lng: job.lng }).toFixed(1) + " km" : null;
-            return (
-              <Card
-                key={job.id}
-                onClick={() => setOpenJob(job)}
-                className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0 cursor-pointer"
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8 max-w-5xl mx-auto">
+          {/* Category Pills */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className={`px-4 py-2 rounded-full font-medium transition-all ${
+                  category === null
+                    ? "bg-orange-500 text-white shadow-md"
+                    : "bg-white text-gray-700 hover:bg-orange-50 border border-gray-200"
+                }`}
+                onClick={() => setCategory(null)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 w-full">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg font-semibold break-words pr-2">{job.title}</CardTitle>
-                      {job.address && (
-                        <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                          <span>📍</span>
-                          <span className="truncate">{job.address}</span>
-                        </div>
-                      )}
+                Alle
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  className={`px-4 py-2 rounded-full font-medium transition-all ${
+                    category === c
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "bg-white text-gray-700 hover:bg-orange-50 border border-gray-200"
+                  }`}
+                  onClick={() => setCategory(category === c ? null : c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Radius Filter */}
+          <div className="sm:w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📍 Avstand {pos && `(${radius} km)`}
+            </label>
+            <select
+              value={radius}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRadius(parseInt(e.target.value))}
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 bg-white focus:border-orange-400 focus:outline-none"
+              disabled={!pos}
+            >
+              {[1, 3, 5, 10, 25, 50].map((km) => (
+                <option key={km} value={km}>
+                  {km} km
+                </option>
+              ))}
+            </select>
+            {geoStatus === "denied" && (
+              <p className="text-xs text-amber-600 mt-1">⚠️ Gi posisjon for å filtrere</p>
+            )}
+            {geoStatus === "unsupported" && (
+              <p className="text-xs text-gray-400 mt-1">Geolokasjon støttes ikke</p>
+            )}
+          </div>
+        </div>
+
+        {/* Job Grid */}
+        {loading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-white p-6 animate-pulse h-64 shadow-sm" />
+            ))}
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Ingen jobber funnet</h3>
+            <p className="text-gray-600">Prøv å endre søkekriteriene dine</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((job) => {
+              const dist = pos ? distanceKm(pos, { lat: job.lat, lng: job.lng }).toFixed(1) + " km" : null;
+              return (
+                <Card
+                  key={job.id}
+                  onClick={() => setOpenJob(job)}
+                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-gray-200/50 hover:border-gray-200 flex flex-col h-[360px]"
+                >
+                  {/* Header Section - Fixed Position */}
+                  <div className="px-6 pt-6 pb-3 flex-shrink-0">
+                    <div className="h-12 flex items-start">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-gray-700 transition leading-tight">
+                          {job.title}
+                        </CardTitle>
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:gap-1 shrink-0">
-                      <span className="text-sm font-medium whitespace-nowrap">
-                        {job.payNok} NOK{job.paymentType === "hourly" ? "/t" : ""}
-                      </span>
-                      <div className="flex flex-row sm:flex-col gap-1">
-                        <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs whitespace-nowrap">
-                          {minutesToHhMm(job.durationMinutes)}
+
+                    {/* Address - Fixed Position */}
+                    <div className="h-5 mt-2">
+                      <div className="text-sm text-gray-500 flex items-center gap-1.5 truncate">
+                        <span className="text-gray-400 flex-shrink-0">📍</span>
+                        <span className="truncate">
+                          {job.address || "Adresse ikke oppgitt"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Badges - Fixed Position */}
+                    <div className="h-7 mt-3 flex items-center overflow-hidden">
+                      <div className="flex gap-2 w-full">
+                        <Badge className="bg-gray-100 text-gray-700 font-medium px-2 py-0.5 text-xs border-0 flex-shrink-0">
+                          {job.category}
                         </Badge>
-                        {job.scheduleType && (
-                          <Badge variant="outline" className="px-2 py-0.5 text-xs whitespace-nowrap">
-                            {job.scheduleType === "flexible" && "🕐 Fleksibel"}
-                            {job.scheduleType === "fixed" && "⏰ Fast tid"}
-                            {job.scheduleType === "deadline" && "📅 Frist"}
+                        <Badge variant="outline" className="px-2 py-0.5 text-xs border-gray-200 text-gray-600 truncate max-w-[100px] flex-shrink-0 text-left overflow-hidden whitespace-nowrap">
+                          {job.areaName}
+                        </Badge>
+                        {dist && (
+                          <Badge variant="outline" className="px-2 py-0.5 text-xs border-gray-200 text-gray-600 flex-shrink-0">
+                            {dist}
                           </Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-700 line-clamp-3 break-words">{job.desc}</p>
-                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
-                    <div className="flex flex-wrap gap-2 items-center max-w-full">
-                      <Badge className="truncate bg-gray-200 text-gray-700 px-2 py-0.5 text-xs">{job.category}</Badge>
-                      <Badge variant="outline" className="truncate px-2 py-0.5 text-xs">{job.areaName}</Badge>
-                      {dist && <span className="text-xs text-gray-400">{dist}</span>}
-                    </div>
-                    <div className="ml-0 sm:ml-auto w-full sm:w-auto flex gap-2">
-                      <Button
-                        className="flex-1 sm:flex-none rounded-lg bg-green-500 hover:bg-green-600 text-white"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); quickApply(job.id); }}
-                        disabled={appliedJobIds.has(job.id) || !isLoggedIn}
-                        title={!isLoggedIn ? "Du må være innlogget for å søke" : "Hent jobb med ett klikk"}
-                      >
-                        {appliedJobIds.has(job.id)
-                          ? "✓ Søkt"
-                          : !isLoggedIn
-                          ? "Logg inn"
-                          : "⚡ Hent"}
-                      </Button>
-                      <Button
-                        className="flex-1 sm:flex-none rounded-lg"
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => { e.stopPropagation(); apply(job.id); }}
-                        disabled={appliedJobIds.has(job.id) || !isLoggedIn}
-                        title={!isLoggedIn ? "Du må være innlogget for å søke" : ""}
-                      >
-                        {appliedJobIds.has(job.id)
-                          ? "Allerede sendt"
-                          : !isLoggedIn
-                          ? "Logg inn for å søke"
-                          : "Søk"}
-                      </Button>
+
+                  {/* Description - Flexible Space */}
+                  <div className="px-6 flex-1 min-h-0">
+                    <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm h-full">
+                      {job.desc?.trim() || "Beskrivelse ikke tilgjengelig"}
+                    </p>
+                  </div>
+
+                  {/* Price & Time - Fixed Position */}
+                  <div className="px-6 py-3 border-t border-gray-100 flex-shrink-0">
+                    <div className="flex items-center justify-between h-8">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-2xl font-bold text-gray-900 leading-none truncate">
+                          {job.payNok && job.payNok > 0 ? `${job.payNok} kr` : "Pris ikke oppgitt"}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5 truncate">
+                          {job.paymentType === "hourly" ? "per time" : "fast pris"} • {minutesToHhMm(job.durationMinutes) || "Varighet ikke oppgitt"}
+                        </div>
+                      </div>
+
+                      {job.scheduleType && (
+                        <div className="flex-shrink-0 ml-3">
+                          <Badge variant="outline" className="px-2.5 py-0.5 text-xs border-gray-200 text-gray-600">
+                            {job.scheduleType === "flexible" && "Fleksibel"}
+                            {job.scheduleType === "fixed" && "Fast tid"}
+                            {job.scheduleType === "deadline" && "Frist"}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+
+                  {/* Button - Fixed Position */}
+                  <div className="px-6 pb-6 flex-shrink-0">
+                    <Button
+                      className={`w-full rounded-lg py-2.5 font-medium text-sm transition-colors h-9 ${
+                        appliedJobIds.has(job.id)
+                          ? "bg-green-600 hover:bg-green-700 text-white cursor-default"
+                          : !isLoggedIn
+                          ? "bg-blue-600 hover:bg-blue-700 text-white"
+                          : "bg-gray-900 hover:bg-gray-800 text-white"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        apply(job.id);
+                      }}
+                      disabled={appliedJobIds.has(job.id)}
+                    >
+                      {appliedJobIds.has(job.id)
+                        ? "✓ Søknad sendt"
+                        : !isLoggedIn
+                        ? "🔓 Logg inn for å søke"
+                        : "Søk på jobb"}
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      
       <JobDetailsDialog
         open={!!openJob}
         onOpenChange={(v) => !v && setOpenJob(null)}

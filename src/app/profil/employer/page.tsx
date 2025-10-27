@@ -187,7 +187,7 @@ export default function EmployerProfilePage() {
         setSelectedJobId(jobId);
       }
     } catch (err) {
-      console.error("Error loading applications:", err);
+      console.error("Feil ved lasting av søknader:", err);
     } finally {
       setLoadingApplications(false);
     }
@@ -212,7 +212,7 @@ export default function EmployerProfilePage() {
         alert(`Feil: ${error.error}`);
       }
     } catch (err) {
-      console.error("Error selecting candidate:", err);
+      console.error("Feil ved valg av kandidat:", err);
       alert("Det oppstod en feil ved valg av kandidat");
     }
   };
@@ -234,7 +234,7 @@ export default function EmployerProfilePage() {
         toast.error(`Feil: ${error.error}`);
       }
     } catch (err) {
-      console.error("Error updating settings:", err);
+      console.error("Feil ved oppdatering av innstillinger:", err);
       toast.error("Kunne ikke oppdatere innstillinger");
     } finally {
       setLoadingSettings(false);

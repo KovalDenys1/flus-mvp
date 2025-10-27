@@ -187,7 +187,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
       setMessages(prev => [...prev, messageData.message]);
       toast.success("Bilde sendt!");
     } catch (error) {
-      console.error("Photo upload error:", error);
+      console.error("Feil ved opplasting av bilde:", error);
       toast.error("Kunne ikke sende bilde");
     } finally {
       setUploadingPhoto(false);
@@ -224,7 +224,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         toast.error(`Feil: ${error.error}`);
       }
     } catch (error) {
-      console.error("Complete work error:", error);
+      console.error("Feil ved fullføring av arbeid:", error);
       toast.error("Kunne ikke markere arbeid som fullført");
     }
   };
@@ -250,7 +250,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         toast.error(`Feil: ${error.error}`);
       }
     } catch (error) {
-      console.error("Confirm completion error:", error);
+      console.error("Feil ved bekreftelse av fullføring:", error);
       toast.error("Kunne ikke godkjenne arbeid");
     }
   };

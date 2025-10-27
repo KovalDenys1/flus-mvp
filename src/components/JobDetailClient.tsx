@@ -158,7 +158,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
         toast.error(`Feil: ${error.error}`);
       }
     } catch (error) {
-      console.error("Select candidate error:", error);
+      console.error("Feil ved valg av kandidat:", error);
       toast.error("Kunne ikke velge kandidat");
     }
   };

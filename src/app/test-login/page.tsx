@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function TestLoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
-  const loginAs = async (userId: string, description: string) => {
+  const loginAs = async (userId: string) => {
     setLoading(userId);
     try {
       const response = await fetch("/api/auth/test-login", {
@@ -39,7 +39,7 @@ export default function TestLoginPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
-            onClick={() => loginAs("test_employer_1", "Employer")}
+            onClick={() => loginAs("test_employer_1")}
             disabled={loading === "test_employer_1"}
             className="w-full"
             variant="default"
@@ -48,7 +48,7 @@ export default function TestLoginPage() {
           </Button>
 
           <Button
-            onClick={() => loginAs("test_worker_1", "Worker")}
+            onClick={() => loginAs("test_worker_1")}
             disabled={loading === "test_worker_1"}
             className="w-full"
             variant="outline"

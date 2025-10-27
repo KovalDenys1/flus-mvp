@@ -49,7 +49,6 @@ const FAQ_ITEMS = [
 export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
 
@@ -71,7 +70,7 @@ export default function SupportPage() {
       const data = await res.json();
       setTickets(data.tickets || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ukjent feil");
+      console.error("Feil ved lasting av support-tickets:", err);
     } finally {
       setLoading(false);
     }

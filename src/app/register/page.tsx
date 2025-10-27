@@ -34,7 +34,7 @@ export default function Page() {
     try {
       const vippsHref = `/api/auth/vipps/start?role=${role}&birthYear=${birthYear}`;
       window.location.href = vippsHref;
-    } catch (error) {
+    } catch {
       toast.error("Noe gikk galt. Prøv igjen.");
       setLoading(false);
     }

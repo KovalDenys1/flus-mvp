@@ -55,6 +55,8 @@ export async function POST(request: Request) {
       durationMinutes,
       areaName,
       address,
+      lat,
+      lng,
       scheduleType,
       startTime,
       endTime,
@@ -88,8 +90,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const lat = 59.9139;
-    const lng = 10.7522;
+    const defaultLat = 59.9139;
+    const defaultLng = 10.7522;
 
     const { data, error } = await supabase
       .from("jobs")
@@ -100,8 +102,8 @@ export async function POST(request: Request) {
         pay_nok: payNok,
         duration_minutes: durationMinutes,
         area_name: areaName,
-        lat,
-        lng,
+        lat: lat || defaultLat,
+        lng: lng || defaultLng,
         status: "open",
         employer_id: user.id,
         address,

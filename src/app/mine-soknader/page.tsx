@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AuthGuard from "@/components/AuthGuard";
 import ReviewDialog from "@/components/ReviewDialog";
-import { toast } from "sonner";
 
 type Application = {
   id: string;

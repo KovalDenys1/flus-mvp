@@ -160,7 +160,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       setError("Kunne ikke laste profil");
-      console.error(err);
+      console.error("Feil ved lasting av profil:", err);
     } finally {
       setLoading(false);
     }
@@ -196,7 +196,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke legge til arbeidserfaring");
-      console.error(err);
+      console.error("Feil ved tillegging av arbeidserfaring:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -229,7 +229,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke legge til ferdighet");
-      console.error(err);
+      console.error("Feil ved tillegging av ferdighet:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -252,7 +252,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke slette arbeidserfaring");
-      console.error(err);
+      console.error("Feil ved sletting av arbeidserfaring:", err);
     }
   };
 
@@ -273,7 +273,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke slette ferdighet");
-      console.error(err);
+      console.error("Feil ved sletting av ferdighet:", err);
     }
   };
 
@@ -333,7 +333,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke oppdatere arbeidserfaring");
-      console.error(err);
+      console.error("Feil ved oppdatering av arbeidserfaring:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -369,7 +369,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       alert("Kunne ikke oppdatere ferdighet");
-      console.error(err);
+      console.error("Feil ved oppdatering av ferdighet:", err);
     } finally {
       setIsSubmitting(false);
     }

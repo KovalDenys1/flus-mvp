@@ -47,124 +47,193 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <section className="relative overflow-hidden py-20 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="mb-4 bg-orange-100 text-orange-800 border-orange-200 px-4 py-1">
-              🚀 FLUS MVP - Finn lokale jobber enkelt
+            <Badge className="mb-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 px-6 py-2 text-sm font-semibold shadow-lg">
+              🚀 FLUS - Din lokale jobbplattform
             </Badge>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Koble sammen
-              <span className="text-orange-600 block">lokale jobber</span>
-              <span className="text-blue-600">og dyktige folk</span>
+            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 leading-tight">
+              Finn <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">småjobber</span>
+              <br />
+              i ditt nærområde
             </h1>
 
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              FLUS gjør det enkelt å finne småjobber i ditt område eller tilby dine tjenester.
-              Alt skjer lokalt, trygt og effektivt.
+            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Tusenvis av lokale småjobber venter. Tjen penger fleksibelt eller få hjelp med oppgaver hjemme.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link href="/register">
-                <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg">
-                  Kom i gang gratis
+                <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-10 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all rounded-2xl">
+                  Kom i gang gratis →
                 </Button>
               </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-orange-300 px-8 py-3 text-lg">
-                  Logg inn
+              <Link href="/jobber">
+                <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 px-10 py-7 text-lg font-semibold rounded-2xl transition-all">
+                  Se alle jobber
                 </Button>
               </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mt-16">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-orange-600 mb-2">500+</div>
+                <div className="text-sm text-gray-600">Aktive jobber</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-orange-600 mb-2">1000+</div>
+                <div className="text-sm text-gray-600">Registrerte brukere</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-orange-600 mb-2">4.8★</div>
+                <div className="text-sm text-gray-600">Gjennomsnittsvurdering</div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Background decoration */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200 rounded-full opacity-20"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full opacity-20"></div>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+          <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full opacity-20 blur-3xl"></div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Hvordan det fungerer
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Enkel plattform for lokale jobber - enten du trenger hjelp eller vil hjelpe.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Tre enkle steg til din neste småjobb
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          {/* Steps */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <span className="text-4xl">🔍</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">1. Søk</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Finn småjobber i ditt område basert på dine ferdigheter og interesser
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <span className="text-4xl">💬</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">2. Koble sammen</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Chat direkte med arbeidsgivere og bli enige om detaljer
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <span className="text-4xl">💰</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">3. Få betalt</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Fullfør jobben og motta betaling umiddelbart
+              </p>
+            </div>
+          </div>
+
+          {/* Cards */}
+          <div className="grid md:grid-cols-2 gap-8">
             {/* For Workers */}
-            <Card className="border-2 border-orange-100 hover:border-orange-300 transition-all duration-300">
-              <CardHeader className="text-center pb-4">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">👷</span>
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-orange-50 to-white rounded-3xl overflow-hidden group">
+              <CardHeader className="text-center pb-6 pt-8">
+                <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <span className="text-5xl">👷</span>
                 </div>
-                <CardTitle className="text-2xl text-orange-600">For jobbsøkere</CardTitle>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  For jobbsøkere
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-500 mt-1">✓</span>
-                    <span>Finn småjobber i ditt område</span>
+              <CardContent className="space-y-6 pb-8">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
+                      <span className="text-orange-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Finn småjobber i ditt nærområde</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-500 mt-1">✓</span>
-                    <span>Søk enkelt med ett klikk</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
+                      <span className="text-orange-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Søk enkelt med ett klikk</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-500 mt-1">✓</span>
-                    <span>Chat direkte med arbeidsgivere</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
+                      <span className="text-orange-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Chat direkte med arbeidsgivere</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-orange-500 mt-1">✓</span>
-                    <span>Få betalt umiddelbart etter jobb</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
+                      <span className="text-orange-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Få betalt umiddelbart etter jobb</span>
                   </div>
                 </div>
-                <Link href="/register" className="block mt-6">
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700">
-                    Bli jobbsøker
+                <Link href="/register" className="block mt-8">
+                  <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                    Bli jobbsøker →
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
             {/* For Employers */}
-            <Card className="border-2 border-blue-100 hover:border-blue-300 transition-all duration-300">
-              <CardHeader className="text-center pb-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">💼</span>
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-white rounded-3xl overflow-hidden group">
+              <CardHeader className="text-center pb-6 pt-8">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <span className="text-5xl">💼</span>
                 </div>
-                <CardTitle className="text-2xl text-blue-600">For arbeidsgivere</CardTitle>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                  For arbeidsgivere
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="text-blue-500 mt-1">✓</span>
-                    <span>Opprett jobber på få minutter</span>
+              <CardContent className="space-y-6 pb-8">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
+                      <span className="text-blue-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Opprett jobber på få minutter</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-blue-500 mt-1">✓</span>
-                    <span>Få søknader fra kvalifiserte kandidater</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
+                      <span className="text-blue-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Få søknader fra kvalifiserte kandidater</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-blue-500 mt-1">✓</span>
-                    <span>Chat og følg opp arbeidet</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
+                      <span className="text-blue-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Chat og følg opp arbeidet</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-blue-500 mt-1">✓</span>
-                    <span>Trygg betaling og kvalitetsgaranti</span>
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
+                      <span className="text-blue-600 font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg">Trygg betaling og kvalitetsgaranti</span>
                   </div>
                 </div>
-                <Link href="/register" className="block mt-6">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                    Bli arbeidsgiver
+                <Link href="/register" className="block mt-8">
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                    Bli arbeidsgiver →
                   </Button>
                 </Link>
               </CardContent>
@@ -174,12 +243,15 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Populære kategorier
             </h2>
+            <p className="text-lg text-gray-600">
+              Finn småjobber som passer deg
+            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -193,9 +265,9 @@ export default function HomePage() {
               { name: "Leksehjelp", icon: "📚", count: "30+" },
               { name: "Montering", icon: "🔧", count: "50+" },
             ].map((category) => (
-              <div key={category.name} className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-3xl mb-2">{category.icon}</div>
-                <div className="font-semibold text-gray-900">{category.name}</div>
+              <div key={category.name} className="group text-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-2">
+                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{category.icon}</div>
+                <div className="font-bold text-gray-900 text-lg mb-1">{category.name}</div>
                 <div className="text-sm text-gray-500">{category.count} jobber</div>
               </div>
             ))}
