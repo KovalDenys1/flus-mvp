@@ -19,7 +19,8 @@ export async function GET() {
     const { data, error } = await supabase
       .from("jobs")
       .select(
-        "id,title,description,category,pay_nok,duration_minutes,area_name,lat,lng,created_at,status,address,schedule_type,start_time,end_time,payment_type,requirements,employer_id"
+        `id,title,description,category,pay_nok,duration_minutes,area_name,lat,lng,created_at,status,address,schedule_type,start_time,end_time,payment_type,requirements,employer_id,selected_worker_id,
+        selected_worker:selected_worker_id(id,navn,email)`
       )
       .eq("employer_id", user.id)
       .order("created_at", { ascending: false });
@@ -48,6 +49,8 @@ export async function GET() {
       paymentType: j.payment_type,
       requirements: j.requirements,
       employerId: j.employer_id,
+      selectedWorkerId: j.selected_worker_id,
+      selectedWorker: j.selected_worker,
     }));
     
     return NextResponse.json({ jobs });

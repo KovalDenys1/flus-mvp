@@ -92,6 +92,7 @@ export default function Navbar() {
             )}
             {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Samtaler</Link>}
             <Link className={`${linkClass} ${isActive('/profil') ? 'nav-link-active' : ''}`} href="/profil">Profil</Link>
+            <Link className={`${linkClass} ${isActive('/support') ? 'nav-link-active' : ''}`} href="/support">Support</Link>
           </div>
 
           {/* right: auth actions */}
@@ -178,6 +179,7 @@ export default function Navbar() {
             )}
             {user && <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/samtaler">Samtaler</Link>}
             <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/profil">Profil</Link>
+            <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/support">Support</Link>
 
             <div className="border-t pt-2">
               {user ? (

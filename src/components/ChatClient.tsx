@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 import { Camera, CheckCircle } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -268,192 +269,194 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   if (error) return <div className="max-w-3xl mx-auto py-10 px-4 text-red-500">{error}</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto bg-white shadow-lg">
-      {/* Header with Back Button and Job Info */}
-      <div className="bg-white border-b shadow-sm p-4 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <Link href="/samtaler">
-            <Button variant="ghost" size="sm" className="hover:bg-gray-100">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Button>
-          </Link>
-          {job && (
-            <>
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                {job.title.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-base truncate">{job.title}</h2>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>📍 {job.areaName}</span>
-                  <span>💰 {job.payNok} NOK</span>
-                  <span>📊 {job.status === "assigned" ? "Pågår" : job.status === "completed" ? "Fullført" : "Åpen"}</span>
+    <AuthGuard requireAuth={true}>
+      <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto bg-white shadow-lg">
+        {/* Header with Back Button and Job Info */}
+        <div className="bg-white border-b shadow-sm p-4 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <Link href="/samtaler">
+              <Button variant="ghost" size="sm" className="hover:bg-gray-100">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Button>
+            </Link>
+            {job && (
+              <>
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                  {job.title.charAt(0)}
                 </div>
-              </div>
-              <Link href={`/jobber/${job.id}`}>
-                <Button variant="outline" size="sm" className="text-xs">Se jobb</Button>
-              </Link>
-            </>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-bold text-base truncate">{job.title}</h2>
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <span>📍 {job.areaName}</span>
+                    <span>💰 {job.payNok} NOK</span>
+                    <span>📊 {job.status === "assigned" ? "Pågår" : job.status === "completed" ? "Fullført" : "Åpen"}</span>
+                  </div>
+                </div>
+                <Link href={`/jobber/${job.id}`}>
+                  <Button variant="outline" size="sm" className="text-xs">Se jobb</Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Action buttons based on job status and user role */}
+          {job && conversation && currentUserId && (
+            <div className="flex gap-2 mt-3 pt-3 border-t">
+              {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
+                <Button
+                  onClick={handleCompleteWork}
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Marker som fullført
+                </Button>
+              )}
+
+              {job.status === "completed" && currentUserId === job.employerId && (
+                <Button
+                  onClick={handleConfirmCompletion}
+                  size="sm"
+                  className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Godkjenn arbeid
+                </Button>
+              )}
+
+              {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={uploadingPhoto}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-1"
+                    disabled={uploadingPhoto}
+                  >
+                    <Camera className="w-4 h-4" />
+                    {uploadingPhoto ? "Laster opp..." : "Send bilde"}
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Action buttons based on job status and user role */}
-        {job && conversation && currentUserId && (
-          <div className="flex gap-2 mt-3 pt-3 border-t">
-            {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
-              <Button
-                onClick={handleCompleteWork}
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Marker som fullført
-              </Button>
-            )}
-
-            {job.status === "completed" && currentUserId === job.employerId && (
-              <Button
-                onClick={handleConfirmCompletion}
-                size="sm"
-                className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Godkjenn arbeid
-              </Button>
-            )}
-
-            {job.status === "assigned" && currentUserId === job.selectedWorkerId && (
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  disabled={uploadingPhoto}
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-1"
-                  disabled={uploadingPhoto}
-                >
-                  <Camera className="w-4 h-4" />
-                  {uploadingPhoto ? "Laster opp..." : "Send bilde"}
-                </Button>
+        {/* Messages - Scrollable Area */}
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ minHeight: 0 }}>
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-center text-gray-500">
+              <div>
+                <p className="text-lg mb-2">👋 Start samtalen!</p>
+                <p className="text-sm">Send den første meldingen til arbeidsgiveren.</p>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Messages - Scrollable Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ minHeight: 0 }}>
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center text-gray-500">
-            <div>
-              <p className="text-lg mb-2">👋 Start samtalen!</p>
-              <p className="text-sm">Send den første meldingen til arbeidsgiveren.</p>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((msg) => {
-              const isOwn = msg.sender_id === currentUserId;
-              const isSystem = msg.message_type === 'system';
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg) => {
+                const isOwn = msg.sender_id === currentUserId;
+                const isSystem = msg.message_type === 'system';
 
-              if (isSystem) {
-                // System message
-                let systemText = "";
-                switch (msg.system_event) {
-                  case 'work_started':
-                    systemText = "🔄 Arbeid startet";
-                    break;
-                  case 'work_completed':
-                    systemText = "✅ Arbeid fullført av arbeider";
-                    break;
-                  case 'work_approved':
-                    systemText = "🎉 Arbeid godkjent av arbeidsgiver";
-                    break;
-                  case 'work_rejected':
-                    systemText = "❌ Arbeid avvist av arbeidsgiver";
-                    break;
-                  default:
-                    systemText = "Systemhendelse";
+                if (isSystem) {
+                  // System message
+                  let systemText = "";
+                  switch (msg.system_event) {
+                    case 'work_started':
+                      systemText = "🔄 Arbeid startet";
+                      break;
+                    case 'work_completed':
+                      systemText = "✅ Arbeid fullført av arbeider";
+                      break;
+                    case 'work_approved':
+                      systemText = "🎉 Arbeid godkjent av arbeidsgiver";
+                      break;
+                    case 'work_rejected':
+                      systemText = "❌ Arbeid avvist av arbeidsgiver";
+                      break;
+                    default:
+                      systemText = "Systemhendelse";
+                  }
+
+                  return (
+                    <div key={msg.id} className="flex justify-center">
+                      <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs">
+                        {systemText}
+                      </div>
+                    </div>
+                  );
                 }
 
                 return (
-                  <div key={msg.id} className="flex justify-center">
-                    <div className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs">
-                      {systemText}
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
-                  {!isOwn && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-xs font-bold">
-                      👤
-                    </div>
-                  )}
-
-                  <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
-                    {msg.message_type === 'photo' && msg.photo_url ? (
-                      <div className="space-y-2">
-                        <div className="relative w-full max-w-xs h-48 rounded-lg overflow-hidden">
-                          <Image
-                            src={msg.photo_url}
-                            alt="Arbeidsbilde"
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 320px) 100vw, 320px"
-                          />
-                        </div>
-                        {msg.text_content && (
-                          <p className="text-sm break-words">{msg.text_content}</p>
-                        )}
+                  <div key={msg.id} className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"}`}>
+                    {!isOwn && (
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-xs font-bold">
+                        👤
                       </div>
-                    ) : (
-                      <p className="text-sm break-words">{msg.text_content}</p>
                     )}
 
-                    <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
-                      {new Date(msg.created_at).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  </div>
+                    <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
+                      {msg.message_type === 'photo' && msg.photo_url ? (
+                        <div className="space-y-2">
+                          <div className="relative w-full max-w-xs h-48 rounded-lg overflow-hidden">
+                            <Image
+                              src={msg.photo_url}
+                              alt="Arbeidsbilde"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 320px) 100vw, 320px"
+                            />
+                          </div>
+                          {msg.text_content && (
+                            <p className="text-sm break-words">{msg.text_content}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm break-words">{msg.text_content}</p>
+                      )}
 
-                  {isOwn && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
-                      Du
+                      <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
+                        {new Date(msg.created_at).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+                      </p>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
 
-      {/* Input - Fixed at Bottom */}
-      <div className="p-4 bg-white border-t shadow-lg flex-shrink-0">
-        <form onSubmit={handleSendMessage} className="flex gap-2">
-          <Input 
-            value={newMessage} 
-            onChange={(e) => setNewMessage(e.target.value)} 
-            placeholder="Skriv en melding..." 
-            autoComplete="off" 
-            disabled={sending}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={sending || !newMessage.trim()} className="px-6">
-            {sending ? "Sender..." : "Send"}
-          </Button>
-        </form>
+                    {isOwn && (
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                        Du
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* Input - Fixed at Bottom */}
+        <div className="p-4 bg-white border-t shadow-lg flex-shrink-0">
+          <form onSubmit={handleSendMessage} className="flex gap-2">
+            <Input 
+              value={newMessage} 
+              onChange={(e) => setNewMessage(e.target.value)} 
+              placeholder="Skriv en melding..." 
+              autoComplete="off" 
+              disabled={sending}
+              className="flex-1"
+            />
+            <Button type="submit" disabled={sending || !newMessage.trim()} className="px-6">
+              {sending ? "Sender..." : "Send"}
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

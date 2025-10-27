@@ -219,7 +219,7 @@ export default function Page() {
                 className="hover:shadow-md transition w-full max-w-full overflow-hidden bg-white/90 rounded-xl border-0 cursor-pointer"
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3 w-full">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 w-full">
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-lg font-semibold break-words pr-2">{job.title}</CardTitle>
                       {job.address && (
@@ -229,20 +229,22 @@ export default function Page() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:gap-1 shrink-0">
                       <span className="text-sm font-medium whitespace-nowrap">
                         {job.payNok} NOK{job.paymentType === "hourly" ? "/t" : ""}
                       </span>
-                      <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs whitespace-nowrap">
-                        {minutesToHhMm(job.durationMinutes)}
-                      </Badge>
-                      {job.scheduleType && (
-                        <Badge variant="outline" className="px-2 py-0.5 text-xs whitespace-nowrap">
-                          {job.scheduleType === "flexible" && "🕐 Fleksibel"}
-                          {job.scheduleType === "fixed" && "⏰ Fast tid"}
-                          {job.scheduleType === "deadline" && "📅 Frist"}
+                      <div className="flex flex-row sm:flex-col gap-1">
+                        <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-2 py-0.5 text-xs whitespace-nowrap">
+                          {minutesToHhMm(job.durationMinutes)}
                         </Badge>
-                      )}
+                        {job.scheduleType && (
+                          <Badge variant="outline" className="px-2 py-0.5 text-xs whitespace-nowrap">
+                            {job.scheduleType === "flexible" && "🕐 Fleksibel"}
+                            {job.scheduleType === "fixed" && "⏰ Fast tid"}
+                            {job.scheduleType === "deadline" && "📅 Frist"}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardHeader>

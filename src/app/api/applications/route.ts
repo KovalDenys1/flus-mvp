@@ -11,7 +11,10 @@ export async function GET() {
   const supabase = getSupabaseServer();
   const { data, error } = await supabase
     .from("applications")
-    .select("id, job_id, applicant_id, created_at")
+    .select(`
+      id, job_id, applicant_id, created_at, status,
+      job:job_id(id, title, employer_id, employer:employer_id(id, navn, email))
+    `)
     .eq("applicant_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -20,12 +23,18 @@ export async function GET() {
     return NextResponse.json({ applications: [] });
   }
 
-  const applications = (data ?? []).map((a: { id: string; job_id: string; applicant_id: string; created_at: string }) => ({
-    id: a.id,
-    jobId: a.job_id,
-    workerId: a.applicant_id,
-    status: "sendt" as const,
-    createdAt: a.created_at,
+  const applications = (data ?? []).map((a: Record<string, unknown>) => ({
+    id: a.id as string,
+    jobId: a.job_id as string,
+    workerId: a.applicant_id as string,
+    status: (a.status as string) || "sendt",
+    createdAt: a.created_at as string,
+    job: a.job ? {
+      id: (a.job as Record<string, unknown>).id as string,
+      title: (a.job as Record<string, unknown>).title as string,
+      employerId: (a.job as Record<string, unknown>).employer_id as string,
+      employer: (a.job as Record<string, unknown>).employer
+    } : null,
   }));
   return NextResponse.json({ applications });
 }

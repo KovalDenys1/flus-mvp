@@ -89,7 +89,7 @@ export default function Page() {
             <ul className="space-y-3">
               {tickets.map(t=>(
                 <li key={t.id} className="rounded-lg bg-gray-100 px-4 py-3 flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <div className="text-sm text-gray-500">{new Date(t.createdAt).toLocaleString()}</div>
                     <div className="text-xs px-2 py-1 rounded bg-orange-100 text-orange-700 capitalize">{t.status}</div>
                   </div>
