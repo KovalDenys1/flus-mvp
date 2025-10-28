@@ -1,0 +1,273 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import AuthGuard from "@/components/AuthGuard";
+
+type User = { id: string; email: string; isWorker: boolean; isEmployer: boolean; navn?: string } | null;
+type Stats = { totalJobsCreated: number; activeJobs: number; completedJobs: number; totalApplications: number; acceptedApplications: number; totalEarnings: number };
+type Achievements = { xp: number; badges: string[]; perCategory: { category: string; count: number; target: number }[]; canContactCurator: boolean };
+type RecentJob = { id: string; title: string; areaName: string; payNok: number; status: string };
+
+export default function DashboardPage() {
+  const [user, setUser] = useState<User>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [achievements, setAchievements] = useState<Achievements | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+
+        // Get user info
+        const userRes = await fetch("/api/auth/me");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData.user);
+        }
+
+        // Get stats if employer
+        if (user?.isEmployer) {
+          const statsRes = await fetch("/api/profile/stats");
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            setStats(statsData.stats);
+          }
+        }
+
+        // Get achievements if worker
+        if (user?.isWorker) {
+          const achievementsRes = await fetch("/api/achievements");
+          if (achievementsRes.ok) {
+            const achievementsData = await achievementsRes.json();
+            setAchievements(achievementsData.achievements);
+          }
+        }
+
+        // Get recent jobs/applications
+        const jobsRes = await fetch("/api/jobs?limit=3");
+        if (jobsRes.ok) {
+          const jobsData = await jobsRes.json();
+          setRecentJobs(jobsData.jobs || []);
+        }
+
+      } catch (error) {
+        console.error("Error loading dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [user?.isEmployer, user?.isWorker]);
+
+  if (loading) {
+    return (
+      <AuthGuard requireAuth={true}>
+        <div className="max-w-6xl mx-auto mt-10 p-4">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </AuthGuard>
+    );
+  }
+
+  return (
+    <AuthGuard requireAuth={true}>
+      <div className="max-w-6xl mx-auto mt-10 p-4 space-y-8">
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-blue-600 rounded-2xl p-8 text-white">
+          <h1 className="text-3xl font-bold mb-2">
+            Velkommen tilbake, {user?.navn || user?.email?.split('@')[0]}! 👋
+          </h1>
+          <p className="text-orange-100 text-lg">
+            {user?.isWorker && user?.isEmployer
+              ? "Du er både jobbsøker og arbeidsgiver"
+              : user?.isWorker
+              ? "Du er jobbsøker"
+              : "Du er arbeidsgiver"
+            }
+          </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {user?.isWorker && (
+            <Link href="/jobber">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200 hover:border-orange-300">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">🔍</div>
+                  <h3 className="font-semibold text-gray-900">Finn jobber</h3>
+                  <p className="text-sm text-gray-600 mt-1">Se tilgjengelige jobber</p>
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
+          {user?.isEmployer && (
+            <Link href="/jobber/ny">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200 hover:border-blue-300">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl mb-3">➕</div>
+                  <h3 className="font-semibold text-gray-900">Opprett jobb</h3>
+                  <p className="text-sm text-gray-600 mt-1">Legg ut ny jobbannonse</p>
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
+          <Link href="/samtaler">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl mb-3">💬</div>
+                <h3 className="font-semibold text-gray-900">Meldinger</h3>
+                <p className="text-sm text-gray-600 mt-1">Chat med andre brukere</p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/profil">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl mb-3">👤</div>
+                <h3 className="font-semibold text-gray-900">Min profil</h3>
+                <p className="text-sm text-gray-600 mt-1">Administrer profil</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Stats and Achievements */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Employer Stats */}
+          {user?.isEmployer && stats && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">💼</span>
+                  Arbeidsgiver statistikk
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
+                    <div className="text-sm text-gray-600">Jobber opprettet</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{stats.activeJobs}</div>
+                    <div className="text-sm text-gray-600">Aktive jobber</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{stats.totalApplications}</div>
+                    <div className="text-sm text-gray-600">Søknader mottatt</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">{stats.acceptedApplications}</div>
+                    <div className="text-sm text-gray-600">Godkjente søknader</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Link href="/statistikk">
+                    <Button variant="outline" className="w-full">Se detaljer</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Worker Achievements */}
+          {user?.isWorker && achievements && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🏆</span>
+                  Prestasjoner
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">XP:</span>
+                      <span className="text-2xl font-bold text-orange-600">{achievements.xp}</span>
+                    </div>
+                    <Progress value={Math.min(100, (achievements.xp / 1000) * 100)} className="h-2" />
+                  </div>
+
+                  {achievements.badges.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-2">Badges</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {achievements.badges.slice(0, 3).map(badge => (
+                          <Badge key={badge} variant="secondary" className="bg-orange-100 text-orange-700">
+                            {badge}
+                          </Badge>
+                        ))}
+                        {achievements.badges.length > 3 && (
+                          <Badge variant="outline">+{achievements.badges.length - 3} flere</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <Link href="/profil">
+                    <Button variant="outline" className="w-full">Se alle prestasjoner</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Jobs */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <span className="text-2xl">📋</span>
+                  {user?.isEmployer ? "Mine siste jobber" : "Tilgjengelige jobber"}
+                </span>
+                <Link href={user?.isEmployer ? "/mine-jobber" : "/jobber"}>
+                  <Button variant="ghost" size="sm">Se alle</Button>
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentJobs.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">
+                  {user?.isEmployer ? "Du har ingen jobber ennå" : "Ingen jobber tilgjengelig"}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentJobs.slice(0, 3).map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                      <div>
+                        <h4 className="font-medium">{job.title}</h4>
+                        <p className="text-sm text-gray-600">{job.areaName} • {job.payNok} kr</p>
+                      </div>
+                      <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
+                        {job.status === 'open' ? 'Åpen' : 'Stengt'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </AuthGuard>
+  );
+}

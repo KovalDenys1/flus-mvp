@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createUser, type Role } from "../../../../lib/data/users";
 import { createSession } from "../../../../lib/data/sessions";
 import { SESSION_COOKIE, COOKIE_OPTIONS } from "../../../../lib/utils/cookies";
+import { sendWelcomeEmail } from "../../../../lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,8 +21,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "invalid role" }, { status: 400 });
     }
 
-    const user = createUser({ email, password, role, navn, kommune, fodselsdato });
+    const user = await createUser({ email, password, role, navn, kommune, fodselsdato });
     const session = await createSession(user.id);
+
+    // Send welcome email asynchronously (don't block registration)
+    sendWelcomeEmail(user.email, user.navn || "Bruker", user.role).catch((error) => {
+      console.error("Failed to send welcome email:", error);
+    });
 
     const res = NextResponse.json({ ok: true, user: { id: user.id, email: user.email, role: user.role } });
     res.cookies.set(SESSION_COOKIE, session.token, COOKIE_OPTIONS);

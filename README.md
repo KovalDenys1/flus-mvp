@@ -11,6 +11,7 @@
 - Track achievements and progress
 - View application status
 - Profile with CV, skills, reviews
+- **Email notifications** for application status updates
 
 ### For Employers (Arbeidsgiver)
 - Create jobs with requirements
@@ -18,6 +19,7 @@
 - Chat with applicants
 - View statistics
 - Company profile and reviews
+- **Email notifications** for new applications
 
 ### Job Features
 - Flexible scheduling (anytime/fixed/deadline)
@@ -25,6 +27,14 @@
 - Payment options (fixed/hourly)
 - Photo uploads
 - Job categories
+
+### Communication & Notifications
+- **Real-time chat** between employers and workers
+- **Email notifications** for:
+  - New job applications (to employers)
+  - Application status changes (to workers)
+  - Welcome emails upon registration
+- **Persistent conversations** with Supabase storage
 
 ## Tech Stack
 
@@ -48,14 +58,10 @@ npm install
 
 ### 2. Supabase Setup
 
-**See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed guide!**
-
-Quick steps:
-1. Create Supabase project
-2. Run `supabase/migrations/01_init_schema.sql` (includes all security fixes)
+1. Create Supabase project at [supabase.com](https://supabase.com)
+2. Run the SQL migration in `supabase/migrations/01_init_schema.sql`
 3. Create `job-photos` storage bucket (Public: YES, 5MB limit)
 4. Run `supabase/migrations/02_storage_policies.sql`
-5. (Optional) Run `supabase/migrations/03_seed_demo_jobs.sql` for test data
 
 ### 3. Environment Variables
 
@@ -65,16 +71,33 @@ Create `.env.local`:
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # Vipps OAuth
 VIPPS_CLIENT_ID=your-client-id
 VIPPS_CLIENT_SECRET=your-client-secret
 VIPPS_SUBSCRIPTION_KEY=your-subscription-key
 VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
+VIPPS_REDIRECT_URI=https://your-domain.com/api/auth/vipps/callback
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+NEXT_PUBLIC_APP_URL=https://your-domain.com
 ```
 
-### 4. Run
+### 4. Email Setup (Optional)
+
+For email notifications, configure SMTP in `.env.local`. Uses Gmail by default:
+
+1. Enable 2FA on Gmail
+2. Generate App Password: https://myaccount.google.com/apppasswords
+3. Use App Password as `SMTP_PASS`
+
+### 5. Run
 
 ```bash
 npm run dev
@@ -93,10 +116,13 @@ Open http://localhost:3000
 - ✅ Reviews and ratings
 - ✅ Photo uploads (Supabase Storage)
 - ✅ Real-time profile sync
+- ✅ **Persistent chat system** with Supabase
+- ✅ **Email notifications** (applications, status updates, welcome)
+- ✅ **E2E testing** with Playwright
 - ✅ Responsive design
 
 **Partial/Demo:**
-- ⚠️ Chat (in-memory, migration ready)
+- ⚠️ Chat (now persistent with database)
 - ⚠️ Statistics (basic)
 - ⚠️ Achievements (demo data)
 
@@ -148,8 +174,6 @@ Real-time sync - profile updates instantly when switching!
 **Storage:**
 - job-photos bucket (5MB)
 
-See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md#database-schema) for details.
-
 ## Project Structure
 
 ```
@@ -171,11 +195,9 @@ flus-mvp/
 
 **"Failed to fetch":** Check `.env.local`, restart server
 
-**"RLS policy error":** Run `01_init_schema.sql`
+**"RLS policy error":** Run database migrations
 
-**"Job not found":** Run migrations, seed data
-
-More help: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md#common-issues)
+**"Job not found":** Check database setup and migrations
 
 ## License
 
@@ -186,7 +208,6 @@ MIT License - Educational prototype
 ## Support
 
 - GitHub Issues
-- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 - Supabase Dashboard logs
 
 ---

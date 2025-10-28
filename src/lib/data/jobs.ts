@@ -1,3 +1,5 @@
+import { getSupabaseServer } from "../supabase/server";
+
 export type Job = {
   id: string;
   title: string;
@@ -10,292 +12,276 @@ export type Job = {
   lng: number;
   createdAt: string;
   status: "open" | "assigned" | "completed" | "cancelled";
-  // ID of the user who created the job (employer)
   employerId: string;
-
-  // Worker assigned to this job (when status is 'assigned' or 'completed')
   selectedWorkerId?: string;
-
-  // New fields for enhanced job scheduling
-  address?: string; // Full address for the job location
-  scheduleType?: "flexible" | "fixed" | "deadline"; // Type of scheduling
-  startTime?: string; // ISO string for when job should start (optional for flexible)
-  endTime?: string; // ISO string for when job must be completed
-  paymentType?: "fixed" | "hourly"; // Fixed price or hourly rate
-  requirements?: string; // Any specific requirements or instructions
+  address?: string;
+  scheduleType?: "flexible" | "fixed" | "deadline";
+  startTime?: string;
+  endTime?: string;
+  paymentType?: "fixed" | "hourly";
+  requirements?: string;
+  employer?: {
+    id: string;
+    navn: string;
+    email: string;
+  };
 };
 
-export const jobs: Job[] = [
-  {
-    id: "j1",
-    title: "Gressklipping",
-    desc: "Liten hage. Ta med hansker.",
-    category: "Hagearbeid",
-    payNok: 300,
-    durationMinutes: 90,
-    areaName: "Oslo",
-    lat: 59.941918,
-    lng: 10.900904,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_1",
-    address: "Sofies gate 15, 0170 Oslo",
-    scheduleType: "deadline",
-    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
-    paymentType: "fixed",
-    requirements: "Du kan begynne når som helst, men vær ferdig innen lørdag klokken 12:00",
-  },
-  {
-    id: "j2",
-    title: "IT-hjelp: sette opp ruter",
-    desc: "Konfigurere Wi-Fi og sikre passord.",
-    category: "IT-hjelp",
-    payNok: 250,
-    durationMinutes: 60,
-    areaName: "Oslo",
-    lat: 59.927336,
-    lng: 10.816307,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_2",
-    address: "Karl Johans gate 22, 0159 Oslo",
-    scheduleType: "fixed",
-    startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-    endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(), // Tomorrow + 2 hours
-    paymentType: "fixed",
-    requirements: "Du må jobbe fra 12:00-14:00 - nøyaktig",
-  },
-  {
-    id: "j3",
-    title: "Snømåking",
-    desc: "Oppkjørsel og fortau, ca. 30–40 min.",
-    category: "Snømåking",
-    payNok: 220,
-    durationMinutes: 40,
-    areaName: "Oslo",
-    lat: 59.91,
-    lng: 10.74,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_1",
-    address: "Bygdøy allé 5, 0257 Oslo",
-    scheduleType: "flexible",
-    paymentType: "fixed",
-    requirements: "Start nå og bruk så lang tid du vil, men du får bare 220 kr",
-  },
-  // --- 15 extra jobs for students within 4km of Oslo (59.927336, 10.816307) ---
-  {
-    id: "j21",
-    title: "Vaske sykkel",
-    desc: "Vaske og smøre sykkel. Alt utstyr finnes.",
-    category: "Vask og vedlikehold",
-    payNok: 90,
-    durationMinutes: 25,
-    areaName: "Oslo",
-    lat: 59.929,
-    lng: 10.819,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_3",
-  },
-  {
-    id: "j22",
-    title: "Passe hund ettermiddag",
-    desc: "Gå tur med liten hund i nabolaget.",
-    category: "Dyrepass",
-    payNok: 80,
-    durationMinutes: 30,
-    areaName: "Oslo",
-    lat: 59.925,
-    lng: 10.812,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_4",
-  },
-  {
-    id: "j23",
-    title: "Handle mat for nabo",
-    desc: "Handle og levere matvarer til eldre nabo.",
-    category: "Ærend",
-    payNok: 100,
-    durationMinutes: 40,
-    areaName: "Oslo",
-    lat: 59.928,
-    lng: 10.810,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_2",
-  },
-  {
-    id: "j24",
-    title: "Rydde løv i hage",
-    desc: "Samle løv i sekker. Hagehansker finnes.",
-    category: "Hagearbeid",
-    payNok: 120,
-    durationMinutes: 50,
-    areaName: "Oslo",
-    lat: 59.930,
-    lng: 10.820,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_5",
-  },
-  {
-    id: "j25",
-    title: "Bære søppel ut",
-    desc: "Hjelpe nabo med å bære ut søppelposer.",
-    category: "Ærend",
-    payNok: 60,
-    durationMinutes: 15,
-    areaName: "Oslo",
-    lat: 59.926,
-    lng: 10.818,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_3",
-  },
-  {
-    id: "j26",
-    title: "Hjelpe til med flytting",
-    desc: "Bære esker og småmøbler. 1,5 time.",
-    category: "Småflytting",
-    payNok: 200,
-    durationMinutes: 90,
-    areaName: "Oslo",
-    lat: 59.924,
-    lng: 10.822,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_4",
-  },
-  {
-    id: "j27",
-    title: "Hjelp med lekser (engelsk)",
-    desc: "Forklare engelskoppgaver for 7. klasse.",
-    category: "Leksehjelp",
-    payNok: 120,
-    durationMinutes: 45,
-    areaName: "Oslo",
-    lat: 59.928,
-    lng: 10.815,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_2",
-  },
-  {
-    id: "j28",
-    title: "Vaske vinduer (ute)",
-    desc: "Vaske 3 vinduer i første etasje.",
-    category: "Vask og vedlikehold",
-    payNok: 110,
-    durationMinutes: 35,
-    areaName: "Oslo",
-    lat: 59.931,
-    lng: 10.813,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_3",
-  },
-  {
-    id: "j29",
-    title: "Plukke søppel i park",
-    desc: "Samle søppel i poser. Hansker finnes.",
-    category: "Rydding",
-    payNok: 90,
-    durationMinutes: 30,
-    areaName: "Oslo",
-    lat: 59.932,
-    lng: 10.817,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_4",
-  },
-  {
-    id: "j30",
-    title: "Passe katt i helgen",
-    desc: "Mate og leke med katt. 2 besøk lørdag/søndag.",
-    category: "Dyrepass",
-    payNok: 120,
-    durationMinutes: 60,
-    areaName: "Oslo",
-    lat: 59.927,
-    lng: 10.814,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_5",
-  },
-  {
-    id: "j31",
-    title: "Enkel maling av gjerde",
-    desc: "Male 2 meter gjerde. Pensel og maling finnes.",
-    category: "Hagearbeid",
-    payNok: 130,
-    durationMinutes: 40,
-    areaName: "Oslo",
-    lat: 59.929,
-    lng: 10.820,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_1",
-  },
-  {
-    id: "j32",
-    title: "Rydde garasje",
-    desc: "Sortere og feie gulv. Ca. 1 time.",
-    category: "Rydding",
-    payNok: 150,
-    durationMinutes: 60,
-    areaName: "Oslo",
-    lat: 59.926,
-    lng: 10.819,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_2",
-  },
-  {
-    id: "j33",
-    title: "Montere enkel IKEA-hylle",
-    desc: "Sette sammen liten hylle. Instruks følger med.",
-    category: "Montering",
-    payNok: 100,
-    durationMinutes: 30,
-    areaName: "Oslo",
-    lat: 59.928,
-    lng: 10.818,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_3",
-  },
-  {
-    id: "j34",
-    title: "Vaske trapp i oppgang",
-    desc: "Vaske 1 etasje. Alt utstyr finnes.",
-    category: "Vask og vedlikehold",
-    payNok: 80,
-    durationMinutes: 25,
-    areaName: "Oslo",
-    lat: 59.925,
-    lng: 10.816,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_4",
-  },
-  {
-    id: "j35",
-    title: "Hjelpe til på loppemarked",
-    desc: "Bære bord, rydde og hjelpe til med salg.",
-    category: "Dugnad",
-    payNok: 120,
-    durationMinutes: 90,
-    areaName: "Oslo",
-    lat: 59.930,
-    lng: 10.815,
-    createdAt: new Date().toISOString(),
-    status: "open",
-    employerId: "u_employer_5",
-  },
-];
+export async function getJobs(filters?: { category?: string; areaName?: string }): Promise<Job[]> {
+  try {
+    const supabase = getSupabaseServer();
+    let query = supabase
+      .from("jobs")
+      .select(`
+        *,
+        employer:employer_id(id, navn, email)
+      `)
+      .eq("status", "open")
+      .order("created_at", { ascending: false });
 
-export function findJobById(id: string): Job | undefined {
-  return jobs.find(j => j.id === id);
+    if (filters?.category) {
+      query = query.eq("category", filters.category);
+    }
+
+    if (filters?.areaName) {
+      query = query.ilike("area_name", `%${filters.areaName}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching jobs:", error);
+      return [];
+    }
+
+    return (data || []).map((j: Record<string, unknown>) => ({
+      id: j.id as string,
+      title: j.title as string,
+      desc: j.description as string,
+      category: j.category as string,
+      payNok: j.pay_nok as number,
+      durationMinutes: j.duration_minutes as number,
+      areaName: j.area_name as string,
+      lat: j.lat as number,
+      lng: j.lng as number,
+      createdAt: j.created_at as string,
+      status: j.status as "open" | "assigned" | "completed" | "cancelled",
+      employerId: j.employer_id as string,
+      selectedWorkerId: j.selected_worker_id as string | undefined,
+      address: j.address as string | undefined,
+      scheduleType: j.schedule_type as "flexible" | "fixed" | "deadline" | undefined,
+      startTime: j.start_time as string | undefined,
+      endTime: j.end_time as string | undefined,
+      paymentType: j.payment_type as "fixed" | "hourly" | undefined,
+      requirements: j.requirements as string | undefined,
+      employer: j.employer ? {
+        id: (j.employer as Record<string, unknown>).id as string,
+        navn: (j.employer as Record<string, unknown>).navn as string,
+        email: (j.employer as Record<string, unknown>).email as string,
+      } : undefined,
+    }));
+  } catch (e) {
+    console.error("Exception fetching jobs:", e);
+    return [];
+  }
+}
+
+export async function findJobById(id: string): Promise<Job | null> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("jobs")
+      .select(`
+        *,
+        employer:employer_id(id, navn, email)
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error finding job:", error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      desc: data.description,
+      category: data.category,
+      payNok: data.pay_nok,
+      durationMinutes: data.duration_minutes,
+      areaName: data.area_name,
+      lat: data.lat,
+      lng: data.lng,
+      createdAt: data.created_at,
+      status: data.status,
+      employerId: data.employer_id,
+      selectedWorkerId: data.selected_worker_id,
+      address: data.address,
+      scheduleType: data.schedule_type,
+      startTime: data.start_time,
+      endTime: data.end_time,
+      paymentType: data.payment_type,
+      requirements: data.requirements,
+      employer: data.employer ? {
+        id: data.employer.id,
+        navn: data.employer.navn,
+        email: data.employer.email,
+      } : undefined,
+    };
+  } catch (e) {
+    console.error("Exception finding job:", e);
+    return null;
+  }
+}
+
+export async function createJob(
+  title: string,
+  description: string,
+  category: string,
+  payNok: number,
+  durationMinutes: number,
+  areaName: string,
+  lat: number,
+  lng: number,
+  employerId: string,
+  address?: string,
+  scheduleType?: "flexible" | "fixed" | "deadline",
+  startTime?: string,
+  endTime?: string,
+  paymentType?: "fixed" | "hourly",
+  requirements?: string
+): Promise<Job | null> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("jobs")
+      .insert({
+        title,
+        description,
+        category,
+        pay_nok: payNok,
+        duration_minutes: durationMinutes,
+        area_name: areaName,
+        lat,
+        lng,
+        employer_id: employerId,
+        address,
+        schedule_type: scheduleType,
+        start_time: startTime,
+        end_time: endTime,
+        payment_type: paymentType,
+        requirements,
+        status: "open",
+      })
+      .select(`
+        *,
+        employer:employer_id(id, navn, email)
+      `)
+      .single();
+
+    if (error) {
+      console.error("Error creating job:", error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      desc: data.description,
+      category: data.category,
+      payNok: data.pay_nok,
+      durationMinutes: data.duration_minutes,
+      areaName: data.area_name,
+      lat: data.lat,
+      lng: data.lng,
+      createdAt: data.created_at,
+      status: data.status,
+      employerId: data.employer_id,
+      selectedWorkerId: data.selected_worker_id,
+      address: data.address,
+      scheduleType: data.schedule_type,
+      startTime: data.start_time,
+      endTime: data.end_time,
+      paymentType: data.payment_type,
+      requirements: data.requirements,
+      employer: data.employer ? {
+        id: data.employer.id,
+        navn: data.employer.navn,
+        email: data.employer.email,
+      } : undefined,
+    };
+  } catch (e) {
+    console.error("Exception creating job:", e);
+    return null;
+  }
+}
+
+export async function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'createdAt' | 'employer'>>): Promise<Job | null> {
+  try {
+    const supabase = getSupabaseServer();
+    const updateData: Record<string, unknown> = {};
+
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.desc !== undefined) updateData.description = updates.desc;
+    if (updates.category !== undefined) updateData.category = updates.category;
+    if (updates.payNok !== undefined) updateData.pay_nok = updates.payNok;
+    if (updates.durationMinutes !== undefined) updateData.duration_minutes = updates.durationMinutes;
+    if (updates.areaName !== undefined) updateData.area_name = updates.areaName;
+    if (updates.lat !== undefined) updateData.lat = updates.lat;
+    if (updates.lng !== undefined) updateData.lng = updates.lng;
+    if (updates.status !== undefined) updateData.status = updates.status;
+    if (updates.selectedWorkerId !== undefined) updateData.selected_worker_id = updates.selectedWorkerId;
+    if (updates.address !== undefined) updateData.address = updates.address;
+    if (updates.scheduleType !== undefined) updateData.schedule_type = updates.scheduleType;
+    if (updates.startTime !== undefined) updateData.start_time = updates.startTime;
+    if (updates.endTime !== undefined) updateData.end_time = updates.endTime;
+    if (updates.paymentType !== undefined) updateData.payment_type = updates.paymentType;
+    if (updates.requirements !== undefined) updateData.requirements = updates.requirements;
+
+    const { data, error } = await supabase
+      .from("jobs")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        employer:employer_id(id, navn, email)
+      `)
+      .single();
+
+    if (error) {
+      console.error("Error updating job:", error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      desc: data.description,
+      category: data.category,
+      payNok: data.pay_nok,
+      durationMinutes: data.duration_minutes,
+      areaName: data.area_name,
+      lat: data.lat,
+      lng: data.lng,
+      createdAt: data.created_at,
+      status: data.status,
+      employerId: data.employer_id,
+      selectedWorkerId: data.selected_worker_id,
+      address: data.address,
+      scheduleType: data.schedule_type,
+      startTime: data.start_time,
+      endTime: data.end_time,
+      paymentType: data.payment_type,
+      requirements: data.requirements,
+      employer: data.employer ? {
+        id: data.employer.id,
+        navn: data.employer.navn,
+        email: data.employer.email,
+      } : undefined,
+    };
+  } catch (e) {
+    console.error("Exception updating job:", e);
+    return null;
+  }
 }

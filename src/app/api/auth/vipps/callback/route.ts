@@ -108,15 +108,33 @@ export async function GET(req: NextRequest) {
 
     // If user doesn't exist, create new one with selected role and birth year
     if (!userId) {
+      const userData: Record<string, string | number | undefined> = {
+        email,
+        role,
+        navn: userInfo.name,
+        telefon: userInfo.phone_number,
+      };
+
+      // Only add birth_year if the column exists
+      if (birthYear) {
+        try {
+          // Check if birth_year column exists by trying to select it
+          const { error: checkError } = await supabase
+            .from("users")
+            .select("birth_year")
+            .limit(1);
+
+          if (!checkError) {
+            userData.birth_year = parseInt(birthYear);
+          }
+        } catch {
+          // Column doesn't exist, skip birth_year
+        }
+      }
+
       const { data: inserted, error } = await supabase
         .from("users")
-        .insert({
-          email,
-          role,
-          navn: userInfo.name,
-          telefon: userInfo.phone_number,
-          birth_year: birthYear ? parseInt(birthYear) : null,
-        })
+        .insert(userData)
         .select("id")
         .maybeSingle();
 
@@ -130,7 +148,19 @@ export async function GET(req: NextRequest) {
       // Update existing user with new role and birth year if provided
       const updateData: Record<string, string | number> = { role };
       if (birthYear) {
-        updateData.birth_year = parseInt(birthYear);
+        try {
+          // Check if birth_year column exists
+          const { error: checkError } = await supabase
+            .from("users")
+            .select("birth_year")
+            .limit(1);
+
+          if (!checkError) {
+            updateData.birth_year = parseInt(birthYear);
+          }
+        } catch {
+          // Column doesn't exist, skip birth_year
+        }
       }
       
       await supabase
