@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ExternalLink, Star, Briefcase, Award, Calendar, ArrowLeft } from "lucide-react";
+import { ExternalLink, Star, Briefcase, Award, Calendar, ArrowLeft, Download } from "lucide-react";
 
 type User = {
   id: string;
@@ -169,6 +169,27 @@ export default function WorkerProfilePage() {
       year: "numeric",
       month: "short",
     });
+  };
+
+  const downloadCV = async () => {
+    try {
+      const response = await fetch("/api/cv/pdf");
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${user?.navn || 'CV'}_CV.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error("Failed to download CV PDF");
+      }
+    } catch (error) {
+      console.error("Error downloading CV PDF:", error);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -431,10 +452,16 @@ export default function WorkerProfilePage() {
       {/* CV Entries */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Arbeidserfaring
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Arbeidserfaring
+            </CardTitle>
+            <Button onClick={downloadCV} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Last ned CV som PDF
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {cvEntries.length === 0 ? (
