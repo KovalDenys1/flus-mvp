@@ -77,7 +77,6 @@ export default function Navbar() {
             {viewMode === "worker" ? (
               <>
                 <Link className={`${linkClass} ${isActive('/jobber') ? 'nav-link-active' : ''}`} href="/jobber">Finn jobber</Link>
-                <Link className={`${linkClass} ${isActive('/prestasjoner') ? 'nav-link-active' : ''}`} href="/prestasjoner">Prestasjoner</Link>
                 <Link className={`${linkClass} ${isActive('/mine-soknader') ? 'nav-link-active' : ''}`} href="/mine-soknader">Mine søknader</Link>
               </>
             ) : (
@@ -164,7 +163,6 @@ export default function Navbar() {
             {viewMode === "worker" ? (
               <>
                 <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/jobber">Finn jobber</Link>
-                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/prestasjoner">Prestasjoner</Link>
                 <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/mine-soknader">Mine søknader</Link>
               </>
             ) : (

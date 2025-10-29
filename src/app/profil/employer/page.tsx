@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Star, Briefcase, TrendingUp, ExternalLink, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
 
 type User = {
   id: string;
@@ -26,11 +25,19 @@ type User = {
 };
 
 type Stats = {
+  role: string;
+  // Employer stats
   totalJobsCreated: number;
   activeJobs: number;
   completedJobs: number;
-  totalApplications: number;
+  totalApplicationsReceived: number;
   acceptedApplications: number;
+  // Worker stats (for both roles)
+  totalApplicationsSent: number;
+  acceptedJobs: number;
+  completedJobsWorker: number;
+  totalEarnings: number;
+  // Common stats
   totalReviews: number;
   averageRating: number;
 };
@@ -89,18 +96,11 @@ export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   
-  const [employerSettings, setEmployerSettings] = useState({
-    autoApproveApplications: false
-  });
-  const [loadingSettings, setLoadingSettings] = useState(false);
-  
   const [profileForm, setProfileForm] = useState({
     navn: "",
     bio: "",
     telefon: "",
     kommune: "",
-    company_name: "",
-    company_org_number: "",
     website_url: "",
   });
 
@@ -137,8 +137,6 @@ export default function EmployerProfilePage() {
           bio: userData.user.bio || "",
           telefon: userData.user.telefon || "",
           kommune: userData.user.kommune || "",
-          company_name: userData.user.company_name || "",
-          company_org_number: userData.user.company_org_number || "",
           website_url: userData.user.website_url || "",
         });
       }
@@ -162,13 +160,6 @@ export default function EmployerProfilePage() {
       if (jobsRes.ok) {
         const jobsData = await jobsRes.json();
         setRecentJobs((jobsData.jobs || []).slice(0, 5));
-      }
-
-      // Get employer settings
-      const settingsRes = await fetch("/api/profile/settings");
-      if (settingsRes.ok) {
-        const settingsData = await settingsRes.json();
-        setEmployerSettings(settingsData.settings);
       }
     } catch (err) {
       console.error(err);
@@ -214,30 +205,6 @@ export default function EmployerProfilePage() {
     } catch (err) {
       console.error("Feil ved valg av kandidat:", err);
       alert("Det oppstod en feil ved valg av kandidat");
-    }
-  };
-
-  const updateEmployerSettings = async (autoApproveApplications: boolean) => {
-    try {
-      setLoadingSettings(true);
-      const res = await fetch("/api/profile/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ autoApproveApplications }),
-      });
-
-      if (res.ok) {
-        setEmployerSettings({ autoApproveApplications });
-        toast.success("Innstillinger oppdatert");
-      } else {
-        const error = await res.json();
-        toast.error(`Feil: ${error.error}`);
-      }
-    } catch (err) {
-      console.error("Feil ved oppdatering av innstillinger:", err);
-      toast.error("Kunne ikke oppdatere innstillinger");
-    } finally {
-      setLoadingSettings(false);
     }
   };
 
@@ -317,43 +284,27 @@ export default function EmployerProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="w-5 h-5" />
-            Bedriftsinformasjon
+            Kontaktinformasjon
           </CardTitle>
         </CardHeader>
         <CardContent>
           {editMode ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Bedriftsnavn / Navn</label>
-                <Input
-                  value={profileForm.company_name}
-                  onChange={(e) => setProfileForm({ ...profileForm, company_name: e.target.value })}
-                  placeholder="Min Bedrift AS"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Organisasjonsnummer</label>
-                <Input
-                  value={profileForm.company_org_number}
-                  onChange={(e) => setProfileForm({ ...profileForm, company_org_number: e.target.value })}
-                  placeholder="123 456 789"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Kontaktperson</label>
+                <label className="block text-sm font-medium mb-1">Navn</label>
                 <Input
                   value={profileForm.navn}
                   onChange={(e) => setProfileForm({ ...profileForm, navn: e.target.value })}
-                  placeholder="Ditt navn"
+                  placeholder="Ditt fulle navn"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Om bedriften</label>
+                <label className="block text-sm font-medium mb-1">Kort om deg</label>
                 <Textarea
                   value={profileForm.bio}
                   onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                  placeholder="Fortell om din bedrift og hva slags jobber dere tilbyr..."
-                  rows={4}
+                  placeholder="Fortell litt om deg selv og hva slags jobber du trenger hjelp med..."
+                  rows={3}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -375,12 +326,16 @@ export default function EmployerProfilePage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Nettside</label>
+                <label className="block text-sm font-medium mb-1">Nettside (valgfritt)</label>
                 <Input
                   value={profileForm.website_url}
                   onChange={(e) => setProfileForm({ ...profileForm, website_url: e.target.value })}
-                  placeholder="https://minbedrift.no"
+                  placeholder="https://dinnettside.no"
                 />
+              </div>
+              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                <strong>Tips:</strong> Som privatperson trenger du ikke organisasjonsnummer. 
+                Vi anbefaler å legge til en kort beskrivelse av deg selv og hva slags hjelp du trenger.
               </div>
               <Button onClick={saveProfile} className="w-full">
                 Lagre endringer
@@ -389,22 +344,12 @@ export default function EmployerProfilePage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-3">
-                {user?.company_name && (
-                  <div>
-                    <strong>Bedriftsnavn:</strong> {user.company_name}
-                  </div>
-                )}
-                {user?.company_org_number && (
-                  <div>
-                    <strong>Org.nr:</strong> {user.company_org_number}
-                  </div>
-                )}
                 <div>
-                  <strong>Kontaktperson:</strong> {user?.navn || "Ikke oppgitt"}
+                  <strong>Navn:</strong> {user?.navn || "Ikke oppgitt"}
                 </div>
                 {user?.bio && (
                   <div>
-                    <strong>Om bedriften:</strong>
+                    <strong>Om meg:</strong>
                     <p className="text-gray-700 mt-1">{user.bio}</p>
                   </div>
                 )}
@@ -461,7 +406,7 @@ export default function EmployerProfilePage() {
                 <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-3xl font-bold text-orange-600">{stats.totalApplications}</div>
+                <div className="text-3xl font-bold text-orange-600">{stats.totalApplicationsReceived}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader mottatt</div>
               </div>
               <div className="text-center p-4 bg-teal-50 rounded-lg">
@@ -479,38 +424,6 @@ export default function EmployerProfilePage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Employer Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Briefcase className="w-5 h-5" />
-            Arbeidsgiverinnstillinger
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h3 className="font-medium">Automatisk godkjenning av søknader</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Når aktivert, blir alle søknader automatisk godkjent. Når deaktivert, må du manuelt godkjenne hver søknad.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => updateEmployerSettings(!employerSettings.autoApproveApplications)}
-                  disabled={loadingSettings}
-                  variant={employerSettings.autoApproveApplications ? "default" : "outline"}
-                  size="sm"
-                >
-                  {loadingSettings ? "Lagrer..." : employerSettings.autoApproveApplications ? "Aktivert" : "Deaktivert"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Recent Jobs */}
       <Card>

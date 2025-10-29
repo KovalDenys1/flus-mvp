@@ -5,7 +5,7 @@ import { getSession } from "@/lib/data/sessions";
 export async function GET() {
   try {
     const supabase = getSupabaseServer();
-    
+
     // Get current user from our session system
     const { user } = await getSession();
     if (!user) {
@@ -17,18 +17,24 @@ export async function GET() {
 
     const stats = {
       role: user.role,
+      // Employer stats
       totalJobsCreated: 0,
       activeJobs: 0,
       completedJobs: 0,
-      totalApplications: 0,
+      totalApplicationsReceived: 0,
       acceptedApplications: 0,
+      // Worker stats
+      totalApplicationsSent: 0,
+      acceptedJobs: 0,
+      completedJobsWorker: 0,
       totalEarnings: 0,
+      // Common stats
       totalReviews: 0,
       averageRating: 0,
     };
 
     if (user.role === "employer" || user.role === "both") {
-      // Get employer statistics
+      // Get employer statistics - jobs created by this user
       const { data: jobs, error: jobsError } = await supabase
         .from("jobs")
         .select("id, status, pay_nok")
@@ -43,29 +49,40 @@ export async function GET() {
       // Get applications for employer's jobs
       const { data: applications, error: appsError } = await supabase
         .from("applications")
-        .select("id, status, jobs!inner(employer_id)")
+        .select(`
+          id,
+          status,
+          jobs!inner(id, employer_id)
+        `)
         .eq("jobs.employer_id", user.id);
 
       if (!appsError && applications) {
-        stats.totalApplications = applications.length;
+        stats.totalApplicationsReceived = applications.length;
         stats.acceptedApplications = applications.filter(a => a.status === "accepted").length;
       }
     }
 
     if (user.role === "worker" || user.role === "both") {
-      // Get worker statistics
+      // Get worker statistics - applications sent by this user
       const { data: applications, error: appsError } = await supabase
         .from("applications")
-        .select("id, status, jobs!inner(pay_nok)")
-        .eq("worker_id", user.id);
+        .select(`
+          id,
+          status,
+          jobs!inner(id, pay_nok, status)
+        `)
+        .eq("applicant_id", user.id);
 
       if (!appsError && applications) {
-        stats.totalApplications = applications.length;
-        stats.acceptedApplications = applications.filter(a => a.status === "accepted").length;
-        
-        // Calculate total earnings from completed jobs
-        const completedApps = applications.filter(a => a.status === "accepted");
-        stats.totalEarnings = completedApps.reduce((sum, app) => {
+        stats.totalApplicationsSent = applications.length;
+        stats.acceptedJobs = applications.filter(a => a.status === "accepted").length;
+
+        // Calculate completed jobs and earnings for worker
+        // For now, count all accepted applications as completed jobs
+        // TODO: Add proper job completion tracking
+        const acceptedJobs = applications.filter(a => a.status === "accepted");
+        stats.completedJobsWorker = acceptedJobs.length;
+        stats.totalEarnings = acceptedJobs.reduce((sum, app) => {
           const job = Array.isArray(app.jobs) ? app.jobs[0] : app.jobs;
           return sum + (job?.pay_nok || 0);
         }, 0);

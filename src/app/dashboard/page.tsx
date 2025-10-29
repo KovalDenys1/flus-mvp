@@ -5,18 +5,31 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import AuthGuard from "@/components/AuthGuard";
 
 type User = { id: string; email: string; isWorker: boolean; isEmployer: boolean; navn?: string } | null;
-type Stats = { totalJobsCreated: number; activeJobs: number; completedJobs: number; totalApplications: number; acceptedApplications: number; totalEarnings: number };
-type Achievements = { xp: number; badges: string[]; perCategory: { category: string; count: number; target: number }[]; canContactCurator: boolean };
+type Stats = {
+  role: string;
+  // Employer stats
+  totalJobsCreated: number;
+  activeJobs: number;
+  completedJobs: number;
+  totalApplicationsReceived: number;
+  acceptedApplications: number;
+  // Worker stats
+  totalApplicationsSent: number;
+  acceptedJobs: number;
+  completedJobsWorker: number;
+  totalEarnings: number;
+  // Common stats
+  totalReviews: number;
+  averageRating: number;
+};
 type RecentJob = { id: string; title: string; areaName: string; payNok: number; status: string };
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User>(null);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [achievements, setAchievements] = useState<Achievements | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
 
@@ -38,15 +51,6 @@ export default function DashboardPage() {
           if (statsRes.ok) {
             const statsData = await statsRes.json();
             setStats(statsData.stats);
-          }
-        }
-
-        // Get achievements if worker
-        if (user?.isWorker) {
-          const achievementsRes = await fetch("/api/achievements");
-          if (achievementsRes.ok) {
-            const achievementsData = await achievementsRes.json();
-            setAchievements(achievementsData.achievements);
           }
         }
 
@@ -171,12 +175,12 @@ export default function DashboardPage() {
                     <div className="text-sm text-gray-600">Aktive jobber</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{stats.totalApplications}</div>
-                    <div className="text-sm text-gray-600">Søknader mottatt</div>
+                    <div className="text-2xl font-bold text-purple-600">{stats.completedJobs}</div>
+                    <div className="text-sm text-gray-600">Fullførte jobber</div>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{stats.acceptedApplications}</div>
-                    <div className="text-sm text-gray-600">Godkjente søknader</div>
+                    <div className="text-2xl font-bold text-orange-600">{stats.totalApplicationsReceived}</div>
+                    <div className="text-sm text-gray-600">Søknader mottatt</div>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -188,43 +192,37 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Worker Achievements */}
-          {user?.isWorker && achievements && (
+          {/* Worker Stats */}
+          {user?.isWorker && stats && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">🏆</span>
-                  Prestasjoner
+                  <span className="text-2xl">👷</span>
+                  Jobbsøker statistikk
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-orange-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">XP:</span>
-                      <span className="text-2xl font-bold text-orange-600">{achievements.xp}</span>
-                    </div>
-                    <Progress value={Math.min(100, (achievements.xp / 1000) * 100)} className="h-2" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{stats.totalApplicationsSent}</div>
+                    <div className="text-sm text-gray-600">Søknader sendt</div>
                   </div>
-
-                  {achievements.badges.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-2">Badges</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {achievements.badges.slice(0, 3).map(badge => (
-                          <Badge key={badge} variant="secondary" className="bg-orange-100 text-orange-700">
-                            {badge}
-                          </Badge>
-                        ))}
-                        {achievements.badges.length > 3 && (
-                          <Badge variant="outline">+{achievements.badges.length - 3} flere</Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <Link href="/profil">
-                    <Button variant="outline" className="w-full">Se alle prestasjoner</Button>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{stats.acceptedJobs}</div>
+                    <div className="text-sm text-gray-600">Godkjente jobber</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{stats.completedJobsWorker}</div>
+                    <div className="text-sm text-gray-600">Fullførte jobber</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
+                    <div className="text-sm text-gray-600">Total inntjening</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Link href="/profil/worker">
+                    <Button variant="outline" className="w-full">Se detaljer</Button>
                   </Link>
                 </div>
               </CardContent>

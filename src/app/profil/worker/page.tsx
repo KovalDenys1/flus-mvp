@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { ExternalLink, Star, Briefcase, Award, Calendar, ArrowLeft, Download } from "lucide-react";
 
 type User = {
@@ -60,6 +61,8 @@ type Skill = {
   years_experience: number;
 };
 
+type Achievements = { xp: number; badges: string[]; perCategory: { category: string; count: number; target: number }[]; canContactCurator: boolean };
+
 export default function WorkerProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -67,6 +70,7 @@ export default function WorkerProfilePage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [cvEntries, setCvEntries] = useState<CvEntry[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [achievements, setAchievements] = useState<Achievements | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   
@@ -139,6 +143,13 @@ export default function WorkerProfilePage() {
         const cvData = await cvRes.json();
         setCvEntries(cvData.cv_entries || []);
         setSkills(cvData.skills || []);
+      }
+
+      // Get achievements
+      const achievementsRes = await fetch("/api/achievements");
+      if (achievementsRes.ok) {
+        const achievementsData = await achievementsRes.json();
+        setAchievements(achievementsData.achievements);
       }
     } catch (err) {
       console.error("Feil ved lasting av profil:", err);
@@ -220,7 +231,7 @@ export default function WorkerProfilePage() {
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <button 
           onClick={() => router.push("/profil")}
-          className="flex items-center gap-1 hover:text-gray-900 transition"
+          className="flex items-center gap-1 hover:text-gray-900 transition cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           Tilbake
@@ -409,6 +420,127 @@ export default function WorkerProfilePage() {
                   <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                 </div>
                 <div className="text-sm text-gray-600 mt-1">{stats.totalReviews} anmeldelser</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Achievements */}
+      {achievements && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Prestasjoner
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-orange-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">XP:</span>
+                    <span className="text-2xl font-bold text-orange-600">{achievements.xp}</span>
+                  </div>
+                  <Progress value={Math.min(100, (achievements.xp / 1000) * 100)} className="h-2" />
+                  <div className="text-xs text-gray-600 mt-2">
+                    {achievements.xp < 1000 ? `${1000 - achievements.xp} XP til neste nivå` : "Maks nivå nådd! 🎉"}
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                  <h4 className="font-medium mb-2">Kategorier</h4>
+                  <div className="text-sm text-gray-600">
+                    {achievements.perCategory.length > 0 ? (
+                      <div className="space-y-1">
+                        {achievements.perCategory.slice(0, 2).map(cat => (
+                          <div key={cat.category} className="flex justify-between">
+                            <span>{cat.category}:</span>
+                            <span className="font-medium">{cat.count}/{cat.target}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span>Ingen kategorier ennå</span>
+                    )}
+                  </div>
+                </div>
+
+                {stats && (
+                  <div className="bg-indigo-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Total inntjening:</span>
+                      <span className="text-2xl font-bold text-indigo-600">
+                        {stats.totalEarnings} kr
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Fra fullførte jobber
+                    </div>
+                  </div>
+                )}
+
+                {achievements.badges.length > 0 && (
+                  <div className="bg-yellow-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                    <h4 className="font-medium mb-2">Badges</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {achievements.badges.slice(0, 3).map(badge => (
+                        <Badge key={badge} variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
+                          {badge}
+                        </Badge>
+                      ))}
+                      {achievements.badges.length > 3 && (
+                        <Badge variant="outline" className="text-xs">+{achievements.badges.length - 3} flere</Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {achievements.canContactCurator && (
+                  <div className="bg-green-50 rounded-lg p-4 h-24 flex flex-col justify-center border border-green-200">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🎯</span>
+                      <div>
+                        <h4 className="font-medium text-sm">Kurator tilgjengelig</h4>
+                        <p className="text-xs text-gray-600">Du kan kontakte en kurator for råd</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {stats && (
+                  <>
+                    <div className="bg-blue-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Vurdering:</span>
+                        <span className="text-2xl font-bold text-blue-600 flex items-center gap-1">
+                          {stats.averageRating > 0 ? stats.averageRating : "—"}
+                          {stats.averageRating > 0 && <span className="text-lg">⭐</span>}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {stats.totalReviews} anmeldelser
+                      </div>
+                    </div>
+
+                    <div className="bg-green-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Fullføringsrate:</span>
+                        <span className="text-2xl font-bold text-green-600">
+                          {stats.totalApplications > 0
+                            ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
+                            : 0}%
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {stats.acceptedApplications} av {stats.totalApplications} søknader
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
