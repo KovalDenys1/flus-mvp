@@ -148,24 +148,26 @@ export default function CreateJobPage() {
 
   return (
     <AuthGuard requireAuth={true}>
+      {/* Progress Bar - Sticky below navbar */}
+      <div className="sticky top-16 bg-white z-40 border-b border-gray-200 px-4 py-3 shadow-sm">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Fremgang</span>
+            <span>{progress}% fullført</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-3xl mx-auto py-10 px-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Opprett ny jobb</h1>
           <p className="text-gray-600 mt-1">Fyll ut skjemaet nedenfor for å opprette en ny jobbannonse</p>
-          
-          {/* Progress Bar */}
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Fremgang</span>
-              <span>{progress}% fullført</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
