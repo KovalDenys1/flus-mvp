@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,6 +93,7 @@ export default function EmployerProfilePage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [selectedJobApplications, setSelectedJobApplications] = useState<Application[]>([]);
+  const [jobApplicationsById, setJobApplicationsById] = useState<Record<string, Application[]>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -118,10 +121,37 @@ export default function EmployerProfilePage() {
 
     window.addEventListener("viewModeChanged", handleViewModeChange);
 
+    // Setup realtime notifications for new applications
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      .channel('applications-changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'applications'
+      }, async (payload) => {
+        if (!user) return;
+        const application = payload.new as any;
+        // Fetch job to check if it's for this employer
+        const { data: job } = await supabase
+          .from('jobs')
+          .select('employer_id, title')
+          .eq('id', application.job_id)
+          .single();
+        
+        if (job?.employer_id === user.id) {
+          toast.success(`Ny søknad på "${job.title}"!`);
+          // Reload applications
+          loadProfile();
+        }
+      })
+      .subscribe();
+
     return () => {
       window.removeEventListener("viewModeChanged", handleViewModeChange);
+      supabase.removeChannel(channel);
     };
-  }, [router]);
+  }, [router, user]);
 
   const loadProfile = async () => {
     try {
@@ -159,7 +189,18 @@ export default function EmployerProfilePage() {
       const jobsRes = await fetch("/api/my-jobs");
       if (jobsRes.ok) {
         const jobsData = await jobsRes.json();
-        setRecentJobs((jobsData.jobs || []).slice(0, 5));
+        const jobs = (jobsData.jobs || []).slice(0, 5);
+        setRecentJobs(jobs);
+
+        // Load applications for open jobs
+        const openJobs = jobs.filter(job => job.status === "open");
+        for (const job of openJobs) {
+          const appsRes = await fetch(`/api/jobs/${job.id}/applications`);
+          if (appsRes.ok) {
+            const appsData = await appsRes.json();
+            setJobApplicationsById(prev => ({ ...prev, [job.id]: appsData.applications || [] }));
+          }
+        }
       }
     } catch (err) {
       console.error(err);
@@ -518,7 +559,7 @@ export default function EmployerProfilePage() {
                       variant="outline"
                       size="sm"
                     >
-                      Se søknader
+                      Se søknader ({jobApplicationsById[job.id]?.length || 0})
                     </Button>
                   </div>
 

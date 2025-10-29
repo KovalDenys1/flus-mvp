@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,10 +100,39 @@ export default function WorkerProfilePage() {
 
     window.addEventListener("viewModeChanged", handleViewModeChange);
 
+    // Setup realtime notifications for application status updates
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      .channel('applications-updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'applications'
+      }, async (payload) => {
+        if (!user) return;
+        const application = payload.new as any;
+        if (application.applicant_id === user.id) {
+          // Fetch job title
+          const { data: job } = await supabase
+            .from('jobs')
+            .select('title')
+            .eq('id', application.job_id)
+            .single();
+          
+          const statusText = application.status === 'akseptert' ? 'godkjent' : 
+                           application.status === 'avslatt' ? 'avslått' : 'oppdatert';
+          toast.success(`Din søknad på "${job?.title}" er ${statusText}!`);
+          // Reload stats
+          loadProfile();
+        }
+      })
+      .subscribe();
+
     return () => {
       window.removeEventListener("viewModeChanged", handleViewModeChange);
+      supabase.removeChannel(channel);
     };
-  }, [router]);
+  }, [router, user]);
 
   const loadProfile = async () => {
     try {

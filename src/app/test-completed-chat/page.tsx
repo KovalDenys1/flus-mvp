@@ -20,10 +20,10 @@ export default function TestCompletedChatPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Not Logged In</h1>
-          <p className="mb-4">Please login first to test completed job chat</p>
+          <h1 className="text-2xl font-bold mb-4">Ikke logget inn</h1>
+          <p className="mb-4">Vennligst logg inn først for å teste chat for fullført jobb</p>
           <Link href="/test-login">
-            <Button>Go to Test Login</Button>
+            <Button>Gå til testinnlogging</Button>
           </Link>
         </div>
       </div>
@@ -34,24 +34,24 @@ export default function TestCompletedChatPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Test Completed Job Chat - {userId}</h1>
+          <h1 className="text-2xl font-bold">Test chat for fullført jobb - {userId}</h1>
           <div className="space-x-2">
             <Link href="/test-chat">
-              <Button variant="outline">Active Job Chat</Button>
+              <Button variant="outline">Chat for aktiv jobb</Button>
             </Link>
             <Link href="/test-login">
-              <Button variant="outline">Switch User</Button>
+              <Button variant="outline">Bytt bruker</Button>
             </Link>
             <Link href="/jobber">
-              <Button variant="outline">Back to Jobs</Button>
+              <Button variant="outline">Tilbake til jobber</Button>
             </Link>
           </div>
         </div>
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
           <p className="text-sm text-yellow-800">
-            <strong>Completed Job:</strong> Employer can now confirm work completion.
-            {userId === 'test_employer_1' ? ' You should see a "Godkjenn arbeid" button.' : ' You should see the completed status.'}
+            <strong>Fullført jobb:</strong> Arbeidsgiver kan nå bekrefte arbeidets fullføring.
+            {userId === 'test_employer_1' ? ' Du bør se en "Godkjenn arbeid"-knapp.' : ' Du bør se fullført status.'}
           </p>
         </div>
 

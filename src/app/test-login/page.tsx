@@ -19,10 +19,10 @@ export default function TestLoginPage() {
       if (response.ok) {
         window.location.href = "/jobber";
       } else {
-        alert("Login failed");
+        alert("Innlogging feilet");
       }
     } catch (error) {
-      alert("Login error: " + error);
+      alert("Innloggingsfeil: " + error);
     } finally {
       setLoading(null);
     }
@@ -32,9 +32,9 @@ export default function TestLoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Test Login - Chat Testing</CardTitle>
+          <CardTitle>Testinnlogging - Chattesting</CardTitle>
           <CardDescription>
-            Use different browsers/tabs to test chat between users
+            Bruk forskjellige nettlesere/faner for å teste chat mellom brukere
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -44,7 +44,7 @@ export default function TestLoginPage() {
             className="w-full"
             variant="default"
           >
-            {loading === "test_employer_1" ? "Logging in..." : "Login as Employer"}
+            {loading === "test_employer_1" ? "Logger inn..." : "Logg inn som arbeidsgiver"}
           </Button>
 
           <Button
@@ -53,21 +53,21 @@ export default function TestLoginPage() {
             className="w-full"
             variant="outline"
           >
-            {loading === "test_worker_1" ? "Logging in..." : "Login as Worker"}
+            {loading === "test_worker_1" ? "Logger inn..." : "Logg inn som jobbsøker"}
           </Button>
 
           <div className="text-sm text-gray-600 space-y-2">
-            <p><strong>Test Conversations:</strong></p>
+            <p><strong>Testkonversasjoner:</strong></p>
             <ul className="list-disc list-inside space-y-1">
-              <li><strong>Active job:</strong> test_conversation_chat (worker can complete & send photos)</li>
-              <li><strong>Completed job:</strong> test_conversation_completed (employer can confirm)</li>
+              <li><strong>Aktiv jobb:</strong> test_conversation_chat (jobbsøker kan fullføre og sende bilder)</li>
+              <li><strong>Fullført jobb:</strong> test_conversation_completed (arbeidsgiver kan bekrefte)</li>
             </ul>
-            <p><strong>Instructions:</strong></p>
+            <p><strong>Instruksjoner:</strong></p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Login as Employer or Worker</li>
-              <li>Go to /test-chat to test active job</li>
-              <li>Change conversation ID in URL to test_conversation_completed for completed job</li>
-              <li>Test buttons based on your role!</li>
+              <li>Logg inn som arbeidsgiver eller jobbsøker</li>
+              <li>Gå til /test-chat for å teste aktiv jobb</li>
+              <li>Endre konversasjons-ID i URL til test_conversation_completed for fullført jobb</li>
+              <li>Test knappene basert på din rolle!</li>
             </ol>
           </div>
         </CardContent>
