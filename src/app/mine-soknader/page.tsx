@@ -12,7 +12,7 @@ type Application = {
   id: string;
   jobId: string;
   workerId: string;
-  status: "sendt" | "godkjent" | "avvist" | "completed";
+  status: "pending" | "accepted" | "rejected" | "completed";
   createdAt: string;
   job?: {
     id: string;
@@ -79,7 +79,7 @@ export default function MineSoknaderPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "sendt": return "bg-blue-100 text-blue-700";
+      case "pending": return "bg-blue-100 text-blue-700";
       case "godkjent": return "bg-green-100 text-green-700";
       case "avvist": return "bg-red-100 text-red-700";
       default: return "bg-gray-100 text-gray-700";
@@ -88,7 +88,7 @@ export default function MineSoknaderPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "sendt": return "Sendt";
+      case "pending": return "Sendt";
       case "godkjent": return "Godkjent";
       case "avvist": return "Avvist";
       case "completed": return "Fullført";

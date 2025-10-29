@@ -83,12 +83,12 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "applicationId and status are required" }, { status: 400 });
     }
 
-    if (!["akseptert", "avslatt"].includes(status)) {
-      return NextResponse.json({ error: "Invalid status. Must be 'akseptert' or 'avslatt'" }, { status: 400 });
+    if (!["accepted", "rejected"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status. Must be 'accepted' or 'rejected'" }, { status: 400 });
     }
 
     // Update application status
-    const application = await updateApplicationStatus(applicationId, status as "akseptert" | "avslatt");
+    const application = await updateApplicationStatus(applicationId, status as "accepted" | "rejected");
     if (!application) {
       return NextResponse.json({ error: "Application not found or update failed" }, { status: 404 });
     }

@@ -217,71 +217,47 @@ export async function createJob(
   }
 }
 
-export async function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'createdAt' | 'employer'>>): Promise<Job | null> {
+export async function deleteJob(id: string, employerId: string): Promise<boolean> {
   try {
     const supabase = getSupabaseServer();
-    const updateData: Record<string, unknown> = {};
 
-    if (updates.title !== undefined) updateData.title = updates.title;
-    if (updates.desc !== undefined) updateData.description = updates.desc;
-    if (updates.category !== undefined) updateData.category = updates.category;
-    if (updates.payNok !== undefined) updateData.pay_nok = updates.payNok;
-    if (updates.durationMinutes !== undefined) updateData.duration_minutes = updates.durationMinutes;
-    if (updates.areaName !== undefined) updateData.area_name = updates.areaName;
-    if (updates.lat !== undefined) updateData.lat = updates.lat;
-    if (updates.lng !== undefined) updateData.lng = updates.lng;
-    if (updates.status !== undefined) updateData.status = updates.status;
-    if (updates.selectedWorkerId !== undefined) updateData.selected_worker_id = updates.selectedWorkerId;
-    if (updates.address !== undefined) updateData.address = updates.address;
-    if (updates.scheduleType !== undefined) updateData.schedule_type = updates.scheduleType;
-    if (updates.startTime !== undefined) updateData.start_time = updates.startTime;
-    if (updates.endTime !== undefined) updateData.end_time = updates.endTime;
-    if (updates.paymentType !== undefined) updateData.payment_type = updates.paymentType;
-    if (updates.requirements !== undefined) updateData.requirements = updates.requirements;
-
-    const { data, error } = await supabase
+    // First check if job exists and belongs to the user
+    const { data: job, error: fetchError } = await supabase
       .from("jobs")
-      .update(updateData)
+      .select("id, employer_id, status")
       .eq("id", id)
-      .select(`
-        *,
-        employer:employer_id(id, navn, email)
-      `)
       .single();
 
-    if (error) {
-      console.error("Error updating job:", error);
-      return null;
+    if (fetchError || !job) {
+      console.error("Job not found:", fetchError);
+      return false;
     }
 
-    return {
-      id: data.id,
-      title: data.title,
-      desc: data.description,
-      category: data.category,
-      payNok: data.pay_nok,
-      durationMinutes: data.duration_minutes,
-      areaName: data.area_name,
-      lat: data.lat,
-      lng: data.lng,
-      createdAt: data.created_at,
-      status: data.status,
-      employerId: data.employer_id,
-      selectedWorkerId: data.selected_worker_id,
-      address: data.address,
-      scheduleType: data.schedule_type,
-      startTime: data.start_time,
-      endTime: data.end_time,
-      paymentType: data.payment_type,
-      requirements: data.requirements,
-      employer: data.employer ? {
-        id: data.employer.id,
-        navn: data.employer.navn,
-        email: data.employer.email,
-      } : undefined,
-    };
+    if (job.employer_id !== employerId) {
+      console.error("Unauthorized: job doesn't belong to user");
+      return false;
+    }
+
+    // Only allow deletion of open jobs (not assigned or completed)
+    if (job.status !== "open") {
+      console.error("Cannot delete job with status:", job.status);
+      return false;
+    }
+
+    // Delete the job
+    const { error: deleteError } = await supabase
+      .from("jobs")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      console.error("Error deleting job:", deleteError);
+      return false;
+    }
+
+    return true;
   } catch (e) {
-    console.error("Exception updating job:", e);
-    return null;
+    console.error("Exception deleting job:", e);
+    return false;
   }
 }

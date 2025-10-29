@@ -33,7 +33,7 @@ export type Job = {
 type Application = {
   id: string;
   workerId: string;
-  status: "sendt" | "godkjent" | "avvist";
+  status: "pending" | "accepted" | "rejected";
   createdAt: string;
   worker?: {
     id: string;
@@ -302,7 +302,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      {app.status === "sendt" && job.status === "open" && (
+                      {app.status === "pending" && job.status === "open" && (
                         <button
                           onClick={() => handleSelectCandidate(app.id)}
                           className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition"
@@ -311,12 +311,12 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                         </button>
                       )}
                       <div className={`px-2 py-1 rounded text-xs ${
-                        app.status === "godkjent" ? "bg-green-100 text-green-700" :
-                        app.status === "avvist" ? "bg-red-100 text-red-700" :
+                        app.status === "accepted" ? "bg-green-100 text-green-700" :
+                        app.status === "rejected" ? "bg-red-100 text-red-700" :
                         "bg-blue-100 text-blue-700"
                       }`}>
-                        {app.status === "godkjent" ? "Godkjent" :
-                         app.status === "avvist" ? "Avvist" : "Sendt"}
+                        {app.status === "accepted" ? "Godkjent" :
+                         app.status === "rejected" ? "Avvist" : "Sendt"}
                       </div>
                     </div>
                   </div>

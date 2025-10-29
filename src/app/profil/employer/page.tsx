@@ -8,9 +8,10 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Building2, Star, Briefcase, TrendingUp, ExternalLink, ArrowLeft } from "lucide-react";
+import { Building2, Star, Briefcase, TrendingUp, ExternalLink, ArrowLeft, Trash2 } from "lucide-react";
 
 type User = {
   id: string;
@@ -71,7 +72,7 @@ type Application = {
   id: string;
   jobId: string;
   workerId: string;
-  status: "sendt" | "akseptert" | "avslatt" | "completed" | "approved" | "pending";
+  status: "pending" | "accepted" | "rejected" | "completed" | "approved";
   createdAt: string;
   updatedAt?: string;
   worker: {
@@ -98,6 +99,8 @@ export default function EmployerProfilePage() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
   
   const [profileForm, setProfileForm] = useState({
     navn: "",
@@ -263,6 +266,27 @@ export default function EmployerProfilePage() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const deleteJob = async (jobId: string) => {
+    try {
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast.success("Jobben ble slettet");
+        setDeleteDialogOpen(false);
+        setJobToDelete(null);
+        loadProfile(); // Reload jobs
+      } else {
+        const error = await res.json();
+        toast.error(`Feil: ${error.error}`);
+      }
+    } catch (err) {
+      console.error("Feil ved sletting av jobb:", err);
+      toast.error("Kunne ikke slette jobben");
     }
   };
 
@@ -506,14 +530,30 @@ export default function EmployerProfilePage() {
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-green-600">{job.payNok} kr</div>
-                      <Badge
-                        variant={job.status === "open" ? "default" : "secondary"}
-                        className="mt-1 text-xs"
-                      >
-                        {job.status === "open" ? "Åpen" : 
-                         job.status === "assigned" ? "Tildelt" : 
-                         job.status === "completed" ? "Fullført" : "Avbrutt"}
-                      </Badge>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge
+                          variant={job.status === "open" ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {job.status === "open" ? "Åpen" : 
+                           job.status === "assigned" ? "Tildelt" : 
+                           job.status === "completed" ? "Fullført" : "Avbrutt"}
+                        </Badge>
+                        {job.status === "open" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setJobToDelete(job);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -554,13 +594,26 @@ export default function EmployerProfilePage() {
                         <span>{job.payNok} kr</span>
                       </div>
                     </div>
-                    <Button
-                      onClick={() => loadApplications(job.id)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Se søknader ({jobApplicationsById[job.id]?.length || 0})
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => loadApplications(job.id)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Se søknader ({jobApplicationsById[job.id]?.length || 0})
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setJobToDelete(job);
+                          setDeleteDialogOpen(true);
+                        }}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
 
                   {selectedJobId === job.id && (
@@ -584,19 +637,17 @@ export default function EmployerProfilePage() {
                                     </span>
                                     <Badge
                                       variant={
-                                        application.status === "sendt" ? "default" :
-                                        application.status === "akseptert" ? "default" :
+                                        application.status === "pending" ? "default" :
+                                        application.status === "accepted" ? "default" :
                                         application.status === "approved" ? "default" :
-                                        application.status === "pending" ? "secondary" :
-                                        application.status === "avslatt" ? "destructive" : "secondary"
+                                        application.status === "rejected" ? "destructive" : "secondary"
                                       }
                                       className="text-xs"
                                     >
-                                      {application.status === "sendt" ? "Sendt" :
-                                       application.status === "akseptert" ? "Akseptert" :
+                                      {application.status === "pending" ? "Sendt" :
+                                       application.status === "accepted" ? "Akseptert" :
                                        application.status === "approved" ? "Godkjent" :
-                                       application.status === "pending" ? "Venter på godkjenning" :
-                                       application.status === "avslatt" ? "Avslått" : "Fullført"}
+                                       application.status === "rejected" ? "Avslått" : "Fullført"}
                                     </Badge>
                                   </div>
 
@@ -702,6 +753,34 @@ export default function EmployerProfilePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Job Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Slett jobb</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              Er du sikker på at du vil slette jobben <strong>&quot;{jobToDelete?.title}&quot;</strong>?
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Denne handlingen kan ikke angres. Jobben og alle søknader vil bli slettet permanent.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Avbryt
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => jobToDelete && deleteJob(jobToDelete.id)}
+            >
+              Slett jobb
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -4,7 +4,7 @@ export type Application = {
   id: string;
   jobId: string;
   workerId: string;
-  status: "sendt" | "akseptert" | "avslatt" | "completed";
+  status: "pending" | "accepted" | "rejected" | "completed";
   createdAt: string;
   updatedAt?: string;
   job?: {
@@ -137,7 +137,7 @@ export async function createApplication(jobId: string, workerId: string): Promis
       .single();
 
     const autoApprove = employerData?.auto_approve_applications ?? false;
-    const initialStatus = autoApprove ? "akseptert" : "sendt";
+    const initialStatus = autoApprove ? "accepted" : "pending";
 
     const { data, error } = await supabase
       .from("applications")
@@ -183,7 +183,7 @@ export async function createApplication(jobId: string, workerId: string): Promis
   }
 }
 
-export async function updateApplicationStatus(applicationId: string, status: "sendt" | "akseptert" | "avslatt" | "completed"): Promise<Application | null> {
+export async function updateApplicationStatus(applicationId: string, status: "pending" | "accepted" | "rejected" | "completed"): Promise<Application | null> {
   try {
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
