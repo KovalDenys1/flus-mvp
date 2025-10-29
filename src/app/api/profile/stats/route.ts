@@ -78,11 +78,10 @@ export async function GET() {
         stats.acceptedJobs = applications.filter(a => a.status === "accepted").length;
 
         // Calculate completed jobs and earnings for worker
-        // For now, count all accepted applications as completed jobs
-        // TODO: Add proper job completion tracking
-        const acceptedJobs = applications.filter(a => a.status === "accepted");
-        stats.completedJobsWorker = acceptedJobs.length;
-        stats.totalEarnings = acceptedJobs.reduce((sum, app) => {
+        // Count only completed applications
+        const completedJobs = applications.filter(a => a.status === "completed");
+        stats.completedJobsWorker = completedJobs.length;
+        stats.totalEarnings = completedJobs.reduce((sum, app) => {
           const job = Array.isArray(app.jobs) ? app.jobs[0] : app.jobs;
           return sum + (job?.pay_nok || 0);
         }, 0);

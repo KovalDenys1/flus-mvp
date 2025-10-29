@@ -11,9 +11,10 @@ type Props = {
     payNok: number; durationMinutes: number; areaName: string; lat: number; lng: number;
   } | null;
   onApply?: (jobId: string) => void;
+  hasApplied?: boolean;
 };
 
-export function JobDetailsDialog({ open, onOpenChange, job, onApply }: Props) {
+export function JobDetailsDialog({ open, onOpenChange, job, onApply, hasApplied = false }: Props) {
   if (!job) return null;
   const mapSrc = googleMapsEmbedUrl(job.lat, job.lng, job.title);
   return (
@@ -43,10 +44,15 @@ export function JobDetailsDialog({ open, onOpenChange, job, onApply }: Props) {
         <div className="flex gap-2 w-full mt-4">
           {onApply && (
             <button
-              className="w-1/2 px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+              className={`w-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 ${
+                hasApplied
+                  ? "bg-green-500 text-white cursor-default"
+                  : "bg-orange-500 text-white hover:bg-orange-600"
+              }`}
               onClick={() => onApply(job.id)}
+              disabled={hasApplied}
             >
-              Søk
+              {hasApplied ? "✓ Søknad sendt" : "Søk"}
             </button>
           )}
           <a

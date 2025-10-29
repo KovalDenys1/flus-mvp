@@ -113,6 +113,15 @@ export default function EmployerProfilePage() {
   useEffect(() => {
     loadProfile();
 
+    // Check if we need to refresh stats (e.g., after creating a new job)
+    if (typeof window !== 'undefined') {
+      const shouldRefresh = sessionStorage.getItem('refreshEmployerStats');
+      if (shouldRefresh === 'true') {
+        sessionStorage.removeItem('refreshEmployerStats');
+        // Stats will be refreshed by loadProfile() above
+      }
+    }
+
     // Listen for viewMode changes from Navbar
     const handleViewModeChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ viewMode: "worker" | "employer" }>;
@@ -279,6 +288,10 @@ export default function EmployerProfilePage() {
         toast.success("Jobben ble slettet");
         setDeleteDialogOpen(false);
         setJobToDelete(null);
+        // Set flag to refresh stats on other pages
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('refreshEmployerStats', 'true');
+        }
         loadProfile(); // Reload jobs
       } else {
         const error = await res.json();

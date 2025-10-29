@@ -28,8 +28,9 @@ type User = {
 };
 
 type Stats = {
-  totalApplications: number;
-  acceptedApplications: number;
+  totalApplicationsSent: number;
+  acceptedJobs: number;
+  completedJobsWorker: number;
   totalEarnings: number;
   totalReviews: number;
   averageRating: number;
@@ -119,8 +120,8 @@ export default function WorkerProfilePage() {
             .eq('id', application.job_id)
             .single();
           
-          const statusText = application.status === 'akseptert' ? 'godkjent' : 
-                           application.status === 'avslatt' ? 'avslått' : 'oppdatert';
+          const statusText = application.status === 'accepted' ? 'godkjent' : 
+                           application.status === 'rejected' ? 'avslått' : 'oppdatert';
           toast.success(`Din søknad på "${job?.title}" er ${statusText}!`);
           // Reload stats
           loadProfile();
@@ -133,6 +134,41 @@ export default function WorkerProfilePage() {
       supabase.removeChannel(channel);
     };
   }, [router, user]);
+
+  // Setup realtime notifications after user is loaded
+  useEffect(() => {
+    if (!user) return;
+
+    const supabase = getSupabaseBrowser();
+    const channel = supabase
+      .channel('applications-updates')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'applications'
+      }, async (payload) => {
+        const application = payload.new as any;
+        if (application.applicant_id === user.id) {
+          // Fetch job title
+          const { data: job } = await supabase
+            .from('jobs')
+            .select('title')
+            .eq('id', application.job_id)
+            .single();
+          
+          const statusText = application.status === 'accepted' ? 'godkjent' : 
+                           application.status === 'rejected' ? 'avslått' : 'oppdatert';
+          toast.success(`Din søknad på "${job?.title}" er ${statusText}!`);
+          // Reload stats
+          loadProfile();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]); // Now depends on user, but only runs when user is loaded
 
   const loadProfile = async () => {
     try {
@@ -434,12 +470,12 @@ export default function WorkerProfilePage() {
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-3xl font-bold text-blue-600">{stats.totalApplications}</div>
+                <div className="text-3xl font-bold text-blue-600">{stats.totalApplicationsSent}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
-                <div className="text-sm text-gray-600 mt-1">Godkjente jobber</div>
+                <div className="text-3xl font-bold text-green-600">{stats.completedJobsWorker}</div>
+                <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">
                 <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
@@ -561,13 +597,13 @@ export default function WorkerProfilePage() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Fullføringsrate:</span>
                         <span className="text-2xl font-bold text-green-600">
-                          {stats.totalApplications > 0
-                            ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
+                          {stats.totalApplicationsSent > 0
+                            ? Math.round((stats.completedJobsWorker / stats.totalApplicationsSent) * 100)
                             : 0}%
                         </span>
                       </div>
                       <div className="text-sm text-gray-600">
-                        {stats.acceptedApplications} av {stats.totalApplications} søknader
+                        {stats.completedJobsWorker} av {stats.totalApplicationsSent} søknader
                       </div>
                     </div>
                   </>

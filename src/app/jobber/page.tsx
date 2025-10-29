@@ -78,6 +78,19 @@ export default function Page() {
       .catch(() => setIsLoggedIn(false));
   }, []);
 
+  // Load user's existing applications
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetch("/api/applications")
+        .then((r) => r.json())
+        .then((d) => {
+          const appliedIds = new Set<string>((d.applications || []).map((app: any) => String(app.jobId)));
+          setAppliedJobIds(appliedIds);
+        })
+        .catch((e) => console.error("Kunne ikke hente søknader:", e));
+    }
+  }, [isLoggedIn]);
+
   const categories = useMemo(() => {
     const s = new Set<string>();
     jobs.forEach((j) => s.add(j.category));
@@ -351,6 +364,7 @@ export default function Page() {
         onOpenChange={(v) => !v && setOpenJob(null)}
         job={openJob}
         onApply={openJob ? () => apply(openJob.id) : undefined}
+        hasApplied={openJob ? appliedJobIds.has(openJob.id) : false}
       />
     </div>
   );

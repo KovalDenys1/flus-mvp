@@ -132,6 +132,10 @@ export default function CreateJobPage() {
       if (!res.ok) throw new Error(data.error || "Kunne ikke opprette jobb");
 
       toast.success("Jobb opprettet!");
+      // Set flag to refresh employer profile stats on next visit
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('refreshEmployerStats', 'true');
+      }
       // Redirect to the newly created job's detail page
       if (data.job?.id) {
         router.push(`/jobber/${data.job.id}`);
