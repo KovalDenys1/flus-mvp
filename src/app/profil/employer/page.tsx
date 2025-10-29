@@ -193,7 +193,7 @@ export default function EmployerProfilePage() {
         setRecentJobs(jobs);
 
         // Load applications for open jobs
-        const openJobs = jobs.filter(job => job.status === "open");
+        const openJobs = jobs.filter((job: Job) => job.status === "open");
         for (const job of openJobs) {
           const appsRes = await fetch(`/api/jobs/${job.id}/applications`);
           if (appsRes.ok) {
