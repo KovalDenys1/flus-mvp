@@ -133,7 +133,15 @@ export default function EmployerProfilePage() {
 
     window.addEventListener("viewModeChanged", handleViewModeChange);
 
-    // Setup realtime notifications for new applications
+    return () => {
+      window.removeEventListener("viewModeChanged", handleViewModeChange);
+    };
+  }, [router]); // Removed 'user' from dependencies
+
+  // Separate useEffect for realtime notifications that depends on user
+  useEffect(() => {
+    if (!user) return;
+
     const supabase = getSupabaseBrowser();
     const channel = supabase
       .channel('applications-changes')
@@ -142,7 +150,6 @@ export default function EmployerProfilePage() {
         schema: 'public',
         table: 'applications'
       }, async (payload) => {
-        if (!user) return;
         const application = payload.new as any;
         // Fetch job to check if it's for this employer
         const { data: job } = await supabase
@@ -160,10 +167,9 @@ export default function EmployerProfilePage() {
       .subscribe();
 
     return () => {
-      window.removeEventListener("viewModeChanged", handleViewModeChange);
       supabase.removeChannel(channel);
     };
-  }, [router, user]);
+  }, [user]); // Only depends on user
 
   const loadProfile = async () => {
     try {

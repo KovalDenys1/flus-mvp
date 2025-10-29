@@ -101,41 +101,12 @@ export default function WorkerProfilePage() {
 
     window.addEventListener("viewModeChanged", handleViewModeChange);
 
-    // Setup realtime notifications for application status updates
-    const supabase = getSupabaseBrowser();
-    const channel = supabase
-      .channel('applications-updates')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'applications'
-      }, async (payload) => {
-        if (!user) return;
-        const application = payload.new as any;
-        if (application.applicant_id === user.id) {
-          // Fetch job title
-          const { data: job } = await supabase
-            .from('jobs')
-            .select('title')
-            .eq('id', application.job_id)
-            .single();
-          
-          const statusText = application.status === 'accepted' ? 'godkjent' : 
-                           application.status === 'rejected' ? 'avslått' : 'oppdatert';
-          toast.success(`Din søknad på "${job?.title}" er ${statusText}!`);
-          // Reload stats
-          loadProfile();
-        }
-      })
-      .subscribe();
-
     return () => {
       window.removeEventListener("viewModeChanged", handleViewModeChange);
-      supabase.removeChannel(channel);
     };
-  }, [router, user]);
+  }, [router]); // Removed 'user' from dependencies
 
-  // Setup realtime notifications after user is loaded
+  // Separate useEffect for realtime notifications that depends on user
   useEffect(() => {
     if (!user) return;
 
@@ -168,7 +139,7 @@ export default function WorkerProfilePage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]); // Now depends on user, but only runs when user is loaded
+  }, [user]); // Only depends on user
 
   const loadProfile = async () => {
     try {
