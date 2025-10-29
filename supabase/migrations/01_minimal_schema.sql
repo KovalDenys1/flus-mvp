@@ -213,6 +213,21 @@ CREATE INDEX IF NOT EXISTS idx_reviews_job_id ON reviews(job_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
 
 -- =============================================================================
+-- SESSIONS TABLE
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Sessions indexes
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+
+-- =============================================================================
 -- ENABLE RLS ON ALL TABLES (except users - handled separately)
 -- =============================================================================
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
@@ -225,6 +240,7 @@ ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cv_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
 -- =============================================================================
 -- PERMISSIVE RLS POLICIES (security enforced at API layer)
@@ -259,6 +275,9 @@ CREATE POLICY "skills_all_policy" ON skills FOR ALL USING (true);
 DROP POLICY IF EXISTS "reviews_all_policy" ON reviews;
 CREATE POLICY "reviews_all_policy" ON reviews FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "sessions_all_policy" ON sessions;
+CREATE POLICY "sessions_all_policy" ON sessions FOR ALL USING (true);
+
 -- =============================================================================
 -- FUNCTIONS & TRIGGERS
 -- =============================================================================
@@ -289,6 +308,9 @@ CREATE TRIGGER update_cv_entries_updated_at BEFORE UPDATE ON cv_entries FOR EACH
 
 DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
 CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON skills FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_sessions_updated_at ON sessions;
+CREATE TRIGGER update_sessions_updated_at BEFORE UPDATE ON sessions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =============================================================================
 -- SEED ACHIEVEMENTS
