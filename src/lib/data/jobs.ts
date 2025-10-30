@@ -261,3 +261,97 @@ export async function deleteJob(id: string, employerId: string): Promise<boolean
     return false;
   }
 }
+
+export async function updateJob(
+  id: string,
+  employerId: string,
+  updates: Partial<{
+    title: string;
+    description: string;
+    category: string;
+    payNok: number;
+    durationMinutes: number;
+    areaName: string;
+    address: string;
+    lat: number;
+    lng: number;
+    scheduleType: "flexible" | "fixed" | "deadline";
+    startTime: string;
+    endTime: string;
+    paymentType: "fixed" | "hourly";
+    requirements: string;
+  }>
+): Promise<Job | null> {
+  try {
+    const supabase = getSupabaseServer();
+
+    // First check if job exists and belongs to the user
+    const { data: existingJob, error: fetchError } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !existingJob) {
+      console.error("Job not found:", fetchError);
+      return null;
+    }
+
+    if (existingJob.employer_id !== employerId) {
+      console.error("Unauthorized: job doesn't belong to user");
+      return null;
+    }
+
+    // Only allow updates for open jobs
+    if (existingJob.status !== "open") {
+      console.error("Cannot update job with status:", existingJob.status);
+      return null;
+    }
+
+    // Update the job
+    const { data, error: updateError } = await supabase
+      .from("jobs")
+      .update(updates)
+      .eq("id", id)
+      .select(`
+        *,
+        employer:employer_id(id, navn, email)
+      `)
+      .single();
+
+    if (updateError) {
+      console.error("Error updating job:", updateError);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      desc: data.description,
+      category: data.category,
+      payNok: data.pay_nok,
+      durationMinutes: data.duration_minutes,
+      areaName: data.area_name,
+      lat: data.lat,
+      lng: data.lng,
+      createdAt: data.created_at,
+      status: data.status,
+      employerId: data.employer_id,
+      selectedWorkerId: data.selected_worker_id,
+      address: data.address,
+      scheduleType: data.schedule_type,
+      startTime: data.start_time,
+      endTime: data.end_time,
+      paymentType: data.payment_type,
+      requirements: data.requirements,
+      employer: data.employer ? {
+        id: data.employer.id,
+        navn: data.employer.navn,
+        email: data.employer.email,
+      } : undefined,
+    };
+  } catch (e) {
+    console.error("Exception updating job:", e);
+    return null;
+  }
+}

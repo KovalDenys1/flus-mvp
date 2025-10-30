@@ -13,7 +13,6 @@ import AuthGuard from "@/components/AuthGuard";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co'
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key'
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 type Job = {
   id: string;
@@ -46,6 +45,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   const [job, setJob] = useState<Job | null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [supabaseClient, setSupabaseClient] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -56,8 +56,18 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     fetch("/api/auth/me")
       .then(res => res.json())
       .then(data => {
-        if (data.user) setCurrentUserId(data.user.id);
-        else setError("Du må være logget inn for å se denne samtalen.");
+        if (data.user) {
+          setCurrentUserId(data.user.id);
+          // Initialize authenticated Supabase client for realtime
+          const authSupabase = createClient(supabaseUrl, supabaseKey, {
+            auth: {
+              persistSession: false
+            }
+          });
+          setSupabaseClient(authSupabase);
+        } else {
+          setError("Du må være logget inn for å se denne samtalen.");
+        }
       });
   }, []);
 
@@ -97,9 +107,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
 
   // Realtime subscription for new messages
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !supabaseClient) return;
 
-    const channel = supabase
+    const channel = supabaseClient
       .channel(`messages:${conversationId}`)
       .on(
         'postgres_changes',
@@ -109,7 +119,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        (payload: any) => {
           const newMessage = payload.new as Message;
           setMessages(prev => {
             // Check if message is already in the list
@@ -123,9 +133,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabaseClient.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, supabaseClient]);
 
   useEffect(() => scrollToBottom(), [messages]);
 
@@ -140,8 +150,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         body: JSON.stringify({ text: newMessage }),
       });
       if (!res.ok) throw new Error("Kunne ikke sende melding");
-      const data = await res.json();
-      setMessages(prev => [...prev, data.message]);
+      // Don't add message to state here - realtime will handle it
       setNewMessage("");
     } catch {
       toast.error("Kunne ikke sende melding.");
@@ -183,8 +192,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         throw new Error("Kunne ikke sende bilde");
       }
 
-      const messageData = await messageRes.json();
-      setMessages(prev => [...prev, messageData.message]);
+      // Don't add message to state here - realtime will handle it
       toast.success("Bilde sendt!");
     } catch (error) {
       console.error("Feil ved opplasting av bilde:", error);

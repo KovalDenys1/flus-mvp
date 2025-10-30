@@ -46,10 +46,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Decode state to get role and birthYear
+    // Decode state to get role
     const decodedState = JSON.parse(Buffer.from(state, 'base64').toString());
     const role = decodedState.role || 'worker';
-    const birthYear = decodedState.birthYear;
 
     // Exchange authorization code for access token
     const tokenResponse = await fetch(VIPPS_TOKEN_URL, {
@@ -106,31 +105,14 @@ export async function GET(req: NextRequest) {
 
     let userId: string | null = existing?.id ?? null;
 
-    // If user doesn't exist, create new one with selected role and birth year
+    // If user doesn't exist, create new one with selected role
     if (!userId) {
-      const userData: Record<string, string | number | undefined> = {
+      const userData = {
         email,
         role,
         navn: userInfo.name,
         telefon: userInfo.phone_number,
       };
-
-      // Only add birth_year if the column exists
-      if (birthYear) {
-        try {
-          // Check if birth_year column exists by trying to select it
-          const { error: checkError } = await supabase
-            .from("users")
-            .select("birth_year")
-            .limit(1);
-
-          if (!checkError) {
-            userData.birth_year = parseInt(birthYear);
-          }
-        } catch {
-          // Column doesn't exist, skip birth_year
-        }
-      }
 
       const { data: inserted, error } = await supabase
         .from("users")
@@ -145,27 +127,10 @@ export async function GET(req: NextRequest) {
 
       userId = inserted?.id ?? null;
     } else {
-      // Update existing user with new role and birth year if provided
-      const updateData: Record<string, string | number> = { role };
-      if (birthYear) {
-        try {
-          // Check if birth_year column exists
-          const { error: checkError } = await supabase
-            .from("users")
-            .select("birth_year")
-            .limit(1);
-
-          if (!checkError) {
-            updateData.birth_year = parseInt(birthYear);
-          }
-        } catch {
-          // Column doesn't exist, skip birth_year
-        }
-      }
-      
+      // Update existing user with new role
       await supabase
         .from("users")
-        .update(updateData)
+        .update({ role })
         .eq("id", userId);
     }
 

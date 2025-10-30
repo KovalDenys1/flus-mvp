@@ -6,21 +6,10 @@ const VIPPS_AUTH_URL = "https://api.vipps.no/access-management-1.0/access/oauth2
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const role = searchParams.get('role') || 'worker';
-  const birthYear = searchParams.get('birthYear');
-
-  // Validate age if provided
-  if (birthYear) {
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - parseInt(birthYear);
-    if (age < 18) {
-      return NextResponse.redirect(new URL('/register?error=age', req.url));
-    }
-  }
 
   const state = JSON.stringify({ 
     timestamp: Date.now(),
-    role,
-    birthYear: birthYear || null
+    role
   });
 
   // Vipps authorization URL parameters

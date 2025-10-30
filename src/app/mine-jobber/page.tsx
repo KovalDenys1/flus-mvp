@@ -5,12 +5,14 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import AuthGuard from "@/components/AuthGuard";
 import ReviewDialog from "@/components/ReviewDialog";
 
 type Job = {
   id: string;
   title: string;
+  desc: string;
   category: string;
   payNok: number;
   paymentType: "fixed" | "hourly";
@@ -24,6 +26,11 @@ type Job = {
     navn: string;
     email: string;
   };
+  durationMinutes: number;
+  address?: string;
+  startTime?: string;
+  endTime?: string;
+  requirements?: string;
 };
 
 export default function MyJobsPage() {
@@ -32,6 +39,24 @@ export default function MyJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ jobId: string; workerId: string; workerName: string } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ jobId: string; jobTitle: string } | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Job | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    payNok: "",
+    durationMinutes: "",
+    areaName: "",
+    address: "",
+    scheduleType: "flexible" as "flexible" | "fixed" | "deadline",
+    startTime: "",
+    endTime: "",
+    paymentType: "fixed" as "fixed" | "hourly",
+    requirements: "",
+  });
 
   useEffect(() => {
     async function fetchMyJobs() {
@@ -99,22 +124,169 @@ export default function MyJobsPage() {
     setReviewDialogOpen(true);
   };
 
+  const openDeleteDialog = (jobId: string, jobTitle: string) => {
+    setDeleteTarget({ jobId, jobTitle });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteJob = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      const res = await fetch(`/api/my-jobs/${deleteTarget.jobId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Kunne ikke slette jobb");
+      }
+
+      // Remove job from state
+      setJobs(prev => prev.filter(job => job.id !== deleteTarget.jobId));
+      toast.success(`Jobb "${deleteTarget.jobTitle}" slettet`);
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      toast.error("Kunne ikke slette jobb");
+    }
+  };
+
+  const openEditDialog = (job: Job) => {
+    setEditTarget(job);
+    setEditForm({
+      title: job.title,
+      description: job.desc,
+      category: job.category,
+      payNok: job.payNok.toString(),
+      durationMinutes: job.durationMinutes.toString(),
+      areaName: job.areaName,
+      address: job.address || "",
+      scheduleType: job.scheduleType || "flexible",
+      startTime: job.startTime || "",
+      endTime: job.endTime || "",
+      paymentType: job.paymentType || "fixed",
+      requirements: job.requirements || "",
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditJob = async () => {
+    if (!editTarget) return;
+
+    try {
+      const updates = {
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        category: editForm.category,
+        pay_nok: parseInt(editForm.payNok),
+        duration_minutes: parseInt(editForm.durationMinutes),
+        area_name: editForm.areaName,
+        address: editForm.address.trim() || null,
+        schedule_type: editForm.scheduleType,
+        start_time: editForm.startTime || null,
+        end_time: editForm.endTime || null,
+        payment_type: editForm.paymentType,
+        requirements: editForm.requirements.trim() || null,
+      };
+
+      const res = await fetch(`/api/my-jobs/${editTarget.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Kunne ikke oppdatere jobb");
+      }
+
+      const data = await res.json();
+      
+      // Update job in state
+      setJobs(prev => prev.map(job => 
+        job.id === editTarget.id ? {
+          ...job,
+          title: data.job.title,
+          desc: data.job.desc,
+          category: data.job.category,
+          payNok: data.job.payNok,
+          durationMinutes: data.job.durationMinutes,
+          areaName: data.job.areaName,
+          address: data.job.address,
+          scheduleType: data.job.scheduleType,
+          startTime: data.job.startTime,
+          endTime: data.job.endTime,
+          paymentType: data.job.paymentType,
+          requirements: data.job.requirements,
+        } : job
+      ));
+
+      toast.success("Jobb oppdatert!");
+      setEditDialogOpen(false);
+      setEditTarget(null);
+    } catch (error) {
+      console.error("Error updating job:", error);
+      toast.error("Kunne ikke oppdatere jobb");
+    }
+  };
+
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto py-10 px-4">
-        <div className="text-center py-20">Laster...</div>
+      <div className="max-w-6xl mx-auto py-12 px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Mine jobber</h1>
+            <p className="text-lg text-gray-600">Administrer jobbene du har publisert</p>
+          </div>
+        </div>
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="h-7 bg-gray-200 rounded w-3/4 mb-3"></div>
+                    <div className="flex gap-2 mb-2">
+                      <div className="h-6 bg-gray-200 rounded w-20"></div>
+                      <div className="h-6 bg-gray-200 rounded w-16"></div>
+                      <div className="h-6 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="h-8 bg-gray-200 rounded w-20 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  </div>
+                  <div className="h-8 bg-gray-200 rounded w-24"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-5xl mx-auto py-10 px-4">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-semibold mb-2 text-red-600">Feil</h3>
-            <p className="text-gray-600">{error}</p>
+      <div className="max-w-6xl mx-auto py-12 px-4">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="py-16 text-center">
+            <div className="text-8xl mb-6">⚠️</div>
+            <h3 className="text-2xl font-bold text-red-900 mb-3">Feil</h3>
+            <p className="text-red-700 mb-6 max-w-md mx-auto">{error}</p>
+            <p className="text-sm text-red-600">
+              Det kan hende du ikke er logget inn som arbeidsgiver.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -123,90 +295,131 @@ export default function MyJobsPage() {
 
   return (
     <AuthGuard requireAuth={true}>
-      <div className="max-w-5xl mx-auto py-10 px-4">
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-6xl mx-auto py-12 px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Mine jobber</h1>
-            <p className="text-gray-600 mt-1">Administrer jobbene du har publisert</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Mine jobber</h1>
+            <p className="text-lg text-gray-600">Administrer jobbene du har publisert</p>
           </div>
           <Link
             href="/jobber/ny"
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            + Ny jobb
+            <span className="text-xl">+</span>
+            Ny jobb
           </Link>
         </div>
 
         {jobs.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <div className="text-6xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold mb-2">Ingen jobber ennå</h3>
-              <p className="text-gray-600 mb-6">
-                Du har ikke publisert noen jobber ennå. Kom i gang ved å opprette din første jobb!
+          <Card className="border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+            <CardContent className="py-16 text-center">
+              <div className="text-8xl mb-6">📋</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Ingen jobber ennå</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+                Du har ikke publisert noen jobber ennå. Kom i gang ved å opprette din første jobb og finn kvalifiserte arbeidere!
               </p>
               <Link
                 href="/jobber/ny"
-                className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg"
               >
+                <span className="text-2xl">+</span>
                 Opprett første jobb
               </Link>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition">
-                <CardHeader>
+              <Link key={job.id} href={`/jobber/${job.id}`}>
+                <Card className="hover:shadow-lg hover:shadow-orange-100/50 transition-all duration-200 cursor-pointer border-l-4 border-l-transparent hover:border-l-orange-400 bg-gradient-to-r from-white to-orange-50/30">
+                <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <Badge variant="outline">{job.category}</Badge>
-                        <Badge className={getStatusColor(job.status)}>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-gray-900 hover:text-orange-600 transition-colors">{job.title}</CardTitle>
+                      <div className="flex items-center gap-2 mt-3 flex-wrap">
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">{job.category}</Badge>
+                        <Badge className={`${getStatusColor(job.status)} font-medium`}>
                           {job.status === "open" ? "Åpen" : job.status === "in_progress" ? "Pågår" : "Fullført"}
                         </Badge>
-                        <span className="text-sm text-gray-500">📍 {job.areaName}</span>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <span>📍</span>
+                          {job.areaName}
+                        </span>
                       </div>
                     </div>
                     <div className="text-left sm:text-right">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-3xl font-bold text-green-600 mb-1">
                         {job.payNok} kr
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-sm text-gray-500 font-medium">
                         {job.paymentType === "hourly" ? "per time" : "fast pris"}
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <span>{getScheduleLabel(job.scheduleType)}</span>
-                      <span>•</span>
-                      <span>Opprettet {new Date(job.createdAt).toLocaleDateString('no-NO')}</span>
+                <CardContent className="pt-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+                        {getScheduleLabel(job.scheduleType)}
+                      </span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-500">
+                        Opprettet {new Date(job.createdAt).toLocaleDateString('no-NO')}
+                      </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       {job.status === "completed" && job.selectedWorker && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openReviewDialog(job.id, job.selectedWorker!.id, job.selectedWorker!.navn)}
-                          className="text-green-600 border-green-300 hover:bg-green-50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openReviewDialog(job.id, job.selectedWorker!.id, job.selectedWorker!.navn);
+                          }}
+                          className="text-green-600 border-green-300 hover:bg-green-50 hover:border-green-400 transition-colors font-medium"
                         >
-                          Gi vurdering
+                          ⭐ Gi vurdering
                         </Button>
                       )}
-                      <Link
-                        href={`/jobber/${job.id}`}
-                        className="text-orange-600 hover:text-orange-700 font-semibold text-sm"
-                      >
-                        Se detaljer →
-                      </Link>
+                      {job.status === "open" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openEditDialog(job);
+                            }}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-colors font-medium"
+                          >
+                            ✏️ Rediger
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openDeleteDialog(job.id, job.title);
+                            }}
+                            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 transition-colors font-medium"
+                          >
+                            🗑️ Slett jobb
+                          </Button>
+                        </>
+                      )}
+                        <span className="text-orange-600 hover:text-orange-700 font-semibold text-sm flex items-center gap-1 transition-colors">
+                          Se detaljer
+                          <span className="text-lg">→</span>
+                        </span>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
@@ -221,6 +434,163 @@ export default function MyJobsPage() {
         submitButtonText="Send vurdering"
         revieweeName={reviewTarget?.workerName || ""}
       />
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialogOpen && deleteTarget && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🗑️</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Slett jobb</h3>
+              <p className="text-gray-600 mb-6">
+                Er du sikker på at du vil slette jobben &ldquo;{deleteTarget.jobTitle}&rdquo;?
+                Denne handlingen kan ikke angres.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteDialogOpen(false);
+                    setDeleteTarget(null);
+                  }}
+                  className="px-6"
+                >
+                  Avbryt
+                </Button>
+                <Button
+                  onClick={handleDeleteJob}
+                  className="px-6 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Slett jobb
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Job Dialog */}
+      {editDialogOpen && editTarget && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Rediger jobb</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Jobbtittel</label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Beskrivelse</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                <input
+                  type="text"
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Betaling (NOK)</label>
+                  <input
+                    type="number"
+                    value={editForm.payNok}
+                    onChange={(e) => setEditForm({ ...editForm, payNok: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Varighet (minutter)</label>
+                  <input
+                    type="number"
+                    value={editForm.durationMinutes}
+                    onChange={(e) => setEditForm({ ...editForm, durationMinutes: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Område</label>
+                <input
+                  type="text"
+                  value={editForm.areaName}
+                  onChange={(e) => setEditForm({ ...editForm, areaName: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                <input
+                  type="text"
+                  value={editForm.address}
+                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Starttid</label>
+                  <input
+                    type="time"
+                    value={editForm.startTime}
+                    onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sluttid</label>
+                  <input
+                    type="time"
+                    value={editForm.endTime}
+                    onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Krav til arbeidstaker</label>
+                <textarea
+                  value={editForm.requirements}
+                  onChange={(e) => setEditForm({ ...editForm, requirements: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  rows={2}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditDialogOpen(false);
+                  setEditTarget(null);
+                }}
+                className="px-6"
+              >
+                Avbryt
+              </Button>
+              <Button
+                onClick={handleEditJob}
+                className="px-6 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Oppdater jobb
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthGuard>
   );
 }

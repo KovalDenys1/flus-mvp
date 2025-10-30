@@ -86,11 +86,12 @@ CREATE TABLE IF NOT EXISTS messages (
   sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'photo', 'system')),
   text_content TEXT,
+  photo_url TEXT,
   system_event TEXT CHECK (system_event IN ('work_started', 'work_completed', 'work_approved', 'work_rejected')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT message_content_check CHECK (
     (message_type = 'text' AND text_content IS NOT NULL) OR
-    (message_type = 'photo') OR
+    (message_type = 'photo' AND photo_url IS NOT NULL) OR
     (message_type = 'system' AND system_event IS NOT NULL)
   )
 );

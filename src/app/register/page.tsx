@@ -2,29 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function Page() {
   const [role, setRole] = useState<"worker" | "employer">("worker");
-  const [birthYear, setBirthYear] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!birthYear) {
-      toast.error("Vennligst oppgi fødselsår");
-      return;
-    }
-
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - parseInt(birthYear);
-
-    if (age < 18) {
-      toast.error("Du må være minst 18 år gammel for å bruke FLUS");
-      return;
-    }
-
     if (!acceptTerms) {
       toast.error("Du må godta vilkårene for å registrere deg");
       return;
@@ -32,7 +17,7 @@ export default function Page() {
 
     setLoading(true);
     try {
-      const vippsHref = `/api/auth/vipps/start?role=${role}&birthYear=${birthYear}`;
+      const vippsHref = `/api/auth/vipps/start?role=${role}`;
       window.location.href = vippsHref;
     } catch {
       toast.error("Noe gikk galt. Prøv igjen.");
@@ -82,22 +67,6 @@ export default function Page() {
               </div>
             </label>
           </div>
-        </div>
-
-        {/* Age Verification */}
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700">
-            Fødselsår * <span className="text-xs text-gray-500">(Du må være minst 18 år)</span>
-          </label>
-          <Input
-            type="number"
-            value={birthYear}
-            onChange={(e) => setBirthYear(e.target.value)}
-            placeholder="2005"
-            min="1900"
-            max={new Date().getFullYear()}
-            required
-          />
         </div>
 
         {/* Terms and Conditions */}

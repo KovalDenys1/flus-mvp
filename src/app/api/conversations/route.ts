@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         job_id: jobId,
         applicant_id: workerId,
-        status: 'sendt'
+        status: 'pending'
       })
     });
 
