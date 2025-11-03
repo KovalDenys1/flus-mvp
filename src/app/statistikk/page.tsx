@@ -13,6 +13,8 @@ type Stats = {
   completedJobs: number;
   totalApplications: number;
   acceptedApplications: number;
+  rejectedApplications: number;
+  pendingApplications: number;
   totalEarnings: number;
   totalReviews: number;
   averageRating: number;
@@ -103,6 +105,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
                       <div className="text-sm text-gray-600">Totale jobber opprettet</div>
+                      <div className="text-xs text-gray-500 mt-1">Gjennom hele tiden</div>
                     </div>
                     <Briefcase className="w-8 h-8 text-blue-600" />
                   </div>
@@ -115,6 +118,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-orange-600">{stats.activeJobs}</div>
                       <div className="text-sm text-gray-600">Aktive jobber</div>
+                      <div className="text-xs text-gray-500 mt-1">Åpne eller pågående</div>
                     </div>
                     <TrendingUp className="w-8 h-8 text-orange-600" />
                   </div>
@@ -127,6 +131,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-green-600">{stats.completedJobs}</div>
                       <div className="text-sm text-gray-600">Fullførte jobber</div>
+                      <div className="text-xs text-gray-500 mt-1">Alle godkjente jobber</div>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
@@ -139,6 +144,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-purple-600">{stats.totalApplications}</div>
                       <div className="text-sm text-gray-600">Totale søknader mottatt</div>
+                      <div className="text-xs text-gray-500 mt-1">Fra alle arbeidstakere</div>
                     </div>
                     <Users className="w-8 h-8 text-purple-600" />
                   </div>
@@ -151,8 +157,39 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-teal-600">{stats.acceptedApplications}</div>
                       <div className="text-sm text-gray-600">Godkjente søknader</div>
+                      <div className="text-xs text-gray-500 mt-1">Akseptert eller fullført</div>
                     </div>
                     <CheckCircle className="w-8 h-8 text-teal-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-amber-600">{stats.pendingApplications}</div>
+                      <div className="text-sm text-gray-600">Ventende søknader</div>
+                      <div className="text-xs text-gray-500 mt-1">Venter på svar</div>
+                    </div>
+                    <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-red-600">{stats.rejectedApplications}</div>
+                      <div className="text-sm text-gray-600">Avviste søknader</div>
+                      <div className="text-xs text-gray-500 mt-1">Ikke valgt</div>
+                    </div>
+                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
                 </CardContent>
               </Card>
@@ -174,6 +211,26 @@ export default function StatistikkPage() {
                       </div>
                     </div>
                     <Star className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Success rate card */}
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-indigo-600">
+                        {stats.totalApplications > 0 
+                          ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
+                          : 0}%
+                      </div>
+                      <div className="text-sm text-gray-600">Akseptrate</div>
+                      <div className="text-xs text-gray-500 mt-1">Godkjente av totalt mottatte</div>
+                    </div>
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                   </div>
                 </CardContent>
               </Card>
@@ -195,6 +252,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-blue-600">{stats.totalApplications}</div>
                       <div className="text-sm text-gray-600">Søknader sendt</div>
+                      <div className="text-xs text-gray-500 mt-1">Totalt alle søknader</div>
                     </div>
                     <Users className="w-8 h-8 text-blue-600" />
                   </div>
@@ -207,6 +265,7 @@ export default function StatistikkPage() {
                     <div>
                       <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
                       <div className="text-sm text-gray-600">Godkjente jobber</div>
+                      <div className="text-xs text-gray-500 mt-1">Aksepterte eller fullførte</div>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
@@ -217,10 +276,54 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
+                      <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
+                      <div className="text-sm text-gray-600">Fullførte jobber</div>
+                      <div className="text-xs text-gray-500 mt-1">Godkjent av arbeidsgiver</div>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
                       <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
                       <div className="text-sm text-gray-600">Total inntjening</div>
+                      <div className="text-xs text-gray-500 mt-1">Fra fullførte jobber</div>
                     </div>
                     <DollarSign className="w-8 h-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-amber-600">{stats.pendingApplications}</div>
+                      <div className="text-sm text-gray-600">Ventende søknader</div>
+                      <div className="text-xs text-gray-500 mt-1">Venter på svar</div>
+                    </div>
+                    <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-red-600">{stats.rejectedApplications}</div>
+                      <div className="text-sm text-gray-600">Avviste søknader</div>
+                      <div className="text-xs text-gray-500 mt-1">Ikke valgt</div>
+                    </div>
+                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
                 </CardContent>
               </Card>
@@ -242,6 +345,46 @@ export default function StatistikkPage() {
                       </div>
                     </div>
                     <Star className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Success rate card */}
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-indigo-600">
+                        {stats.totalApplications > 0 
+                          ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
+                          : 0}%
+                      </div>
+                      <div className="text-sm text-gray-600">Suksessrate</div>
+                      <div className="text-xs text-gray-500 mt-1">Godkjente søknader</div>
+                    </div>
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Average earnings per job */}
+              <Card>
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-cyan-600">
+                        {stats.completedJobs > 0 
+                          ? Math.round(stats.totalEarnings / stats.completedJobs)
+                          : 0} kr
+                      </div>
+                      <div className="text-sm text-gray-600">Gjennomsnitt per jobb</div>
+                      <div className="text-xs text-gray-500 mt-1">Inntjening per fullført jobb</div>
+                    </div>
+                    <svg className="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
                 </CardContent>
               </Card>

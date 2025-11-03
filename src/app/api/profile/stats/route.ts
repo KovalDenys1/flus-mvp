@@ -21,12 +21,11 @@ export async function GET() {
       totalJobsCreated: 0,
       activeJobs: 0,
       completedJobs: 0,
-      totalApplicationsReceived: 0,
+      totalApplications: 0, // Total applications received (for employers) or sent (for workers)
       acceptedApplications: 0,
-      // Worker stats
-      totalApplicationsSent: 0,
-      acceptedJobs: 0,
-      completedJobsWorker: 0,
+      rejectedApplications: 0,
+      pendingApplications: 0,
+      // Worker stats  
       totalEarnings: 0,
       // Common stats
       totalReviews: 0,
@@ -42,11 +41,11 @@ export async function GET() {
 
       if (!jobsError && jobs) {
         stats.totalJobsCreated = jobs.length;
-        stats.activeJobs = jobs.filter(j => j.status === "open").length;
+        stats.activeJobs = jobs.filter(j => j.status === "open" || j.status === "assigned").length;
         stats.completedJobs = jobs.filter(j => j.status === "completed").length;
       }
 
-      // Get applications for employer's jobs
+      // Get ALL applications for employer's jobs (total count over all time)
       const { data: applications, error: appsError } = await supabase
         .from("applications")
         .select(`
@@ -57,8 +56,10 @@ export async function GET() {
         .eq("jobs.employer_id", user.id);
 
       if (!appsError && applications) {
-        stats.totalApplicationsReceived = applications.length;
-        stats.acceptedApplications = applications.filter(a => a.status === "accepted").length;
+        stats.totalApplications = applications.length; // All applications ever received
+        stats.acceptedApplications = applications.filter(a => a.status === "accepted" || a.status === "completed").length;
+        stats.rejectedApplications = applications.filter(a => a.status === "rejected").length;
+        stats.pendingApplications = applications.filter(a => a.status === "pending").length;
       }
     }
 
@@ -74,13 +75,17 @@ export async function GET() {
         .eq("applicant_id", user.id);
 
       if (!appsError && applications) {
-        stats.totalApplicationsSent = applications.length;
-        stats.acceptedJobs = applications.filter(a => a.status === "accepted").length;
+        // For workers, totalApplications = total sent applications
+        stats.totalApplications = applications.length;
+        
+        // Count accepted and completed applications
+        stats.acceptedApplications = applications.filter(a => a.status === "accepted" || a.status === "completed").length;
+        stats.rejectedApplications = applications.filter(a => a.status === "rejected").length;
+        stats.pendingApplications = applications.filter(a => a.status === "pending").length;
 
         // Calculate completed jobs and earnings for worker
-        // Count only completed applications
         const completedJobs = applications.filter(a => a.status === "completed");
-        stats.completedJobsWorker = completedJobs.length;
+        stats.completedJobs = completedJobs.length;
         stats.totalEarnings = completedJobs.reduce((sum, app) => {
           const job = Array.isArray(app.jobs) ? app.jobs[0] : app.jobs;
           return sum + (job?.pay_nok || 0);
