@@ -46,6 +46,12 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [supabaseClient, setSupabaseClient] = useState<any>(null);
+  const [beforePhoto, setBeforePhoto] = useState<string | null>(null);
+  const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
+  const [beforePhotoPreview, setBeforePhotoPreview] = useState<string | null>(null);
+  const [afterPhotoPreview, setAfterPhotoPreview] = useState<string | null>(null);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [completingWork, setCompletingWork] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -212,13 +218,69 @@ export default function ChatClient({ conversationId }: { conversationId: string 
   };
 
   const handleCompleteWork = async () => {
+    // Open completion dialog
+    setShowCompletionDialog(true);
+  };
+
+  const handleSubmitCompletion = async () => {
+    if (!beforePhoto || !afterPhoto) {
+      toast.error("Du må laste opp bilder før og etter arbeidet");
+      return;
+    }
+
+    setCompletingWork(true);
     try {
+      // Upload before photo
+      const beforeFormData = new FormData();
+      const beforeBlob = await fetch(beforePhotoPreview!).then(r => r.blob());
+      beforeFormData.append("photo", beforeBlob, "before.jpg");
+
+      const beforeUploadRes = await fetch("/api/upload/photo", {
+        method: "POST",
+        body: beforeFormData,
+      });
+
+      if (!beforeUploadRes.ok) {
+        throw new Error("Kunne ikke laste opp 'før' bilde");
+      }
+
+      const beforeUploadData = await beforeUploadRes.json();
+
+      // Upload after photo
+      const afterFormData = new FormData();
+      const afterBlob = await fetch(afterPhotoPreview!).then(r => r.blob());
+      afterFormData.append("photo", afterBlob, "after.jpg");
+
+      const afterUploadRes = await fetch("/api/upload/photo", {
+        method: "POST",
+        body: afterFormData,
+      });
+
+      if (!afterUploadRes.ok) {
+        throw new Error("Kunne ikke laste opp 'etter' bilde");
+      }
+
+      const afterUploadData = await afterUploadRes.json();
+
+      // Complete the job with photos
       const res = await fetch(`/api/jobs/${job?.id}/complete`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          beforePhotoUrl: beforeUploadData.photoUrl,
+          afterPhotoUrl: afterUploadData.photoUrl,
+          conversationId,
+        }),
       });
 
       if (res.ok) {
         toast.success("Arbeid markert som fullført!");
+        setShowCompletionDialog(false);
+        setBeforePhoto(null);
+        setAfterPhoto(null);
+        setBeforePhotoPreview(null);
+        setAfterPhotoPreview(null);
+        
         // Reload job data
         if (conversation) {
           const jobRes = await fetch(`/api/jobs/${conversation.job_id}`);
@@ -234,13 +296,43 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     } catch (error) {
       console.error("Feil ved fullføring av arbeid:", error);
       toast.error("Kunne ikke markere arbeid som fullført");
+    } finally {
+      setCompletingWork(false);
     }
+  };
+
+  const handleBeforePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBeforePhoto(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBeforePhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = "";
+  };
+
+  const handleAfterPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAfterPhoto(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAfterPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = "";
   };
 
   const handleConfirmCompletion = async () => {
     try {
       const res = await fetch(`/api/jobs/${job?.id}/confirm-completion`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId }),
       });
 
       if (res.ok) {
@@ -464,6 +556,140 @@ export default function ChatClient({ conversationId }: { conversationId: string 
             </Button>
           </form>
         </div>
+
+        {/* Completion Dialog */}
+        {showCompletionDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Fullfør arbeid</h3>
+              <p className="text-gray-600 mb-6">Last opp bilder av arbeidet før og etter for å fullføre jobben.</p>
+              
+              <div className="space-y-6">
+                {/* Before Photo */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">📸 Før arbeid</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-400 transition-colors">
+                    {beforePhotoPreview ? (
+                      <div className="space-y-2">
+                        <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                          <Image
+                            src={beforePhotoPreview}
+                            alt="Før arbeid"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setBeforePhoto(null);
+                            setBeforePhotoPreview(null);
+                          }}
+                          className="w-full"
+                        >
+                          Fjern bilde
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleBeforePhotoSelect}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="text-center py-8">
+                          <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Klikk for å velge bilde</p>
+                          <p className="text-xs text-gray-500 mt-1">eller dra og slipp</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* After Photo */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">📸 Etter arbeid</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-400 transition-colors">
+                    {afterPhotoPreview ? (
+                      <div className="space-y-2">
+                        <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                          <Image
+                            src={afterPhotoPreview}
+                            alt="Etter arbeid"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setAfterPhoto(null);
+                            setAfterPhotoPreview(null);
+                          }}
+                          className="w-full"
+                        >
+                          Fjern bilde
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAfterPhotoSelect}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="text-center py-8">
+                          <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">Klikk for å velge bilde</p>
+                          <p className="text-xs text-gray-500 mt-1">eller dra og slipp</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Tips:</strong> Ta klare bilder som viser arbeidet før og etter. Dette hjelper arbeidsgiveren med å godkjenne arbeidet raskere.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-6 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCompletionDialog(false);
+                    setBeforePhoto(null);
+                    setAfterPhoto(null);
+                    setBeforePhotoPreview(null);
+                    setAfterPhotoPreview(null);
+                  }}
+                  disabled={completingWork}
+                  className="flex-1"
+                >
+                  Avbryt
+                </Button>
+                <Button
+                  onClick={handleSubmitCompletion}
+                  disabled={!beforePhoto || !afterPhoto || completingWork}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  {completingWork ? "Sender..." : "Fullfør arbeid"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AuthGuard>
   );

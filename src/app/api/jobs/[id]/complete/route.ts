@@ -15,6 +15,13 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const body = await request.json();
+    const { beforePhotoUrl, afterPhotoUrl, conversationId } = body;
+
+    if (!beforePhotoUrl || !afterPhotoUrl) {
+      return NextResponse.json({ error: "Both before and after photos are required" }, { status: 400 });
+    }
+
     const jobId = id;
 
     // Check if job exists and current user is the assigned worker
@@ -42,6 +49,71 @@ export async function POST(
       );
     }
 
+    // Get application
+    const { data: application, error: appError } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("job_id", jobId)
+      .eq("applicant_id", user.id)
+      .single();
+
+    if (appError || !application) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    // Send system message to conversation with before photo
+    const { data: beforeMessage } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_type: 'photo',
+        text_content: 'Før arbeid',
+        photo_url: beforePhotoUrl
+      })
+      .select()
+      .single();
+
+    // Send system message to conversation with after photo
+    const { data: afterMessage } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_type: 'photo',
+        text_content: 'Etter arbeid',
+        photo_url: afterPhotoUrl
+      })
+      .select()
+      .single();
+
+    // Save photos to job_photos table
+    if (beforeMessage) {
+      await supabase
+        .from("job_photos")
+        .insert({
+          application_id: application.id,
+          message_id: beforeMessage.id,
+          uploaded_by: user.id,
+          photo_type: 'before',
+          storage_path: beforePhotoUrl,
+          storage_url: beforePhotoUrl
+        });
+    }
+
+    if (afterMessage) {
+      await supabase
+        .from("job_photos")
+        .insert({
+          application_id: application.id,
+          message_id: afterMessage.id,
+          uploaded_by: user.id,
+          photo_type: 'after',
+          storage_path: afterPhotoUrl,
+          storage_url: afterPhotoUrl
+        });
+    }
+
     // Update job status to completed
     const { error: jobUpdateError } = await supabase
       .from("jobs")
@@ -61,6 +133,7 @@ export async function POST(
       .from("applications")
       .update({
         status: "completed",
+        work_completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq("job_id", jobId)
@@ -73,6 +146,16 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // Send system message about work completion
+    await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_type: 'system',
+        system_event: 'work_completed'
+      });
 
     return NextResponse.json({
       success: true,

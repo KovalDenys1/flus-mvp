@@ -387,13 +387,15 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
             Se mine jobber
           </Link>
         ) : (
-          <button
-            onClick={handleApply}
-            disabled={applying}
-            className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:bg-orange-300"
-          >
-            {applying ? "Starter samtale..." : "Søk"}
-          </button>
+          user && job.employerId !== user.id && (
+            <button
+              onClick={handleApply}
+              disabled={applying}
+              className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:bg-orange-300"
+            >
+              {applying ? "Starter samtale..." : "Søk"}
+            </button>
+          )
         )}
       </div>
     </div>

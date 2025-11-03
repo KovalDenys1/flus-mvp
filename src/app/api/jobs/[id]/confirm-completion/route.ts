@@ -15,6 +15,9 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const body = await request.json();
+    const { conversationId } = body;
+
     const jobId = id;
 
     // Check if job exists and current user is the employer
@@ -42,9 +45,31 @@ export async function POST(
       );
     }
 
-    // Update job status to confirmed (we'll keep it as completed, but add a confirmation flag)
-    // For now, we'll just mark it as completed and the confirmation is implicit
-    // In the future, we could add a separate confirmation status
+    // Update application with approval timestamp
+    const { error: appUpdateError } = await supabase
+      .from("applications")
+      .update({
+        employer_approved_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq("job_id", jobId)
+      .eq("applicant_id", job.selected_worker_id);
+
+    if (appUpdateError) {
+      console.error("Error updating application:", appUpdateError);
+    }
+
+    // Send system message about work approval
+    if (conversationId) {
+      await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          message_type: 'system',
+          system_event: 'work_approved'
+        });
+    }
 
     // Update worker's completed jobs count
     const { data: currentProfile } = await supabase

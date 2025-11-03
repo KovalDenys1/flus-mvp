@@ -125,20 +125,30 @@ export default function MyJobsPage() {
   };
 
   const openDeleteDialog = (jobId: string, jobTitle: string) => {
+    console.log("openDeleteDialog called with:", { jobId, jobTitle });
     setDeleteTarget({ jobId, jobTitle });
     setDeleteDialogOpen(true);
+    console.log("After setting state - deleteTarget:", { jobId, jobTitle }, "deleteDialogOpen:", true);
   };
 
   const handleDeleteJob = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      console.error("No delete target");
+      return;
+    }
+
+    console.log("Deleting job:", deleteTarget.jobId, deleteTarget.jobTitle);
 
     try {
       const res = await fetch(`/api/my-jobs/${deleteTarget.jobId}`, {
         method: "DELETE",
       });
 
+      console.log("Delete response status:", res.status);
+
       if (!res.ok) {
         const error = await res.json();
+        console.error("Delete error:", error);
         throw new Error(error.error || "Kunne ikke slette jobb");
       }
 
@@ -403,6 +413,7 @@ export default function MyJobsPage() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              console.log("Delete button clicked for job:", job.id, job.title);
                               openDeleteDialog(job.id, job.title);
                             }}
                             className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 transition-colors font-medium"
@@ -437,31 +448,40 @@ export default function MyJobsPage() {
 
       {/* Delete Confirmation Dialog */}
       {deleteDialogOpen && deleteTarget && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => {
+          setDeleteDialogOpen(false);
+          setDeleteTarget(null);
+        }}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
-              <div className="text-6xl mb-4">🗑️</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Slett jobb</h3>
-              <p className="text-gray-600 mb-6">
-                Er du sikker på at du vil slette jobben &ldquo;{deleteTarget.jobTitle}&rdquo;?
-                Denne handlingen kan ikke angres.
-              </p>
-              <div className="flex gap-3 justify-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Bekreft sletting</h3>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-red-800 font-medium mb-2">Du er i ferd med å slette:</p>
+                <p className="text-red-900 font-semibold text-lg">&ldquo;{deleteTarget.jobTitle}&rdquo;</p>
+                <p className="text-red-700 text-sm mt-2">Denne handlingen kan ikke angres.</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="outline"
                   onClick={() => {
+                    console.log("Cancel delete clicked");
                     setDeleteDialogOpen(false);
                     setDeleteTarget(null);
                   }}
-                  className="px-6"
+                  className="flex-1 px-6 py-3 text-gray-700 border-gray-300 hover:bg-gray-50 font-medium"
                 >
                   Avbryt
                 </Button>
                 <Button
-                  onClick={handleDeleteJob}
-                  className="px-6 bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => {
+                    console.log("Delete job button clicked");
+                    handleDeleteJob();
+                  }}
+                  className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  disabled={!deleteTarget}
                 >
-                  Slett jobb
+                  🗑️ Slett jobb
                 </Button>
               </div>
             </div>
@@ -471,122 +491,140 @@ export default function MyJobsPage() {
 
       {/* Edit Job Dialog */}
       {editDialogOpen && editTarget && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Rediger jobb</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Jobbtittel</label>
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => {
+          setEditDialogOpen(false);
+          setEditTarget(null);
+        }}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 sm:p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Rediger jobb</h3>
+                <button
+                  onClick={() => {
+                    setEditDialogOpen(false);
+                    setEditTarget(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                >
+                  ×
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beskrivelse</label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                <input
-                  type="text"
-                  value={editForm.category}
-                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Betaling (NOK)</label>
-                  <input
-                    type="number"
-                    value={editForm.payNok}
-                    onChange={(e) => setEditForm({ ...editForm, payNok: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  />
+              <div className="max-h-[60vh] overflow-y-auto">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Jobbtittel</label>
+                    <input
+                      type="text"
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Beskrivelse</label>
+                    <textarea
+                      value={editForm.description}
+                      onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                    <input
+                      type="text"
+                      value={editForm.category}
+                      onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Betaling (NOK)</label>
+                      <input
+                        type="number"
+                        value={editForm.payNok}
+                        onChange={(e) => setEditForm({ ...editForm, payNok: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Varighet (minutter)</label>
+                      <input
+                        type="number"
+                        value={editForm.durationMinutes}
+                        onChange={(e) => setEditForm({ ...editForm, durationMinutes: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Område</label>
+                    <input
+                      type="text"
+                      value={editForm.areaName}
+                      onChange={(e) => setEditForm({ ...editForm, areaName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                    <input
+                      type="text"
+                      value={editForm.address}
+                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Starttid</label>
+                      <input
+                        type="time"
+                        value={editForm.startTime}
+                        onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sluttid</label>
+                      <input
+                        type="time"
+                        value={editForm.endTime}
+                        onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Krav til arbeidstaker</label>
+                    <textarea
+                      value={editForm.requirements}
+                      onChange={(e) => setEditForm({ ...editForm, requirements: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      rows={2}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Varighet (minutter)</label>
-                  <input
-                    type="number"
-                    value={editForm.durationMinutes}
-                    onChange={(e) => setEditForm({ ...editForm, durationMinutes: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  />
-                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Område</label>
-                <input
-                  type="text"
-                  value={editForm.areaName}
-                  onChange={(e) => setEditForm({ ...editForm, areaName: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                />
+              <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditDialogOpen(false);
+                    setEditTarget(null);
+                  }}
+                  className="flex-1 px-6 order-2 sm:order-1"
+                >
+                  Avbryt
+                </Button>
+                <Button
+                  onClick={handleEditJob}
+                  className="flex-1 px-6 bg-blue-600 hover:bg-blue-700 text-white order-1 sm:order-2"
+                >
+                  Oppdater jobb
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                <input
-                  type="text"
-                  value={editForm.address}
-                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Starttid</label>
-                  <input
-                    type="time"
-                    value={editForm.startTime}
-                    onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sluttid</label>
-                  <input
-                    type="time"
-                    value={editForm.endTime}
-                    onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Krav til arbeidstaker</label>
-                <textarea
-                  value={editForm.requirements}
-                  onChange={(e) => setEditForm({ ...editForm, requirements: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  rows={2}
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditDialogOpen(false);
-                  setEditTarget(null);
-                }}
-                className="px-6"
-              >
-                Avbryt
-              </Button>
-              <Button
-                onClick={handleEditJob}
-                className="px-6 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Oppdater jobb
-              </Button>
             </div>
           </div>
         </div>

@@ -94,6 +94,7 @@ export async function POST(
       .from("applications")
       .update({
         status: "akseptert",
+        work_started_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq("id", application.id);
@@ -126,6 +127,25 @@ export async function POST(
     if (rejectError) {
       console.error("Error rejecting other applications:", rejectError);
       // This is not critical, so we don't rollback
+    }
+
+    // Send system message to conversation about work started
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("job_id", jobId)
+      .eq("worker_id", workerId)
+      .single();
+
+    if (conversation) {
+      await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversation.id,
+          sender_id: user.id,
+          message_type: 'system',
+          system_event: 'work_started'
+        });
     }
 
     return NextResponse.json({
