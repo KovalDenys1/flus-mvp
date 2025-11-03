@@ -17,11 +17,11 @@ export async function POST(
 
     const jobId = id;
     const body = await request.json();
-    const { workerId } = body;
+    const { applicationId } = body;
 
-    if (!workerId) {
+    if (!applicationId) {
       return NextResponse.json(
-        { error: "workerId is required" },
+        { error: "applicationId is required" },
         { status: 400 }
       );
     }
@@ -51,12 +51,12 @@ export async function POST(
       );
     }
 
-    // Check if application exists
+    // Check if application exists and get worker ID
     const { data: application, error: appError } = await supabase
       .from("applications")
-      .select("id, status")
+      .select("id, applicant_id, status")
+      .eq("id", applicationId)
       .eq("job_id", jobId)
-      .eq("applicant_id", workerId)
       .single();
 
     if (appError || !application) {
@@ -66,7 +66,9 @@ export async function POST(
       );
     }
 
-    if (application.status !== "sendt") {
+    const workerId = application.applicant_id;
+
+    if (application.status !== "pending") {
       return NextResponse.json(
         { error: "Application is not pending" },
         { status: 400 }
@@ -93,11 +95,11 @@ export async function POST(
     const { error: appUpdateError } = await supabase
       .from("applications")
       .update({
-        status: "akseptert",
+        status: "accepted",
         work_started_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq("id", application.id);
+      .eq("id", applicationId);
 
     if (appUpdateError) {
       console.error("Error updating application:", appUpdateError);
@@ -117,12 +119,12 @@ export async function POST(
     const { error: rejectError } = await supabase
       .from("applications")
       .update({
-        status: "avslatt",
+        status: "rejected",
         updated_at: new Date().toISOString()
       })
       .eq("job_id", jobId)
       .neq("applicant_id", workerId)
-      .eq("status", "sendt");
+      .eq("status", "pending");
 
     if (rejectError) {
       console.error("Error rejecting other applications:", rejectError);

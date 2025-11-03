@@ -1,10 +1,13 @@
 import { getSupabaseServer } from "../supabase/server";
 
-export type SupportTicketStatus = "åpen" | "under arbeid" | "lukket";
+export type SupportTicketStatus = "open" | "in_progress" | "closed";
 
 export type SupportTicket = {
   id: string;
   workerId: string;
+  subject?: string;
+  message?: string;
+  category?: string;
   reason: string;
   createdAt: string;
   status: SupportTicketStatus;
@@ -23,7 +26,9 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
       .select(`
         id,
         worker_id,
-        reason,
+        subject,
+        message,
+        category,
         created_at,
         status,
         notes,
@@ -39,7 +44,10 @@ export async function getSupportTickets(): Promise<SupportTicket[]> {
     return (data || []).map(ticket => ({
       id: ticket.id,
       workerId: ticket.worker_id,
-      reason: ticket.reason,
+      subject: ticket.subject,
+      message: ticket.message,
+      category: ticket.category,
+      reason: ticket.subject && ticket.message ? `${ticket.subject}: ${ticket.message}` : ticket.subject || ticket.message || '',
       createdAt: ticket.created_at,
       status: ticket.status,
       notes: ticket.notes,
@@ -71,7 +79,10 @@ export async function getSupportTicketsForUser(userId: string): Promise<SupportT
     return (data || []).map(ticket => ({
       id: ticket.id,
       workerId: ticket.worker_id,
-      reason: ticket.reason,
+      subject: ticket.subject,
+      message: ticket.message,
+      category: ticket.category,
+      reason: ticket.subject && ticket.message ? `${ticket.subject}: ${ticket.message}` : ticket.subject || ticket.message || '',
       createdAt: ticket.created_at,
       status: ticket.status,
       notes: ticket.notes,
@@ -82,20 +93,24 @@ export async function getSupportTicketsForUser(userId: string): Promise<SupportT
   }
 }
 
-export async function createSupportTicket(workerId: string, reason: string): Promise<SupportTicket | null> {
+export async function createSupportTicket(workerId: string, subject: string, message: string, category?: string): Promise<SupportTicket | null> {
   try {
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from("support_tickets")
       .insert({
         worker_id: workerId,
-        reason,
-        status: "åpen",
+        subject,
+        message,
+        category,
+        status: "open",
       })
       .select(`
         id,
         worker_id,
-        reason,
+        subject,
+        message,
+        category,
         created_at,
         status,
         notes,
@@ -111,7 +126,10 @@ export async function createSupportTicket(workerId: string, reason: string): Pro
     return {
       id: data.id,
       workerId: data.worker_id,
-      reason: data.reason,
+      subject: data.subject,
+      message: data.message,
+      category: data.category,
+      reason: `${data.subject}: ${data.message}`,
       createdAt: data.created_at,
       status: data.status,
       notes: data.notes,

@@ -32,8 +32,10 @@ export async function GET(req: NextRequest) {
 
   try {
     // Check if user is participant in this conversation
+    console.log(`GET /api/conversations/${conversationId}/messages: userId=${session.user.id}`)
     const isParticipant = await isUserInConversation(conversationId, session.user.id);
     if (!isParticipant) {
+      console.log(`User ${session.user.id} is not participant in conversation ${conversationId}`)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

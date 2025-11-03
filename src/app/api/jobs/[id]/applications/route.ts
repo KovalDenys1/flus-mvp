@@ -61,9 +61,9 @@ export async function GET(
     const applicationsWithUsers = await Promise.all(
       (data || []).map(async (app) => {
         const { data: profile } = await supabase
-          .from("profiles")
-          .select("id, name, email, phone, bio, skills, rating, completed_jobs")
-          .eq("user_id", app.applicant_id)
+          .from("users")
+          .select("id, navn, email, telefon")
+          .eq("id", app.applicant_id)
           .single();
 
         return {
@@ -75,13 +75,9 @@ export async function GET(
           updatedAt: app.updated_at,
           worker: profile ? {
             id: profile.id,
-            name: profile.name,
+            navn: profile.navn,
             email: profile.email,
-            phone: profile.phone,
-            bio: profile.bio,
-            skills: profile.skills,
-            rating: profile.rating,
-            completedJobs: profile.completed_jobs,
+            telefon: profile.telefon,
           } : null,
         };
       })

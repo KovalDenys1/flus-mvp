@@ -203,5 +203,9 @@ export async function createSystemMessage(conversationId: string, systemEvent: '
  */
 export async function isUserInConversation(conversationId: string, userId: string): Promise<boolean> {
   const conversation = await getConversationById(conversationId)
-  return conversation ? (conversation.worker_id === userId || conversation.employer_id === userId) : false
+  const isParticipant = conversation ? (conversation.worker_id === userId || conversation.employer_id === userId) : false
+
+  console.log(`isUserInConversation: conversationId=${conversationId}, userId=${userId}, conversation=`, conversation, `isParticipant=${isParticipant}`)
+
+  return isParticipant
 }

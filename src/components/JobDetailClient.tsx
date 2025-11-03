@@ -33,7 +33,7 @@ export type Job = {
 type Application = {
   id: string;
   workerId: string;
-  status: "pending" | "accepted" | "rejected";
+  status: "pending" | "accepted" | "rejected" | "completed";
   createdAt: string;
   worker?: {
     id: string;
@@ -313,10 +313,12 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                       <div className={`px-2 py-1 rounded text-xs ${
                         app.status === "accepted" ? "bg-green-100 text-green-700" :
                         app.status === "rejected" ? "bg-red-100 text-red-700" :
-                        "bg-blue-100 text-blue-700"
+                        app.status === "completed" ? "bg-blue-100 text-blue-700" :
+                        "bg-yellow-100 text-yellow-700"
                       }`}>
                         {app.status === "accepted" ? "Godkjent" :
-                         app.status === "rejected" ? "Avvist" : "Sendt"}
+                         app.status === "rejected" ? "Avvist" :
+                         app.status === "completed" ? "Fullført" : "Sendt"}
                       </div>
                     </div>
                   </div>

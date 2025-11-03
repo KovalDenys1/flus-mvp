@@ -21,7 +21,7 @@ export async function GET() {
         job:job_id(id, title, employer_id),
         applicant:applicant_id(id, navn, email)
       `)
-      .eq("status", "sendt")
+      .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(5);
 

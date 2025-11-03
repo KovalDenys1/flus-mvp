@@ -80,8 +80,9 @@ export default function MineSoknaderPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-blue-100 text-blue-700";
-      case "godkjent": return "bg-green-100 text-green-700";
-      case "avvist": return "bg-red-100 text-red-700";
+      case "accepted": return "bg-green-100 text-green-700";
+      case "rejected": return "bg-red-100 text-red-700";
+      case "completed": return "bg-purple-100 text-purple-700";
       default: return "bg-gray-100 text-gray-700";
     }
   };
@@ -89,8 +90,8 @@ export default function MineSoknaderPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending": return "Sendt";
-      case "godkjent": return "Godkjent";
-      case "avvist": return "Avvist";
+      case "accepted": return "Godkjent";
+      case "rejected": return "Avvist";
       case "completed": return "Fullført";
       default: return status;
     }

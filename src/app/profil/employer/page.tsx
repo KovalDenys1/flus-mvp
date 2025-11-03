@@ -72,14 +72,16 @@ type Application = {
   id: string;
   jobId: string;
   workerId: string;
-  status: "pending" | "accepted" | "rejected" | "completed" | "approved";
+  status: "pending" | "accepted" | "rejected" | "completed";
   createdAt: string;
   updatedAt?: string;
   worker: {
     id: string;
     name: string;
+    navn: string;
     email: string;
     phone?: string;
+    telefon?: string;
     bio?: string;
     skills?: string[];
     rating?: number;
@@ -243,12 +245,12 @@ export default function EmployerProfilePage() {
     }
   };
 
-  const selectCandidate = async (jobId: string, workerId: string) => {
+  const selectCandidate = async (jobId: string, applicationId: string) => {
     try {
       const res = await fetch(`/api/jobs/${jobId}/select-candidate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workerId }),
+        body: JSON.stringify({ applicationId }),
       });
 
       if (res.ok) {
@@ -652,21 +654,20 @@ export default function EmployerProfilePage() {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
                                     <span className="font-medium">
-                                      {application.worker?.name || "Ukjent bruker"}
+                                      {application.worker?.navn || application.worker?.name || "Ukjent bruker"}
                                     </span>
                                     <Badge
                                       variant={
                                         application.status === "pending" ? "default" :
                                         application.status === "accepted" ? "default" :
-                                        application.status === "approved" ? "default" :
                                         application.status === "rejected" ? "destructive" : "secondary"
                                       }
                                       className="text-xs"
                                     >
                                       {application.status === "pending" ? "Sendt" :
                                        application.status === "accepted" ? "Akseptert" :
-                                       application.status === "approved" ? "Godkjent" :
-                                       application.status === "rejected" ? "Avslått" : "Fullført"}
+                                       application.status === "rejected" ? "Avslått" :
+                                       application.status === "completed" ? "Fullført" : "Ukjent"}
                                     </Badge>
                                   </div>
 
@@ -677,6 +678,9 @@ export default function EmployerProfilePage() {
                                       )}
                                       {application.worker.phone && (
                                         <div>Telefon: {application.worker.phone}</div>
+                                      )}
+                                      {application.worker.telefon && (
+                                        <div>Telefon: {application.worker.telefon}</div>
                                       )}
                                       {application.worker.bio && (
                                         <div className="mt-2">
@@ -692,7 +696,7 @@ export default function EmployerProfilePage() {
 
                                 {application.status === "pending" && (
                                   <Button
-                                    onClick={() => selectCandidate(job.id, application.workerId)}
+                                    onClick={() => selectCandidate(job.id, application.id)}
                                     size="sm"
                                     className="ml-3"
                                   >

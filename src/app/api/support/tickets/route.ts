@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { subject, message } = body;
+    const { subject, message, category } = body;
 
     // Validation
     if (!subject || !message) {
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ticket = await createSupportTicket(user.id, `${subject}: ${message}`);
+    const ticket = await createSupportTicket(user.id, subject, message, category);
     if (!ticket) {
       return NextResponse.json(
         { error: "Failed to create support ticket" },

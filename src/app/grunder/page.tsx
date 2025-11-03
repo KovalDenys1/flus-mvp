@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-type Ticket = { id:string; workerId:string; reason:string; createdAt:string; status:"åpen"|"under arbeid"|"lukket"; notes?:string };
+type Ticket = { id:string; workerId:string; subject?:string; message?:string; reason:string; createdAt:string; status:"open"|"in_progress"|"closed"; notes?:string };
 
 export default function Page() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -28,7 +28,7 @@ export default function Page() {
     if (!canContactCurator) return;
     const text = reason.trim();
     if (text.length < 5) { toast.error("Skriv en kort grunn (minst 5 tegn)."); return; }
-    const res = await fetch("/api/support/tickets", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ reason: text }) });
+    const res = await fetch("/api/support/tickets", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ subject: "Kontakt kurator", message: text }) });
     const data = await res.json();
     if (!res.ok) { toast.error(data?.error || "Feil"); return; }
     const t = data.ticket as Ticket;
@@ -91,7 +91,9 @@ export default function Page() {
                 <li key={t.id} className="rounded-lg bg-gray-100 px-4 py-3 flex flex-col gap-1">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <div className="text-sm text-gray-500">{new Date(t.createdAt).toLocaleString()}</div>
-                    <div className="text-xs px-2 py-1 rounded bg-orange-100 text-orange-700 capitalize">{t.status}</div>
+                    <div className="text-xs px-2 py-1 rounded bg-orange-100 text-orange-700 capitalize">
+                      {t.status === "open" ? "Åpen" : t.status === "in_progress" ? "Under arbeid" : "Lukket"}
+                    </div>
                   </div>
                   <div className="mt-1 text-sm text-gray-800">{t.reason}</div>
                   {t.notes && <div className="mt-1 text-xs text-gray-600">Notat: {t.notes}</div>}
