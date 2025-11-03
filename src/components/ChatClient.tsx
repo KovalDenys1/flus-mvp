@@ -90,6 +90,13 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         const messagesData = await messagesRes.json();
         setMessages(messagesData.messages || []);
         
+        // If API returned a corrected conversationId (when job ID was passed), update our state
+        if (messagesData.conversationId && messagesData.conversationId !== conversationId) {
+          console.log(`ChatClient: API corrected conversationId from ${conversationId} to ${messagesData.conversationId}`);
+          // Update the URL without causing a re-render
+          window.history.replaceState({}, '', `/samtaler/${messagesData.conversationId}`);
+        }
+        
         if (convRes.ok) {
           const convData = await convRes.json();
           const currentConv = (convData.conversations || []).find((c: Conversation) => c.id === conversationId);

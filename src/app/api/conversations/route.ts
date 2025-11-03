@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
-    // Получаем информацию о работе, чтобы узнать employer_id
+    // Get job information to find employer_id
     const jobRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/jobs?id=eq.${jobId}&select=employer_id`, {
       headers: {
         'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
@@ -60,13 +60,13 @@ export async function POST(req: NextRequest) {
 
     const employerId = jobs[0].employer_id;
 
-    // Определяем роли: текущий пользователь - worker, employer - владелец работы
+    // Define roles: current user is worker, employer is job owner
     const workerId = session.user.id;
 
-    // Создаем или находим разговор
+    // Create or find conversation
     const conversation = await findOrCreateConversation(jobId, workerId, employerId);
 
-    // Создаем заявку на работу
+    // Create job application
     const appRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/applications`, {
       method: 'POST',
       headers: {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     if (!appRes.ok) {
       console.error('Failed to create application:', await appRes.text());
-      // Не прерываем процесс, если заявка не создалась
+      // Don't interrupt the process if application creation fails
     }
 
     return NextResponse.json({ conversation }, { status: 201 });

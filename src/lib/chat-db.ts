@@ -25,10 +25,10 @@ export type Message = {
 }
 
 /**
- * Находит или создает разговор между работником и работодателем по конкретной работе
+ * Finds or creates a conversation between worker and employer for a specific job
  */
 export async function findOrCreateConversation(jobId: string, workerId: string, employerId: string): Promise<Conversation> {
-  // Сначала попробуем найти существующий разговор
+  // First try to find existing conversation
   const { data: existing, error: findError } = await supabase
     .from('conversations')
     .select('*')
@@ -44,7 +44,7 @@ export async function findOrCreateConversation(jobId: string, workerId: string, 
     return existing
   }
 
-  // Создаем новый разговор
+  // Create new conversation
   const { data: newConversation, error: createError } = await supabase
     .from('conversations')
     .insert({
@@ -63,7 +63,7 @@ export async function findOrCreateConversation(jobId: string, workerId: string, 
 }
 
 /**
- * Получает все разговоры для пользователя
+ * Gets all conversations for a user
  */
 export async function getConversationsForUser(userId: string): Promise<Conversation[]> {
   const { data, error } = await supabase
@@ -80,7 +80,7 @@ export async function getConversationsForUser(userId: string): Promise<Conversat
 }
 
 /**
- * Получает разговор по ID
+ * Gets conversation by ID
  */
 export async function getConversationById(conversationId: string): Promise<Conversation | null> {
   const { data, error } = await supabase
@@ -97,7 +97,7 @@ export async function getConversationById(conversationId: string): Promise<Conve
 }
 
 /**
- * Получает все сообщения для разговора
+ * Gets all messages for a conversation
  */
 export async function getMessagesForConversation(conversationId: string): Promise<Message[]> {
   const { data, error } = await supabase
@@ -114,7 +114,7 @@ export async function getMessagesForConversation(conversationId: string): Promis
 }
 
 /**
- * Создает новое сообщение
+ * Creates a new message
  */
 export async function createMessage(conversationId: string, senderId: string, text: string): Promise<Message> {
   const { data, error } = await supabase
@@ -132,7 +132,7 @@ export async function createMessage(conversationId: string, senderId: string, te
     throw new Error(`Failed to create message: ${error.message}`)
   }
 
-  // Обновляем updated_at для разговора
+  // Update updated_at for conversation
   await supabase
     .from('conversations')
     .update({ updated_at: new Date().toISOString() })
@@ -142,7 +142,7 @@ export async function createMessage(conversationId: string, senderId: string, te
 }
 
 /**
- * Создает сообщение с фото
+ * Creates a photo message
  */
 export async function createPhotoMessage(conversationId: string, senderId: string, photoUrl: string, caption?: string): Promise<Message> {
   const { data, error } = await supabase
@@ -161,7 +161,7 @@ export async function createPhotoMessage(conversationId: string, senderId: strin
     throw new Error(`Failed to create photo message: ${error.message}`)
   }
 
-  // Обновляем updated_at для разговора
+  // Update updated_at for conversation
   await supabase
     .from('conversations')
     .update({ updated_at: new Date().toISOString() })
@@ -171,7 +171,7 @@ export async function createPhotoMessage(conversationId: string, senderId: strin
 }
 
 /**
- * Создает системное сообщение
+ * Creates a system message
  */
 export async function createSystemMessage(conversationId: string, systemEvent: 'work_started' | 'work_completed' | 'work_approved' | 'work_rejected'): Promise<Message> {
   const { data, error } = await supabase
@@ -189,7 +189,7 @@ export async function createSystemMessage(conversationId: string, systemEvent: '
     throw new Error(`Failed to create system message: ${error.message}`)
   }
 
-  // Обновляем updated_at для разговора
+  // Update updated_at for conversation
   await supabase
     .from('conversations')
     .update({ updated_at: new Date().toISOString() })
@@ -199,13 +199,44 @@ export async function createSystemMessage(conversationId: string, systemEvent: '
 }
 
 /**
- * Проверяет, является ли пользователь участником разговора
+ * Checks if user is a participant in the conversation
+ * If conversationId looks like job ID (starts with 'j_'), tries to find conversation for that job
  */
 export async function isUserInConversation(conversationId: string, userId: string): Promise<boolean> {
-  const conversation = await getConversationById(conversationId)
-  const isParticipant = conversation ? (conversation.worker_id === userId || conversation.employer_id === userId) : false
+  let actualConversationId = conversationId;
+  let conversation = null;
 
-  console.log(`isUserInConversation: conversationId=${conversationId}, userId=${userId}, conversation=`, conversation, `isParticipant=${isParticipant}`)
+  // If ID looks like job ID, try to find conversation for that job
+  if (conversationId.startsWith('j_')) {
+    console.log(`isUserInConversation: ${conversationId} looks like job ID, searching for conversation`);
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('job_id', conversationId)
+        .or(`worker_id.eq.${userId},employer_id.eq.${userId}`)
+        .single();
 
-  return isParticipant
+      if (!error && data) {
+        console.log(`isUserInConversation: found conversation ${data.id} for job ${conversationId}`);
+        actualConversationId = data.id;
+        conversation = data;
+      } else {
+        console.log(`isUserInConversation: no conversation found for job ${conversationId} and user ${userId}`);
+        return false;
+      }
+    } catch (error) {
+      console.log(`isUserInConversation: error searching for conversation by job ID:`, error);
+      return false;
+    }
+  } else {
+    // Regular search by conversation ID
+    conversation = await getConversationById(conversationId);
+  }
+
+  const isParticipant = conversation ? (conversation.worker_id === userId || conversation.employer_id === userId) : false;
+
+  console.log(`isUserInConversation: conversationId=${conversationId}, actualConversationId=${actualConversationId}, userId=${userId}, conversation=`, conversation, `isParticipant=${isParticipant}`);
+
+  return isParticipant;
 }
