@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { minutesToHhMm } from "@/lib/utils/format";
 import { googleMapsEmbedUrl } from "@/lib/utils/map";
 import ReviewDialog from "@/components/ReviewDialog";
+import PhotoGallery from "@/components/PhotoGallery";
 
 export type Job = {
   id: string;
@@ -43,6 +44,15 @@ type Application = {
   };
 };
 
+type Photo = {
+  id: string;
+  url: string;
+  caption: string;
+  type: string;
+  uploadedAt: string;
+  uploadedBy: string;
+};
+
 type User = {
   id: string;
   email: string;
@@ -57,6 +67,8 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string } | null>(null);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
 
   useEffect(() => {
     // Load user info
@@ -75,6 +87,18 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
         .then((d) => setApplications(d.applications || []))
         .catch(() => setApplications([]))
         .finally(() => setLoadingApplications(false));
+    }
+  }, [job, user]);
+
+  useEffect(() => {
+    if (job && user && (user.role === "employer" || user.role === "both" || user.role === "worker")) {
+      // Load photos for the job
+      setLoadingPhotos(true);
+      fetch(`/api/jobs/${job.id}/photos`)
+        .then((r) => r.json())
+        .then((d) => setPhotos(d.photos || []))
+        .catch(() => setPhotos([]))
+        .finally(() => setLoadingPhotos(false));
     }
   }, [job, user]);
 
@@ -325,6 +349,20 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Photo Gallery - Show for employers and workers */}
+      {user && (user.role === "employer" || user.role === "both" || user.role === "worker") && (
+        <div className="bg-white border border-gray-200 rounded-lg p-3">
+          <div className="text-xs text-gray-500 uppercase font-semibold mb-3">Jobb bilder</div>
+          {loadingPhotos ? (
+            <div className="text-center py-8">
+              <div className="animate-pulse text-gray-500">Laster bilder...</div>
+            </div>
+          ) : (
+            <PhotoGallery photos={photos} />
           )}
         </div>
       )}
