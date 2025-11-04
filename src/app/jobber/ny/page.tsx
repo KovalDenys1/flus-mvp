@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 export default function CreateJobPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -107,6 +109,27 @@ export default function CreateJobPage() {
 
     setLoading(true);
     try {
+      // Upload photos first if any
+      const photoUrls: string[] = [];
+      if (photos.length > 0) {
+        setUploadingPhotos(true);
+        for (const photo of photos) {
+          const formData = new FormData();
+          formData.append("photo", photo);
+          const uploadRes = await fetch("/api/upload/photo", {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            photoUrls.push(uploadData.photoUrl);
+          } else {
+            console.error("Failed to upload photo:", photo.name);
+          }
+        }
+        setUploadingPhotos(false);
+      }
+
       const res = await fetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,6 +148,7 @@ export default function CreateJobPage() {
           endTime: form.endTime || null,
           paymentType: form.paymentType,
           requirements: form.requirements.trim() || null,
+          initialPhotos: photoUrls,
         }),
       });
 
@@ -147,6 +171,7 @@ export default function CreateJobPage() {
       toast.error(msg);
     } finally {
       setLoading(false);
+      setUploadingPhotos(false);
     }
   };
 
@@ -461,6 +486,40 @@ export default function CreateJobPage() {
             </CardContent>
           </Card>
 
+          {/* Photos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>📸 Jobb bilder (valgfritt)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Tips:</strong> Legg til bilder av jobben for å gjøre annonsen mer attraktiv.
+                  Arbeidstakere kan se bildene før de søker.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Last opp bilder</label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setPhotos(files);
+                  }}
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+                {photos.length > 0 && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    {photos.length} bilde{photos.length > 1 ? 'r' : ''} valgt
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Submit */}
           <div className="flex gap-4">
             <Button
@@ -527,8 +586,8 @@ export default function CreateJobPage() {
               </DialogContent>
             </Dialog>
             
-            <Button type="submit" disabled={loading || progress < 100} className="flex-1 bg-orange-600 hover:bg-orange-700">
-              {loading ? "Oppretter..." : "Opprett jobb"}
+            <Button type="submit" disabled={loading || uploadingPhotos || progress < 100} className="flex-1 bg-orange-600 hover:bg-orange-700">
+              {uploadingPhotos ? "Laster opp bilder..." : loading ? "Oppretter..." : "Opprett jobb"}
             </Button>
           </div>
         </form>

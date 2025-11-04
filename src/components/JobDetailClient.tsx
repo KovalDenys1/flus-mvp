@@ -29,6 +29,7 @@ export type Job = {
   requirements?: string;
   employerId?: string;
   selectedWorkerId?: string;
+  initialPhotos?: string[];
 };
 
 type Application = {
@@ -96,7 +97,23 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       setLoadingPhotos(true);
       fetch(`/api/jobs/${job.id}/photos`)
         .then((r) => r.json())
-        .then((d) => setPhotos(d.photos || []))
+        .then((d) => {
+          const allPhotos = d.photos || [];
+          // Add initial photos from job
+          if (job.initialPhotos && job.initialPhotos.length > 0) {
+            job.initialPhotos.forEach((url, index) => {
+              allPhotos.unshift({
+                id: `initial-${index}`,
+                url,
+                caption: "Bilde fra jobbopprettelse",
+                type: "initial",
+                uploadedAt: job.createdAt,
+                uploadedBy: "employer"
+              });
+            });
+          }
+          setPhotos(allPhotos);
+        })
         .catch(() => setPhotos([]))
         .finally(() => setLoadingPhotos(false));
     }
@@ -427,7 +444,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
             Se mine jobber
           </Link>
         ) : (
-          user && job.employerId !== user.id && (
+          user && (user.role === "worker" || user.role === "both") && job.employerId !== user.id && (
             <button
               onClick={handleApply}
               disabled={applying}

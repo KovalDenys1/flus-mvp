@@ -20,6 +20,7 @@ export type Job = {
   endTime?: string;
   paymentType?: "fixed" | "hourly";
   requirements?: string;
+  initialPhotos?: string[];
   employer?: {
     id: string;
     navn: string;
@@ -74,6 +75,7 @@ export async function getJobs(filters?: { category?: string; areaName?: string }
       endTime: j.end_time as string | undefined,
       paymentType: j.payment_type as "fixed" | "hourly" | undefined,
       requirements: j.requirements as string | undefined,
+      initialPhotos: j.initial_photos as string[] || [],
       employer: j.employer ? {
         id: (j.employer as Record<string, unknown>).id as string,
         navn: (j.employer as Record<string, unknown>).navn as string,
@@ -123,6 +125,7 @@ export async function findJobById(id: string): Promise<Job | null> {
       endTime: data.end_time,
       paymentType: data.payment_type,
       requirements: data.requirements,
+      initialPhotos: data.initial_photos as string[] || [],
       employer: data.employer ? {
         id: data.employer.id,
         navn: data.employer.navn,
@@ -150,7 +153,8 @@ export async function createJob(
   startTime?: string,
   endTime?: string,
   paymentType?: "fixed" | "hourly",
-  requirements?: string
+  requirements?: string,
+  initialPhotos?: string[]
 ): Promise<Job | null> {
   try {
     const supabase = getSupabaseServer();
@@ -172,6 +176,7 @@ export async function createJob(
         end_time: endTime,
         payment_type: paymentType,
         requirements,
+        initial_photos: initialPhotos || [],
         status: "open",
       })
       .select(`
@@ -205,6 +210,7 @@ export async function createJob(
       endTime: data.end_time,
       paymentType: data.payment_type,
       requirements: data.requirements,
+      initialPhotos: data.initial_photos as string[] || [],
       employer: data.employer ? {
         id: data.employer.id,
         navn: data.employer.navn,

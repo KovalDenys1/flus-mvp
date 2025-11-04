@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       endTime,
       paymentType,
       requirements,
+      initialPhotos,
     } = body;
 
     // Basic validation
@@ -73,7 +74,8 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       paymentType || "fixed",
-      requirements
+      requirements,
+      initialPhotos
     );
     if (!job) {
       return NextResponse.json(

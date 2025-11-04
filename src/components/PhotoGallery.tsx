@@ -34,6 +34,25 @@ export default function PhotoGallery({ photos, title = "Jobb bilder" }: PhotoGal
     );
   }
 
+  const getPhotoTypeLabel = (type: string) => {
+    switch (type) {
+      case "before":
+        return "📸 Før arbeid";
+      case "after":
+        return "📸 Etter arbeid";
+      case "chat":
+        return "💬 Chat bilde";
+      case "initial":
+        return "📷 Annonse bilde";
+      default:
+        return "📷 Bilde";
+    }
+  };
+
+  const getUploaderLabel = (uploadedBy: string) => {
+    return uploadedBy === "employer" ? "Arbeidsgiver" : "Arbeidstaker";
+  };
+
   const openLightbox = (index: number) => {
     setSelectedPhotoIndex(index);
   };
@@ -52,23 +71,6 @@ export default function PhotoGallery({ photos, title = "Jobb bilder" }: PhotoGal
     setSelectedPhotoIndex(selectedPhotoIndex === photos.length - 1 ? 0 : selectedPhotoIndex + 1);
   };
 
-  const getPhotoTypeLabel = (type: string) => {
-    switch (type) {
-      case "before":
-        return "📸 Før arbeid";
-      case "after":
-        return "📸 Etter arbeid";
-      case "chat":
-        return "💬 Chat bilde";
-      default:
-        return "📷 Bilde";
-    }
-  };
-
-  const getUploaderLabel = (uploadedBy: string) => {
-    return uploadedBy === "employer" ? "Arbeidsgiver" : "Arbeidstaker";
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -76,38 +78,31 @@ export default function PhotoGallery({ photos, title = "Jobb bilder" }: PhotoGal
         <span className="text-sm text-gray-500">{photos.length} bilde{photos.length !== 1 ? "r" : ""}</span>
       </div>
 
-      {/* Photo Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Photo List - Show images directly */}
+      <div className="space-y-4">
         {photos.map((photo, index) => (
-          <div
-            key={photo.id}
-            className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200 hover:border-orange-300 transition-colors"
-            onClick={() => openLightbox(index)}
-          >
-            <div className="aspect-square relative">
+          <div key={photo.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onClick={() => openLightbox(index)}>
+            <div className="relative w-full h-64 md:h-80">
               <Image
                 src={photo.url}
                 alt={photo.caption}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                sizes="(max-width: 768px) 100vw, 800px"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
             </div>
-
-            {/* Photo type badge */}
-            <div className="absolute top-2 left-2">
-              <span className="px-2 py-1 bg-black bg-opacity-75 text-white text-xs rounded">
-                {getPhotoTypeLabel(photo.type)}
-              </span>
-            </div>
-
-            {/* Caption overlay on hover */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p className="text-white text-sm font-medium truncate">{photo.caption}</p>
-              <p className="text-white text-xs opacity-75">
-                {getUploaderLabel(photo.uploadedBy)} • {new Date(photo.uploadedAt).toLocaleDateString('no-NO')}
-              </p>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                  {getPhotoTypeLabel(photo.type)}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {getUploaderLabel(photo.uploadedBy)} • {new Date(photo.uploadedAt).toLocaleDateString('no-NO')}
+                </span>
+              </div>
+              {photo.caption && (
+                <p className="text-sm text-gray-900">{photo.caption}</p>
+              )}
             </div>
           </div>
         ))}
