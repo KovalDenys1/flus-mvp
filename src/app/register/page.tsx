@@ -79,8 +79,8 @@ export default function Page() {
               className="mt-1 w-4 h-4"
             />
             <div className="text-sm text-gray-700">
-              Jeg godtar <a href="#" className="text-orange-600 hover:underline">vilkårene for bruk</a> og 
-              <a href="#" className="text-orange-600 hover:underline ml-1">personvernerklæringen</a>
+              Jeg godtar <a href="#" className="text-primary hover:underline">vilkårene for bruk</a> og 
+              <a href="#" className="text-primary hover:underline ml-1">personvernerklæringen</a>
             </div>
           </label>
         </div>

@@ -419,7 +419,7 @@ export default function EmployerProfilePage() {
                   placeholder="https://dinnettside.no"
                 />
               </div>
-              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-600 bg-secondary/10 p-3 rounded-lg">
                 <strong>Tips:</strong> Som privatperson trenger du ikke organisasjonsnummer. 
                 Vi anbefaler å legge til en kort beskrivelse av deg selv og hva slags hjelp du trenger.
               </div>
@@ -455,7 +455,7 @@ export default function EmployerProfilePage() {
                       href={user.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition text-sm"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg hover:bg-secondary/5 transition text-sm"
                     >
                       <ExternalLink className="w-4 h-4" />
                       Besøk nettside
@@ -479,8 +479,8 @@ export default function EmployerProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-3xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
+              <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                <div className="text-3xl font-bold text-secondary">{stats.totalJobsCreated}</div>
                 <div className="text-sm text-gray-600 mt-1">Jobber opprettet</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -491,8 +491,8 @@ export default function EmployerProfilePage() {
                 <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
                 <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-3xl font-bold text-orange-600">{stats.totalApplicationsReceived}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.totalApplicationsReceived}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader mottatt</div>
               </div>
               <div className="text-center p-4 bg-teal-50 rounded-lg">

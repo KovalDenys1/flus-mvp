@@ -115,9 +115,9 @@ export default function SupportPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "open":
-        return <AlertCircle className="w-4 h-4 text-orange-500" />;
+        return <AlertCircle className="w-4 h-4 text-primary" />;
       case "in_progress":
-        return <Clock className="w-4 h-4 text-blue-500" />;
+        return <Clock className="w-4 h-4 text-secondary" />;
       case "closed":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       default:
@@ -141,9 +141,9 @@ export default function SupportPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-orange-100 text-orange-700";
+        return "bg-primary/10 text-primary";
       case "in_progress":
-        return "bg-blue-100 text-blue-700";
+        return "bg-secondary/10 text-secondary";
       case "closed":
         return "bg-green-100 text-green-700";
       default:
@@ -246,7 +246,7 @@ export default function SupportPage() {
             <div className="space-y-4">
               {FAQ_ITEMS.map((faq, index) => (
                 <details key={index} className="border rounded-lg p-4">
-                  <summary className="font-medium cursor-pointer hover:text-orange-600">
+                  <summary className="font-medium cursor-pointer hover:text-primary">
                     {faq.question}
                   </summary>
                   <p className="mt-2 text-gray-600 text-sm">{faq.answer}</p>
@@ -309,7 +309,7 @@ export default function SupportPage() {
         </Card>
 
         {/* Contact Info */}
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0">
+        <Card className="bg-gradient-to-r from-secondary/10 to-purple-50 border-0">
           <CardContent className="py-8 text-center">
             <div className="text-4xl mb-4">📞</div>
             <h3 className="text-xl font-semibold mb-2">Trenger du mer hjelp?</h3>

@@ -145,7 +145,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           </div>
         </div>
         <div className="mt-6">
-          <Link href="/jobber" className="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+          <Link href="/jobber" className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition">
             ← Tilbake til jobber
           </Link>
         </div>
@@ -261,8 +261,8 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           <span className="text-sm font-semibold text-green-700">{job.payNok} NOK</span>
           {job.paymentType === "hourly" && <span className="text-xs text-green-600"> /time</span>}
         </div>
-        <div className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
-          <span className="text-sm text-blue-700">⏱️ {minutesToHhMm(job.durationMinutes)}</span>
+        <div className="px-3 py-1.5 bg-secondary/10 border border-secondary/20 rounded-lg">
+          <span className="text-sm text-secondary">⏱️ {minutesToHhMm(job.durationMinutes)}</span>
         </div>
         <div className="px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
           <span className="text-sm text-purple-700">{getScheduleLabel()}</span>
@@ -301,9 +301,9 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
 
       {/* Requirements */}
       {job.requirements && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="text-xs text-blue-700 uppercase font-semibold mb-1">Krav</div>
-          <p className="text-sm text-blue-900 leading-relaxed">{job.requirements}</p>
+        <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-3">
+          <div className="text-xs text-secondary uppercase font-semibold mb-1">Krav</div>
+          <p className="text-sm text-secondary-foreground leading-relaxed">{job.requirements}</p>
         </div>
       )}
 
@@ -354,7 +354,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                       <div className={`px-2 py-1 rounded text-xs ${
                         app.status === "accepted" ? "bg-green-100 text-green-700" :
                         app.status === "rejected" ? "bg-red-100 text-red-700" :
-                        app.status === "completed" ? "bg-blue-100 text-blue-700" :
+                        app.status === "completed" ? "bg-secondary/10 text-secondary" :
                         "bg-yellow-100 text-yellow-700"
                       }`}>
                         {app.status === "accepted" ? "Godkjent" :
@@ -432,14 +432,14 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
         <Link
           href="/jobber"
-          className="flex-1 px-6 py-2 rounded-lg border border-orange-300 text-orange-700 text-base font-medium shadow hover:bg-orange-100 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+          className="flex-1 px-6 py-2 rounded-lg border border-primary text-primary text-base font-medium shadow hover:bg-primary/10 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           ← Tilbake
         </Link>
         {user && (user.role === "employer" || user.role === "both") ? (
           <Link
             href={`/mine-jobber`}
-            className="flex-1 px-6 py-2 rounded-lg bg-blue-500 text-white text-base font-medium shadow hover:bg-blue-600 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+            className="flex-1 px-6 py-2 rounded-lg bg-secondary text-secondary-foreground text-base font-medium shadow hover:bg-secondary/90 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
           >
             Se mine jobber
           </Link>
@@ -448,7 +448,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
             <button
               onClick={handleApply}
               disabled={applying}
-              className="flex-1 px-6 py-2 rounded-lg bg-orange-500 text-white text-base font-medium shadow hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:bg-orange-300"
+              className="flex-1 px-6 py-2 rounded-lg bg-primary text-primary-foreground text-base font-medium shadow hover:bg-primary/90 transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:bg-primary/50"
             >
               {applying ? "Starter samtale..." : "Søk"}
             </button>

@@ -186,7 +186,7 @@ export default function CreateJobPage() {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+              className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -274,8 +274,8 @@ export default function CreateJobPage() {
               <CardTitle>📍 Sted</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="bg-secondary/10 p-3 rounded-lg">
+                <p className="text-sm text-secondary">
                   💡 <strong>Tips:</strong> Bare skriv inn adressen din (f.eks. Furuset alle 19B). 
                   Vi finner automatisk riktig område for deg!
                 </p>
@@ -492,8 +492,8 @@ export default function CreateJobPage() {
               <CardTitle>📸 Jobb bilder (valgfritt)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="bg-secondary/10 p-3 rounded-lg">
+                <p className="text-sm text-secondary">
                   💡 <strong>Tips:</strong> Legg til bilder av jobben for å gjøre annonsen mer attraktiv.
                   Arbeidstakere kan se bildene før de søker.
                 </p>
@@ -509,7 +509,7 @@ export default function CreateJobPage() {
                     const files = Array.from(e.target.files || []);
                     setPhotos(files);
                   }}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/5"
                 />
                 {photos.length > 0 && (
                   <p className="text-sm text-gray-600 mt-2">
@@ -586,7 +586,7 @@ export default function CreateJobPage() {
               </DialogContent>
             </Dialog>
             
-            <Button type="submit" disabled={loading || uploadingPhotos || progress < 100} className="flex-1 bg-orange-600 hover:bg-orange-700">
+            <Button type="submit" disabled={loading || uploadingPhotos || progress < 100} className="flex-1 bg-primary hover:bg-primary">
               {uploadingPhotos ? "Laster opp bilder..." : loading ? "Oppretter..." : "Opprett jobb"}
             </Button>
           </div>

@@ -392,7 +392,7 @@ export default function WorkerProfilePage() {
                           href={user.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition text-sm"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg hover:bg-secondary/5 transition text-sm"
                         >
                           <ExternalLink className="w-4 h-4" />
                           LinkedIn
@@ -440,16 +440,16 @@ export default function WorkerProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-3xl font-bold text-blue-600">{stats.totalApplicationsSent}</div>
+              <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                <div className="text-3xl font-bold text-secondary">{stats.totalApplicationsSent}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-3xl font-bold text-green-600">{stats.completedJobsWorker}</div>
                 <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.totalEarnings} kr</div>
                 <div className="text-sm text-gray-600 mt-1">Total inntjening</div>
               </div>
               <div className="text-center p-4 bg-yellow-50 rounded-lg">
@@ -476,10 +476,10 @@ export default function WorkerProfilePage() {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <div className="bg-orange-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                <div className="bg-primary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium">XP:</span>
-                    <span className="text-2xl font-bold text-orange-600">{achievements.xp}</span>
+                    <span className="text-2xl font-bold text-primary">{achievements.xp}</span>
                   </div>
                   <Progress value={Math.min(100, (achievements.xp / 1000) * 100)} className="h-2" />
                   <div className="text-xs text-gray-600 mt-2">
@@ -551,10 +551,10 @@ export default function WorkerProfilePage() {
               <div className="space-y-4">
                 {stats && (
                   <>
-                    <div className="bg-blue-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                    <div className="bg-secondary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Vurdering:</span>
-                        <span className="text-2xl font-bold text-blue-600 flex items-center gap-1">
+                        <span className="text-2xl font-bold text-secondary flex items-center gap-1">
                           {stats.averageRating > 0 ? stats.averageRating : "—"}
                           {stats.averageRating > 0 && <span className="text-lg">⭐</span>}
                         </span>

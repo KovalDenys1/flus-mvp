@@ -174,7 +174,7 @@ export default function AddressAutocomplete({
             <div
               key={index}
               className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                index === selectedIndex ? "bg-blue-50" : ""
+                index === selectedIndex ? "bg-secondary/10" : ""
               }`}
               onClick={() => selectSuggestion(suggestion)}
             >

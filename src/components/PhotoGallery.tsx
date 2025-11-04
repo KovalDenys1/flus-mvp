@@ -171,7 +171,7 @@ export default function PhotoGallery({ photos, title = "Jobb bilder" }: PhotoGal
                     key={photo.id}
                     onClick={() => setSelectedPhotoIndex(index)}
                     className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden ${
-                      index === selectedPhotoIndex ? 'border-orange-400' : 'border-gray-600'
+                      index === selectedPhotoIndex ? 'border-primary' : 'border-gray-600'
                     }`}
                   >
                     <Image

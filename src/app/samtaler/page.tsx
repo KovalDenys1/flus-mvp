@@ -106,7 +106,7 @@ export default function ConversationsPage() {
         <p className="text-red-500">Kunne ikke laste samtaler: {error}</p>
         <p className="mt-2 text-gray-600">
           Det kan hende du ikke er logget inn.{" "}
-          <Link href="/login" className="underline text-blue-600">
+          <Link href="/login" className="underline text-secondary">
             Logg inn
           </Link>
         </p>
@@ -172,13 +172,13 @@ export default function ConversationsPage() {
 
               return (
                 <Link key={convo.id} href={`/samtaler/${convo.id}`} className="block">
-                  <Card className="hover:shadow-lg hover:border-orange-300 transition-all duration-200 cursor-pointer border border-gray-200 bg-white">
+                  <Card className="hover:shadow-lg hover:border-primary/30 transition-all duration-200 cursor-pointer border border-gray-200 bg-white">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
                         <Avatar className="w-14 h-14 flex-shrink-0 border-2 border-gray-100">
                           <AvatarImage src={otherUser?.photo_url} alt={otherUser?.navn} />
-                          <AvatarFallback className="bg-gradient-to-br from-orange-400 to-orange-600 text-white font-semibold">
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary text-primary-foreground font-semibold">
                             {getInitials(otherUser?.navn, otherUser?.email)}
                           </AvatarFallback>
                         </Avatar>

@@ -103,11 +103,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
-                      <div className="text-sm text-gray-600">Totale jobber opprettet</div>
-                      <div className="text-xs text-gray-500 mt-1">Gjennom hele tiden</div>
+                      <div className="text-3xl font-bold text-secondary">{stats.totalJobsCreated}</div>
+                      <div className="text-sm text-muted-foreground">Totale jobber opprettet</div>
+                      <div className="text-xs text-muted-foreground mt-1">Gjennom hele tiden</div>
                     </div>
-                    <Briefcase className="w-8 h-8 text-blue-600" />
+                    <Briefcase className="w-8 h-8 text-secondary" />
                   </div>
                 </CardContent>
               </Card>
@@ -116,11 +116,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-orange-600">{stats.activeJobs}</div>
-                      <div className="text-sm text-gray-600">Aktive jobber</div>
-                      <div className="text-xs text-gray-500 mt-1">Åpne eller pågående</div>
+                      <div className="text-3xl font-bold text-primary">{stats.activeJobs}</div>
+                      <div className="text-sm text-muted-foreground">Aktive jobber</div>
+                      <div className="text-xs text-muted-foreground mt-1">Åpne eller pågående</div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-orange-600" />
+                    <TrendingUp className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -142,11 +142,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-purple-600">{stats.totalApplications}</div>
-                      <div className="text-sm text-gray-600">Totale søknader mottatt</div>
-                      <div className="text-xs text-gray-500 mt-1">Fra alle arbeidstakere</div>
+                      <div className="text-3xl font-bold text-secondary">{stats.totalApplications}</div>
+                      <div className="text-sm text-muted-foreground">Totale søknader mottatt</div>
+                      <div className="text-xs text-muted-foreground mt-1">Fra alle arbeidstakere</div>
                     </div>
-                    <Users className="w-8 h-8 text-purple-600" />
+                    <Users className="w-8 h-8 text-secondary" />
                   </div>
                 </CardContent>
               </Card>
@@ -250,11 +250,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-blue-600">{stats.totalApplications}</div>
-                      <div className="text-sm text-gray-600">Søknader sendt</div>
-                      <div className="text-xs text-gray-500 mt-1">Totalt alle søknader</div>
+                      <div className="text-3xl font-bold text-secondary">{stats.totalApplications}</div>
+                      <div className="text-sm text-muted-foreground">Søknader sendt</div>
+                      <div className="text-xs text-muted-foreground mt-1">Totalt alle søknader</div>
                     </div>
-                    <Users className="w-8 h-8 text-blue-600" />
+                    <Users className="w-8 h-8 text-secondary" />
                   </div>
                 </CardContent>
               </Card>
@@ -289,11 +289,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
-                      <div className="text-sm text-gray-600">Total inntjening</div>
-                      <div className="text-xs text-gray-500 mt-1">Fra fullførte jobber</div>
+                      <div className="text-3xl font-bold text-primary">{stats.totalEarnings} kr</div>
+                      <div className="text-sm text-muted-foreground">Totale inntekter</div>
+                      <div className="text-xs text-muted-foreground mt-1">Fra fullførte jobber</div>
                     </div>
-                    <DollarSign className="w-8 h-8 text-orange-600" />
+                    <DollarSign className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -393,7 +393,7 @@ export default function StatistikkPage() {
         )}
 
         {/* Summary Card */}
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0">
+        <Card className="bg-gradient-to-r from-secondary/10 to-purple-50 border-0">
           <CardContent className="py-8 text-center">
             <div className="text-4xl mb-4">📊</div>
             <h3 className="text-xl font-semibold mb-2">Din aktivitet på FLUS</h3>

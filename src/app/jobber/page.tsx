@@ -139,15 +139,15 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="text-center mb-8">
-          <div className="inline-block bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
             🚀 {visible.length} ledige jobber
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Finn din neste <span className="text-orange-600">småjobb</span>
+            Finn din neste <span className="text-primary">småjobb</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Søk blant hundrevis av småjobber i ditt område. Filtrer etter kategori og avstand.
@@ -174,7 +174,7 @@ export default function Page() {
               value={query}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
               placeholder="Søk i tittel, beskrivelse eller område..."
-              className="pl-12 pr-4 py-6 text-lg border-2 border-gray-200 focus:border-orange-400 rounded-2xl shadow-sm bg-white"
+              className="pl-12 pr-4 py-6 text-lg border-2 border-border focus:border-primary rounded-2xl shadow-sm bg-background"
             />
           </div>
         </div>
@@ -188,8 +188,8 @@ export default function Page() {
               <button
                 className={`px-4 py-2 rounded-full font-medium transition-all ${
                   category === null
-                    ? "bg-orange-500 text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-orange-50 border border-gray-200"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-background text-foreground hover:bg-primary/5 border border-border"
                 }`}
                 onClick={() => setCategory(null)}
               >
@@ -200,8 +200,8 @@ export default function Page() {
                   key={c}
                   className={`px-4 py-2 rounded-full font-medium transition-all ${
                     category === c
-                      ? "bg-orange-500 text-white shadow-md"
-                      : "bg-white text-gray-700 hover:bg-orange-50 border border-gray-200"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-background text-foreground hover:bg-primary/5 border border-border"
                   }`}
                   onClick={() => setCategory(category === c ? null : c)}
                 >
@@ -219,7 +219,7 @@ export default function Page() {
             <select
               value={radius}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRadius(parseInt(e.target.value))}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 bg-white focus:border-orange-400 focus:outline-none"
+              className="w-full border-2 border-border rounded-xl px-4 py-3 bg-background focus:border-primary focus:outline-none"
               disabled={!pos}
             >
               {[1, 3, 5, 10, 25, 50].map((km) => (
@@ -336,8 +336,8 @@ export default function Page() {
                         appliedJobIds.has(job.id)
                           ? "bg-green-600 hover:bg-green-700 text-white cursor-default"
                           : !isLoggedIn
-                          ? "bg-blue-600 hover:bg-blue-700 text-white"
-                          : "bg-gray-900 hover:bg-gray-800 text-white"
+                          ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                          : "bg-primary hover:bg-primary/90 text-primary-foreground"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();

@@ -79,7 +79,7 @@ export default function MineSoknaderPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-blue-100 text-blue-700";
+      case "pending": return "bg-secondary/10 text-secondary";
       case "accepted": return "bg-green-100 text-green-700";
       case "rejected": return "bg-red-100 text-red-700";
       case "completed": return "bg-purple-100 text-purple-700";
@@ -172,7 +172,7 @@ export default function MineSoknaderPage() {
               </p>
               <Link
                 href="/jobber"
-                className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold"
+                className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary transition font-semibold"
               >
                 Se ledige jobber
               </Link>
@@ -237,7 +237,7 @@ export default function MineSoknaderPage() {
                         )}
                         <Link
                           href={`/jobber/${app.jobId}`}
-                          className="text-orange-600 hover:text-orange-700 font-semibold text-sm"
+                          className="text-primary hover:text-primary font-semibold text-sm"
                         >
                           Se detaljer →
                         </Link>

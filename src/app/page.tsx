@@ -35,7 +35,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
         <div className="animate-pulse">
           <div className="h-12 bg-gray-200 rounded w-64 mb-4"></div>
           <div className="h-6 bg-gray-200 rounded w-48"></div>
@@ -45,17 +45,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="mb-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 px-6 py-2 text-sm font-semibold shadow-lg">
+            <Badge className="mb-6 bg-gradient-to-r from-primary to-primary text-primary-foreground border-0 px-6 py-2 text-sm font-semibold shadow-lg">
               🚀 FLUS - Din lokale jobbplattform
             </Badge>
 
             <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 leading-tight">
-              Finn <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">småjobber</span>
+              <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">småjobber</span>
               <br />
               i ditt nærområde
             </h1>
@@ -66,12 +66,12 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link href="/register">
-                <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-10 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all rounded-2xl">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-primary hover:from-primary/90 hover:to-primary/90 text-primary-foreground px-10 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all rounded-2xl">
                   Kom i gang gratis →
                 </Button>
               </Link>
               <Link href="/jobber">
-                <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 px-10 py-7 text-lg font-semibold rounded-2xl transition-all">
+                <Button size="lg" variant="outline" className="border-2 border-border hover:border-primary hover:bg-primary/5 px-10 py-7 text-lg font-semibold rounded-2xl transition-all">
                   Se alle jobber
                 </Button>
               </Link>
@@ -80,16 +80,16 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mt-16">
               <div className="text-center">
-                <div className="text-4xl font-bold text-orange-600 mb-2">500+</div>
-                <div className="text-sm text-gray-600">Aktive jobber</div>
+                <div className="text-4xl font-bold text-primary mb-2">500+</div>
+                <div className="text-sm text-muted-foreground">Aktive jobber</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-orange-600 mb-2">1000+</div>
-                <div className="text-sm text-gray-600">Registrerte brukere</div>
+                <div className="text-4xl font-bold text-primary mb-2">1000+</div>
+                <div className="text-sm text-muted-foreground">Registrerte brukere</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-orange-600 mb-2">4.8★</div>
-                <div className="text-sm text-gray-600">Gjennomsnittsvurdering</div>
+                <div className="text-4xl font-bold text-primary mb-2">4.8★</div>
+                <div className="text-sm text-muted-foreground">Gjennomsnittsvurdering</div>
               </div>
             </div>
           </div>
@@ -97,8 +97,8 @@ export default function HomePage() {
 
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full opacity-20 blur-3xl"></div>
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-primary/20 to-primary/30 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-br from-secondary/20 to-secondary/30 rounded-full opacity-20 blur-3xl"></div>
         </div>
       </section>
 
@@ -117,7 +117,7 @@ export default function HomePage() {
           {/* Steps */}
           <div className="grid md:grid-cols-3 gap-8 mb-20">
             <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <span className="text-4xl">🔍</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">1. Søk</h3>
@@ -127,7 +127,7 @@ export default function HomePage() {
             </div>
 
             <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <span className="text-4xl">💬</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">2. Koble sammen</h3>
@@ -137,7 +137,7 @@ export default function HomePage() {
             </div>
 
             <div className="text-center group">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <span className="text-4xl">💰</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">3. Få betalt</h3>
@@ -150,44 +150,44 @@ export default function HomePage() {
           {/* Cards */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* For Workers */}
-            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-orange-50 to-white rounded-3xl overflow-hidden group">
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-primary/5 to-background rounded-3xl overflow-hidden group">
               <CardHeader className="text-center pb-6 pt-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary to-primary rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
                   <span className="text-5xl">👷</span>
                 </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">
                   For jobbsøkere
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 pb-8">
                 <div className="space-y-4">
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
-                      <span className="text-orange-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition">
+                      <span className="text-primary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Finn småjobber i ditt nærområde</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
-                      <span className="text-orange-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition">
+                      <span className="text-primary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Søk enkelt med ett klikk</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
-                      <span className="text-orange-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition">
+                      <span className="text-primary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Chat direkte med arbeidsgivere</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-orange-200 transition">
-                      <span className="text-orange-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition">
+                      <span className="text-primary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Få betalt umiddelbart etter jobb</span>
                   </div>
                 </div>
                 <Link href="/register" className="block mt-8">
-                  <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                  <Button className="w-full bg-gradient-to-r from-primary to-primary hover:from-primary/90 hover:to-primary/90 text-primary-foreground py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
                     Bli jobbsøker →
                   </Button>
                 </Link>
@@ -195,44 +195,44 @@ export default function HomePage() {
             </Card>
 
             {/* For Employers */}
-            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-white rounded-3xl overflow-hidden group">
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-secondary/5 to-background rounded-3xl overflow-hidden group">
               <CardHeader className="text-center pb-6 pt-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <div className="w-24 h-24 bg-gradient-to-br from-secondary to-secondary rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
                   <span className="text-5xl">💼</span>
                 </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-secondary to-secondary bg-clip-text text-transparent">
                   For arbeidsgivere
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 pb-8">
                 <div className="space-y-4">
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
-                      <span className="text-blue-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-secondary/20 transition">
+                      <span className="text-secondary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Opprett jobber på få minutter</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
-                      <span className="text-blue-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-secondary/20 transition">
+                      <span className="text-secondary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Få søknader fra kvalifiserte kandidater</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
-                      <span className="text-blue-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-secondary/20 transition">
+                      <span className="text-secondary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Chat og følg opp arbeidet</span>
                   </div>
                   <div className="flex items-start gap-4 group/item">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-blue-200 transition">
-                      <span className="text-blue-600 font-bold">✓</span>
+                    <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center shrink-0 group-hover/item:bg-secondary/20 transition">
+                      <span className="text-secondary font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg">Trygg betaling og kvalitetsgaranti</span>
                   </div>
                 </div>
                 <Link href="/register" className="block mt-8">
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                  <Button className="w-full bg-gradient-to-r from-secondary to-secondary hover:from-secondary/90 hover:to-secondary/90 text-secondary-foreground py-6 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all">
                     Bli arbeidsgiver →
                   </Button>
                 </Link>
@@ -276,7 +276,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-orange-600 to-blue-600 text-white">
+      <section className="py-20 bg-gradient-to-r from-primary to-secondary text-primary-foreground">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Klar til å komme i gang?
@@ -285,7 +285,7 @@ export default function HomePage() {
             Registrer deg gratis og finn din neste jobb eller hjelper i dag.
           </p>
           <Link href="/register">
-            <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold">
+            <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-8 py-3 text-lg font-semibold">
               Registrer deg nå
             </Button>
           </Link>

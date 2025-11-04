@@ -93,7 +93,7 @@ export default function MyJobsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open": return "bg-green-100 text-green-700";
-      case "in_progress": return "bg-blue-100 text-blue-700";
+      case "in_progress": return "bg-secondary/10 text-secondary";
       case "completed": return "bg-gray-100 text-gray-700";
       default: return "bg-gray-100 text-gray-700";
     }
@@ -313,7 +313,7 @@ export default function MyJobsPage() {
           </div>
           <Link
             href="/jobber/ny"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary text-white rounded-xl hover:from-primary hover:to-primary transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <span className="text-xl">+</span>
             Ny jobb
@@ -330,7 +330,7 @@ export default function MyJobsPage() {
               </p>
               <Link
                 href="/jobber/ny"
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-primary text-white rounded-xl hover:from-primary hover:to-primary transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg"
               >
                 <span className="text-2xl">+</span>
                 Opprett første jobb
@@ -341,13 +341,13 @@ export default function MyJobsPage() {
           <div className="space-y-8">
             {jobs.map((job) => (
               <Link key={job.id} href={`/jobber/${job.id}`}>
-                <Card className="hover:shadow-lg hover:shadow-orange-100/50 transition-all duration-200 cursor-pointer border-l-4 border-l-transparent hover:border-l-orange-400 bg-gradient-to-r from-white to-orange-50/30">
+                <Card className="hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 cursor-pointer border-l-4 border-l-transparent hover:border-l-primary bg-gradient-to-r from-white to-primary/5">
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-900 hover:text-orange-600 transition-colors">{job.title}</CardTitle>
+                      <CardTitle className="text-xl text-gray-900 hover:text-primary transition-colors">{job.title}</CardTitle>
                       <div className="flex items-center gap-2 mt-3 flex-wrap">
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">{job.category}</Badge>
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">{job.category}</Badge>
                         <Badge className={`${getStatusColor(job.status)} font-medium`}>
                           {job.status === "open" ? "Åpen" : job.status === "in_progress" ? "Pågår" : "Fullført"}
                         </Badge>
@@ -403,7 +403,7 @@ export default function MyJobsPage() {
                               e.stopPropagation();
                               openEditDialog(job);
                             }}
-                            className="text-blue-600 border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-colors font-medium"
+                            className="text-secondary border-secondary/30 hover:bg-secondary/5 hover:border-secondary/40 transition-colors font-medium"
                           >
                             ✏️ Rediger
                           </Button>
@@ -422,7 +422,7 @@ export default function MyJobsPage() {
                           </Button>
                         </>
                       )}
-                        <span className="text-orange-600 hover:text-orange-700 font-semibold text-sm flex items-center gap-1 transition-colors">
+                        <span className="text-primary hover:text-primary font-semibold text-sm flex items-center gap-1 transition-colors">
                           Se detaljer
                           <span className="text-lg">→</span>
                         </span>
@@ -517,7 +517,7 @@ export default function MyJobsPage() {
                       type="text"
                       value={editForm.title}
                       onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                   </div>
                   <div>
@@ -525,7 +525,7 @@ export default function MyJobsPage() {
                     <textarea
                       value={editForm.description}
                       onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       rows={3}
                     />
                   </div>
@@ -535,7 +535,7 @@ export default function MyJobsPage() {
                       type="text"
                       value={editForm.category}
                       onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -545,7 +545,7 @@ export default function MyJobsPage() {
                         type="number"
                         value={editForm.payNok}
                         onChange={(e) => setEditForm({ ...editForm, payNok: e.target.value })}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       />
                     </div>
                     <div>
@@ -554,7 +554,7 @@ export default function MyJobsPage() {
                         type="number"
                         value={editForm.durationMinutes}
                         onChange={(e) => setEditForm({ ...editForm, durationMinutes: e.target.value })}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       />
                     </div>
                   </div>
@@ -564,7 +564,7 @@ export default function MyJobsPage() {
                       type="text"
                       value={editForm.areaName}
                       onChange={(e) => setEditForm({ ...editForm, areaName: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                   </div>
                   <div>
@@ -573,7 +573,7 @@ export default function MyJobsPage() {
                       type="text"
                       value={editForm.address}
                       onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -583,7 +583,7 @@ export default function MyJobsPage() {
                         type="time"
                         value={editForm.startTime}
                         onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       />
                     </div>
                     <div>
@@ -592,7 +592,7 @@ export default function MyJobsPage() {
                         type="time"
                         value={editForm.endTime}
                         onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       />
                     </div>
                   </div>
@@ -601,7 +601,7 @@ export default function MyJobsPage() {
                     <textarea
                       value={editForm.requirements}
                       onChange={(e) => setEditForm({ ...editForm, requirements: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                       rows={2}
                     />
                   </div>
@@ -620,7 +620,7 @@ export default function MyJobsPage() {
                 </Button>
                 <Button
                   onClick={handleEditJob}
-                  className="flex-1 px-6 bg-blue-600 hover:bg-blue-700 text-white order-1 sm:order-2"
+                  className="flex-1 px-6 bg-secondary hover:bg-secondary text-white order-1 sm:order-2"
                 >
                   Oppdater jobb
                 </Button>

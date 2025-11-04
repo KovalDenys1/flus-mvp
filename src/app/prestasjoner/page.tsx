@@ -28,8 +28,8 @@ export default function Page() {
     <AuthGuard requireAuth={true}>
       <div className="max-w-2xl mx-auto py-10 px-2 space-y-10 bg-gray-50 rounded-2xl">
         <header className="flex flex-col items-center gap-3 mb-4">
-          <div className="bg-orange-50 rounded-full p-3">
-            <Info className="text-orange-500" size={32} />
+          <div className="bg-primary/10 rounded-full p-3">
+            <Info className="text-primary" size={32} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 text-center">Dine prestasjoner</h1>
           <p className="text-gray-500 text-center max-w-lg leading-relaxed">
@@ -48,7 +48,7 @@ export default function Page() {
             ) : (
               <div className="flex flex-wrap gap-2">
                 {achievements.badges.map(b => (
-                  <Badge key={b} variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200 px-3 py-1 text-sm">
+                  <Badge key={b} variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm">
                     {b}
                   </Badge>
                 ))}
@@ -70,8 +70,8 @@ export default function Page() {
                       <div className="text-sm text-gray-500">{c.count} av {c.target} oppdrag</div>
                     </div>
                     <div className="mt-1 flex items-center gap-2">
-                      <Progress value={pct} className={pct === 100 ? "bg-orange-200" : ""} />
-                      {pct === 100 && <span className="text-xs text-orange-600">Gratulerer!</span>}
+                      <Progress value={pct} className={pct === 100 ? "bg-primary/20" : ""} />
+                      {pct === 100 && <span className="text-xs text-primary">Gratulerer!</span>}
                     </div>
                   </li>
                 );
@@ -89,7 +89,7 @@ export default function Page() {
             <div className="flex justify-center">
               <a
                 href="/grunder"
-                className={`px-6 py-3 rounded-lg font-semibold text-base transition text-center ${achievements.canContactCurator ? "bg-orange-500 text-white hover:bg-orange-600 shadow-md" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
+                className={`px-6 py-3 rounded-lg font-semibold text-base transition text-center ${achievements.canContactCurator ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" : "bg-muted text-muted-foreground cursor-not-allowed"}`}
                 tabIndex={achievements.canContactCurator ? 0 : -1}
                 aria-disabled={!achievements.canContactCurator}
                 style={{ minWidth: 180 }}

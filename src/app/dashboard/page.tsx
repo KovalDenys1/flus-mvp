@@ -92,11 +92,11 @@ export default function DashboardPage() {
     <AuthGuard requireAuth={true}>
       <div className="max-w-6xl mx-auto mt-10 p-4 space-y-8">
         {/* Welcome Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-blue-600 rounded-2xl p-8 text-white">
+        <div className="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 text-primary-foreground">
           <h1 className="text-3xl font-bold mb-2">
             Velkommen tilbake, {user?.navn || user?.email?.split('@')[0]}! 👋
           </h1>
-          <p className="text-orange-100 text-lg">
+          <p className="text-primary/80 text-lg">
             {user?.isWorker && user?.isEmployer
               ? "Du er både jobbsøker og arbeidsgiver"
               : user?.isWorker
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {user?.isWorker && (
             <Link href="/jobber">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200 hover:border-orange-300">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-primary/20 hover:border-primary/30">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">🔍</div>
                   <h3 className="font-semibold text-gray-900">Finn jobber</h3>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
 
           {user?.isEmployer && (
             <Link href="/jobber/ny">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200 hover:border-blue-300">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-secondary/20 hover:border-secondary/30">
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl mb-3">➕</div>
                   <h3 className="font-semibold text-gray-900">Opprett jobb</h3>
@@ -166,9 +166,9 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
-                    <div className="text-sm text-gray-600">Jobber opprettet</div>
+                  <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-secondary">{stats.totalJobsCreated}</div>
+                    <div className="text-sm text-muted-foreground">Jobber opprettet</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">{stats.activeJobs}</div>
@@ -178,9 +178,9 @@ export default function DashboardPage() {
                     <div className="text-2xl font-bold text-purple-600">{stats.completedJobs}</div>
                     <div className="text-sm text-gray-600">Fullførte jobber</div>
                   </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{stats.totalApplicationsReceived}</div>
-                    <div className="text-sm text-gray-600">Søknader mottatt</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.totalApplicationsReceived}</div>
+                    <div className="text-sm text-muted-foreground">Søknader mottatt</div>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -203,9 +203,9 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{stats.totalApplicationsSent}</div>
-                    <div className="text-sm text-gray-600">Søknader sendt</div>
+                  <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-secondary">{stats.totalApplicationsSent}</div>
+                    <div className="text-sm text-muted-foreground">Søknader sendt</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">{stats.acceptedJobs}</div>
@@ -215,9 +215,9 @@ export default function DashboardPage() {
                     <div className="text-2xl font-bold text-purple-600">{stats.completedJobsWorker}</div>
                     <div className="text-sm text-gray-600">Fullførte jobber</div>
                   </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
-                    <div className="text-sm text-gray-600">Total inntjening</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.totalEarnings} kr</div>
+                    <div className="text-sm text-muted-foreground">Total inntjening</div>
                   </div>
                 </div>
                 <div className="mt-4">

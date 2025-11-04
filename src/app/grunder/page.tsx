@@ -40,7 +40,7 @@ export default function Page() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-2 space-y-10 bg-gray-50 rounded-2xl">
       <header className="flex flex-col items-center gap-3 mb-4">
-        <div className="bg-orange-50 rounded-full p-3">
+        <div className="bg-primary/10 rounded-full p-3">
           <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#FDBA74"/><path d="M8 17v-2a4 4 0 0 1 8 0v2" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="9" r="4" stroke="#fff" strokeWidth="2"/></svg>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 text-center">Gründerhjelp</h1>
@@ -72,7 +72,7 @@ export default function Page() {
           <form onSubmit={createTicket} className="space-y-3">
             <Textarea rows={3} placeholder="F.eks. 'Ønsker hjelp til å starte ENK for IT-hjelp'"
               value={reason} onChange={e=>setReason(e.target.value)} disabled={!canContactCurator}
-              className="bg-gray-100 rounded-lg border-0 focus:ring-2 focus:ring-orange-200"/>
+              className="bg-gray-100 rounded-lg border-0 focus:ring-2 focus:ring-primary/20"/>
             <Button type="submit" disabled={!canContactCurator} className="w-full px-6 py-3 rounded-lg font-semibold text-base transition text-center">
               Send forespørsel
             </Button>
@@ -91,7 +91,7 @@ export default function Page() {
                 <li key={t.id} className="rounded-lg bg-gray-100 px-4 py-3 flex flex-col gap-1">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <div className="text-sm text-gray-500">{new Date(t.createdAt).toLocaleString()}</div>
-                    <div className="text-xs px-2 py-1 rounded bg-orange-100 text-orange-700 capitalize">
+                    <div className="text-xs px-2 py-1 rounded bg-primary/10 text-primary capitalize">
                       {t.status === "open" ? "Åpen" : t.status === "in_progress" ? "Under arbeid" : "Lukket"}
                     </div>
                   </div>

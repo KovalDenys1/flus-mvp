@@ -44,10 +44,10 @@ export function JobDetailsDialog({ open, onOpenChange, job, onApply, hasApplied 
         <div className="flex gap-2 w-full mt-4">
           {onApply && (
             <button
-              className={`w-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 ${
+              className={`w-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                 hasApplied
                   ? "bg-green-500 text-white cursor-default"
-                  : "bg-orange-500 text-white hover:bg-orange-600"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
               }`}
               onClick={() => onApply(job.id)}
               disabled={hasApplied}
@@ -57,7 +57,7 @@ export function JobDetailsDialog({ open, onOpenChange, job, onApply, hasApplied 
           )}
           <a
             href={`/jobber/${job.id}`}
-            className="w-1/2 px-4 py-2 rounded-lg bg-orange-100 text-orange-700 text-sm font-medium shadow hover:bg-orange-200 transition text-center flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+            className="w-1/2 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium shadow hover:bg-primary/20 transition text-center flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             Åpne full side
           </a>

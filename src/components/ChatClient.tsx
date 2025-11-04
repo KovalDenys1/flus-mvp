@@ -390,7 +390,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
             </Link>
             {job && (
               <>
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-md">
                   {job.title.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -509,7 +509,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                       </div>
                     )}
 
-                    <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-orange-500 text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm"}`}>
+                    <div className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow-sm ${isOwn ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card text-card-foreground rounded-bl-sm"}`}>
                       {msg.message_type === 'photo' && msg.photo_url ? (
                         <div className="space-y-2">
                           <div className="relative w-full max-w-xs h-48 rounded-lg overflow-hidden">
@@ -529,13 +529,13 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                         <p className="text-sm break-words">{msg.text_content}</p>
                       )}
 
-                      <p className={`text-xs mt-1 ${isOwn ? "text-orange-100" : "text-gray-400"}`}>
+                      <p className={`text-xs mt-1 ${isOwn ? "text-primary/80" : "text-muted-foreground"}`}>
                         {new Date(msg.created_at).toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
 
                     {isOwn && (
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-secondary flex items-center justify-center text-secondary-foreground text-xs font-bold shadow">
                         Du
                       </div>
                     )}
@@ -575,7 +575,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 {/* Before Photo */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">📸 Før arbeid</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-400 transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary transition-colors">
                     {beforePhotoPreview ? (
                       <div className="space-y-2">
                         <div className="relative w-full h-64 rounded-lg overflow-hidden">
@@ -620,7 +620,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 {/* After Photo */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">📸 Etter arbeid</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-400 transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary transition-colors">
                     {afterPhotoPreview ? (
                       <div className="space-y-2">
                         <div className="relative w-full h-64 rounded-lg overflow-hidden">
@@ -663,8 +663,8 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 </div>
 
                 {/* Info Box */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4">
+                  <p className="text-sm text-secondary">
                     💡 <strong>Tips:</strong> Ta klare bilder som viser arbeidet før og etter. Dette hjelper arbeidsgiveren med å godkjenne arbeidet raskere.
                   </p>
                 </div>

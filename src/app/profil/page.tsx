@@ -454,8 +454,8 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">{stats.totalJobsCreated}</div>
+                <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-secondary">{stats.totalJobsCreated}</div>
                   <div className="text-sm text-gray-600 mt-1">Totale jobber opprettet</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -466,8 +466,8 @@ export default function ProfilePage() {
                   <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
                   <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
                 </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-3xl font-bold text-orange-600">{stats.totalApplications}</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.totalApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Totale søknader mottatt</div>
                 </div>
                 <div className="text-center p-4 bg-teal-50 rounded-lg">
@@ -487,16 +487,16 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">{stats.totalApplications}</div>
+                <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-secondary">{stats.totalApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Godkjente jobber</div>
                 </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-3xl font-bold text-orange-600">{stats.totalEarnings} kr</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.totalEarnings} kr</div>
                   <div className="text-sm text-gray-600 mt-1">Total inntjening</div>
                 </div>
               </div>
