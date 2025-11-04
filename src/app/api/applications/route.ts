@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/data/sessions";
 import { getApplicationsForUser, createApplication, updateApplicationStatus } from "@/lib/data/applications";
-import { findOrCreateConversation } from "@/lib/chat-db";
 import { sendNewApplicationEmail, sendApplicationStatusEmail } from "@/lib/email";
 
 export async function GET() {
@@ -19,7 +18,7 @@ export async function GET() {
   }
 }
 
-// POST: create an application and tie to a conversation
+// POST: create an application (conversation will be created when employer selects candidate)
 export async function POST(req: NextRequest) {
   try {
     const { user } = await getSession();
@@ -39,9 +38,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create application" }, { status: 500 });
     }
 
-    // Create conversation for chat
-    const conv = await findOrCreateConversation(jobId, user.id, application.job?.employer.id || "");
-
     // Send email notification to employer about new application
     if (application.job?.employer.email) {
       try {
@@ -60,7 +56,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       application,
-      conversationId: conv.id,
     }, { status: 201 });
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : String(e);

@@ -96,22 +96,33 @@ export async function GET(req: NextRequest) {
     const uniqueId = userInfo.sub;
     const email = userInfo.email || `${uniqueId}@vipps.user`;
 
-    // Try to find existing user
+    // Try to find existing user by Vipps sub or email
     const { data: existing } = await supabase
       .from("users")
-      .select("id, email, role, navn, kommune")
-      .eq("email", email)
+      .select("id, email, role, navn, kommune, vipps_sub, telefon")
+      .or(`vipps_sub.eq.${uniqueId},email.eq.${email}`)
       .maybeSingle();
 
     let userId: string | null = existing?.id ?? null;
 
     // If user doesn't exist, create new one with selected role
     if (!userId) {
+      // Use name from Vipps or construct from email
+      const displayName = userInfo.name || 
+                         (userInfo.given_name && userInfo.family_name 
+                           ? `${userInfo.given_name} ${userInfo.family_name}` 
+                           : email.split('@')[0]);
+
+      // Extract municipality from address if available
+      const kommune = userInfo.address?.region || userInfo.address?.postal_code?.substring(0, 4) || null;
+
       const userData = {
         email,
         role,
-        navn: userInfo.name,
+        navn: displayName,
         telefon: userInfo.phone_number,
+        kommune,
+        vipps_sub: uniqueId, // Store Vipps subject for future logins
       };
 
       const { data: inserted, error } = await supabase
@@ -127,10 +138,35 @@ export async function GET(req: NextRequest) {
 
       userId = inserted?.id ?? null;
     } else {
-      // Update existing user with new role
+      // Update existing user with new role and missing info if not set
+      const updates: Record<string, unknown> = { role };
+      
+      if (!existing?.navn && userInfo.name) {
+        updates.navn = userInfo.name;
+      } else if (!existing?.navn && userInfo.given_name && userInfo.family_name) {
+        updates.navn = `${userInfo.given_name} ${userInfo.family_name}`;
+      } else if (!existing?.navn) {
+        updates.navn = email.split('@')[0];
+      }
+
+      // Update phone if not set
+      if (!existing?.telefon && userInfo.phone_number) {
+        updates.telefon = userInfo.phone_number;
+      }
+
+      // Update municipality if not set
+      if (!existing?.kommune && userInfo.address?.region) {
+        updates.kommune = userInfo.address.region;
+      }
+
+      // Always update Vipps sub if not set
+      if (!existing?.vipps_sub) {
+        updates.vipps_sub = uniqueId;
+      }
+
       await supabase
         .from("users")
-        .update({ role })
+        .update(updates)
         .eq("id", userId);
     }
 

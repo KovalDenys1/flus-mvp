@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from("users")
-      .select("id, email, role, navn, kommune")
+      .select("id, email, role, navn, kommune, telefon, vipps_sub")
       .eq("id", sess.userId)
       .maybeSingle();
 

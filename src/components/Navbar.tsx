@@ -82,8 +82,6 @@ export default function Navbar() {
             ) : (
               <>
                 <Link className={`${linkClass} ${isActive('/mine-jobber') ? 'nav-link-active' : ''}`} href="/mine-jobber">Mine jobber</Link>
-                <Link className={`${linkClass} ${isActive('/jobber/ny') ? 'nav-link-active' : ''}`} href="/jobber/ny">+ Ny jobb</Link>
-                <Link className={`${linkClass} ${isActive('/statistikk') ? 'nav-link-active' : ''}`} href="/statistikk">Statistikk</Link>
               </>
             )}
             {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Samtaler</Link>}
@@ -168,8 +166,6 @@ export default function Navbar() {
             ) : (
               <>
                 <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/mine-jobber">Mine jobber</Link>
-                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50 font-semibold text-orange-600" href="/jobber/ny">+ Ny jobb</Link>
-                <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/statistikk">Statistikk</Link>
               </>
             )}
             {user && <Link onClick={() => setOpen(false)} className="block px-2 py-2 rounded hover:bg-gray-50" href="/samtaler">Samtaler</Link>}

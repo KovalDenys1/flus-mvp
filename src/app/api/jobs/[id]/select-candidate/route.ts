@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/data/sessions";
+import { findOrCreateConversation } from "@/lib/chat-db";
 
 export async function POST(
   request: NextRequest,
@@ -75,6 +76,9 @@ export async function POST(
       );
     }
 
+    // Create conversation for chat between employer and worker
+    const conversation = await findOrCreateConversation(jobId, workerId, user.id);
+
     // Start transaction: update job and application status
     const { error: jobUpdateError } = await supabase
       .from("jobs")
@@ -132,13 +136,6 @@ export async function POST(
     }
 
     // Send system message to conversation about work started
-    const { data: conversation } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("job_id", jobId)
-      .eq("worker_id", workerId)
-      .single();
-
     if (conversation) {
       await supabase
         .from("messages")
@@ -152,7 +149,8 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: "Candidate selected successfully"
+      message: "Candidate selected successfully",
+      conversationId: conversation.id
     });
 
   } catch (error) {

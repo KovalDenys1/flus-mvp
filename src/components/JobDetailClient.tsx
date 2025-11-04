@@ -156,20 +156,20 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
   const handleApply = async () => {
     setApplying(true);
     try {
-      // First create/find conversation
-      const convRes = await fetch("/api/conversations", {
+      // Create application only (conversation will be created when employer selects candidate)
+      const appRes = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: job.id }),
       });
 
-      if (!convRes.ok) {
-        const convData = await convRes.json();
-        throw new Error(convData.error || "Could not create conversation");
+      if (!appRes.ok) {
+        const appData = await appRes.json();
+        throw new Error(appData.error || "Could not create application");
       }
 
-      const convData = await convRes.json();
-      router.push(`/samtaler/${convData.conversation.id}`);
+      toast.success("Søknad sendt! Du vil bli varslet når arbeidsgiveren vurderer søknaden.");
+      router.push("/mine-soknader");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error(msg);
