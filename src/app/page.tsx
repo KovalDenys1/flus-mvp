@@ -45,9 +45,12 @@ export default function HomePage() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+      <div className="relative min-h-screen">
+      {/* Fixed gradient background */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-secondary/10"></div>
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
+      <section className="relative overflow-visible py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Badge className="mb-6 bg-gradient-to-r from-primary to-primary text-primary-foreground border-0 px-6 py-2 text-sm font-semibold shadow-lg">

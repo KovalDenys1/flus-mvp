@@ -397,7 +397,7 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto mt-10 p-4">
-        <div className="text-red-600">Feil: {error}</div>
+        <div className="text-gray-600">Feil: {error}</div>
       </div>
     );
   }
@@ -458,20 +458,20 @@ export default function ProfilePage() {
                   <div className="text-3xl font-bold text-secondary">{stats.totalJobsCreated}</div>
                   <div className="text-sm text-gray-600 mt-1">Totale jobber opprettet</div>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">{stats.activeJobs}</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.activeJobs}</div>
                   <div className="text-sm text-gray-600 mt-1">Aktive jobber</div>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.completedJobs}</div>
                   <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
                 </div>
                 <div className="text-center p-4 bg-primary/10 rounded-lg">
                   <div className="text-3xl font-bold text-primary">{stats.totalApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Totale søknader mottatt</div>
                 </div>
-                <div className="text-center p-4 bg-teal-50 rounded-lg">
-                  <div className="text-3xl font-bold text-teal-600">{stats.acceptedApplications}</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.acceptedApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Godkjente søknader</div>
                 </div>
               </div>
@@ -491,8 +491,8 @@ export default function ProfilePage() {
                   <div className="text-3xl font-bold text-secondary">{stats.totalApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <div className="text-3xl font-bold text-primary">{stats.acceptedApplications}</div>
                   <div className="text-sm text-gray-600 mt-1">Godkjente jobber</div>
                 </div>
                 <div className="text-center p-4 bg-primary/10 rounded-lg">
@@ -623,7 +623,7 @@ export default function ProfilePage() {
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          className="text-red-600 hover:text-red-700"
+                          className="text-gray-600 hover:text-red-700"
                           onClick={() => deleteCvEntry(entry.id)}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -733,7 +733,7 @@ export default function ProfilePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-600 hover:text-red-700"
                         onClick={() => deleteSkill(skill.id)}
                       >
                         <Trash2 className="w-4 h-4" />

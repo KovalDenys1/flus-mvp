@@ -316,7 +316,7 @@ export default function EmployerProfilePage() {
       <Star
         key={i}
         className={`w-4 h-4 ${
-          i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          i < rating ? "fill-secondary text-secondary" : "text-gray-300"
         }`}
       />
     ));
@@ -483,26 +483,26 @@ export default function EmployerProfilePage() {
                 <div className="text-3xl font-bold text-secondary">{stats.totalJobsCreated}</div>
                 <div className="text-sm text-gray-600 mt-1">Jobber opprettet</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">{stats.activeJobs}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.activeJobs}</div>
                 <div className="text-sm text-gray-600 mt-1">Aktive jobber</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.completedJobs}</div>
                 <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
               <div className="text-center p-4 bg-primary/10 rounded-lg">
                 <div className="text-3xl font-bold text-primary">{stats.totalApplicationsReceived}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader mottatt</div>
               </div>
-              <div className="text-center p-4 bg-teal-50 rounded-lg">
-                <div className="text-3xl font-bold text-teal-600">{stats.acceptedApplications}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.acceptedApplications}</div>
                 <div className="text-sm text-gray-600 mt-1">Godkjente søknader</div>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600 flex items-center justify-center gap-1">
+              <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                <div className="text-3xl font-bold text-secondary flex items-center justify-center gap-1">
                   {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="w-5 h-5 fill-secondary text-secondary" />
                 </div>
                 <div className="text-sm text-gray-600 mt-1">{stats.totalReviews} anmeldelser</div>
               </div>
@@ -550,7 +550,7 @@ export default function EmployerProfilePage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-green-600">{job.payNok} kr</div>
+                      <div className="font-bold text-primary">{job.payNok} kr</div>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
                           variant={job.status === "open" ? "default" : "secondary"}
@@ -569,7 +569,7 @@ export default function EmployerProfilePage() {
                               setJobToDelete(job);
                               setDeleteDialogOpen(true);
                             }}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -630,7 +630,7 @@ export default function EmployerProfilePage() {
                           setJobToDelete(job);
                           setDeleteDialogOpen(true);
                         }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -718,7 +718,7 @@ export default function EmployerProfilePage() {
                   <h4 className="font-medium mb-3">Fullførte jobber:</h4>
                   <div className="space-y-2">
                     {recentJobs.filter(job => job.status !== "open").map((job) => (
-                      <div key={job.id} className="border rounded p-3 bg-green-50">
+                      <div key={job.id} className="border rounded p-3 bg-primary/10">
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="font-medium">{job.title}</span>

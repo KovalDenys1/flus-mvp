@@ -70,6 +70,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string } | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     // Load user info
@@ -78,6 +79,20 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       .then((d) => setUser(d.user || null))
       .catch(() => setUser(null));
   }, []);
+
+  useEffect(() => {
+    if (user && (user.role === "worker" || user.role === "both") && job) {
+      // Load user's applications to check if they've already applied for this job
+      fetch("/api/applications")
+        .then((r) => r.json())
+        .then((d) => {
+          const userApplications = d.applications || [];
+          const alreadyApplied = userApplications.some((app: any) => String(app.jobId) === String(job.id));
+          setHasApplied(alreadyApplied);
+        })
+        .catch(() => setHasApplied(false));
+    }
+  }, [user, job]);
 
   useEffect(() => {
     if (job && user && (user.role === "employer" || user.role === "both")) {
@@ -135,10 +150,10 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                 <li>Jobben ble slettet</li>
                 <li>Du har ikke tillatelse til å se denne jobben</li>
               </ul>
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                <p className="text-sm text-yellow-800">
+              <div className="mt-4 p-3 bg-secondary/10 border border-secondary/20 rounded">
+                <p className="text-sm text-secondary">
                   <strong>⚡ Hurtigløsning:</strong> Hvis du er utvikler, kjør SQL-migrasjonene i Supabase.
-                  Se <code className="bg-yellow-100 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instruksjoner.
+                  Se <code className="bg-secondary/10 px-1 py-0.5 rounded">SUPABASE_SETUP.md</code> for instruksjoner.
                 </p>
               </div>
             </div>
@@ -168,7 +183,14 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
         throw new Error(appData.error || "Could not create application");
       }
 
+      setHasApplied(true);
       toast.success("Søknad sendt! Du vil bli varslet når arbeidsgiveren vurderer søknaden.");
+      
+      // Refresh stats if the function exists (user might be on stats page)
+      if ((window as any).refreshStats) {
+        (window as any).refreshStats();
+      }
+      
       router.push("/mine-soknader");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -257,15 +279,15 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       
       {/* Payment and Duration */}
       <div className="flex gap-3 flex-wrap">
-        <div className="px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
-          <span className="text-sm font-semibold text-green-700">{job.payNok} NOK</span>
-          {job.paymentType === "hourly" && <span className="text-xs text-green-600"> /time</span>}
+        <div className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg">
+          <span className="text-sm font-semibold text-primary">{job.payNok} NOK</span>
+          {job.paymentType === "hourly" && <span className="text-xs text-primary"> /time</span>}
         </div>
         <div className="px-3 py-1.5 bg-secondary/10 border border-secondary/20 rounded-lg">
           <span className="text-sm text-secondary">⏱️ {minutesToHhMm(job.durationMinutes)}</span>
         </div>
-        <div className="px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
-          <span className="text-sm text-purple-700">{getScheduleLabel()}</span>
+        <div className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg">
+          <span className="text-sm text-primary">{getScheduleLabel()}</span>
         </div>
       </div>
 
@@ -346,16 +368,16 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                       {app.status === "pending" && job.status === "open" && (
                         <button
                           onClick={() => handleSelectCandidate(app.id)}
-                          className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition"
+                          className="px-3 py-1 bg-primary text-white text-xs rounded hover:bg-primary/90 transition"
                         >
                           Velg kandidat
                         </button>
                       )}
                       <div className={`px-2 py-1 rounded text-xs ${
-                        app.status === "accepted" ? "bg-green-100 text-green-700" :
-                        app.status === "rejected" ? "bg-red-100 text-red-700" :
+                        app.status === "accepted" ? "bg-primary/10 text-primary" :
+                        app.status === "rejected" ? "bg-gray-100 text-gray-700" :
                         app.status === "completed" ? "bg-secondary/10 text-secondary" :
-                        "bg-yellow-100 text-yellow-700"
+                        "bg-secondary/10 text-secondary"
                       }`}>
                         {app.status === "accepted" ? "Godkjent" :
                          app.status === "rejected" ? "Avvist" :
@@ -390,11 +412,11 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
       </div>
       {/* Review section for completed jobs */}
       {job.status === "completed" && user && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-green-800">🎉 Arbeid fullført!</h3>
-              <p className="text-sm text-green-700 mt-1">
+              <h3 className="font-semibold text-primary">🎉 Arbeid fullført!</h3>
+              <p className="text-sm text-primary mt-1">
                 {user.role === "employer" || user.role === "both"
                   ? "Hvordan var samarbeidet med arbeidstakeren?"
                   : "Hvordan var samarbeidet med arbeidsgiveren?"
@@ -411,7 +433,7 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
                   openReviewDialog(job.employerId!, "arbeidsgiveren");
                 }
               }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-sm"
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-semibold text-sm"
             >
               Gi vurdering
             </button>
@@ -447,10 +469,14 @@ export default function JobDetailClient({ job }: { job?: Job | null }) {
           user && (user.role === "worker" || user.role === "both") && job.employerId !== user.id && (
             <button
               onClick={handleApply}
-              disabled={applying}
-              className="flex-1 px-6 py-2 rounded-lg bg-primary text-primary-foreground text-base font-medium shadow hover:bg-primary/90 transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:bg-primary/50"
+              disabled={applying || hasApplied}
+              className={`flex-1 px-6 py-2 rounded-lg text-base font-medium shadow focus:outline-none focus:ring-2 focus:ring-offset-2 transition ${
+                hasApplied
+                  ? "bg-primary text-primary-foreground cursor-default"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary"
+              } ${applying ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              {applying ? "Starter samtale..." : "Søk"}
+              {hasApplied ? "✓ Søknad sendt" : applying ? "Starter samtale..." : "Søk"}
             </button>
           )
         )}

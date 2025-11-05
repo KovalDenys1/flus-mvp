@@ -46,7 +46,7 @@ export function JobDetailsDialog({ open, onOpenChange, job, onApply, hasApplied 
             <button
               className={`w-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                 hasApplied
-                  ? "bg-green-500 text-white cursor-default"
+                  ? "bg-primary text-white cursor-default"
                   : "bg-primary text-primary-foreground hover:bg-primary/90"
               }`}
               onClick={() => onApply(job.id)}

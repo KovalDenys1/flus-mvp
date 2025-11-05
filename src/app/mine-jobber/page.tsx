@@ -92,7 +92,7 @@ export default function MyJobsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open": return "bg-green-100 text-green-700";
+      case "open": return "bg-primary/10 text-primary";
       case "in_progress": return "bg-secondary/10 text-secondary";
       case "completed": return "bg-gray-100 text-gray-700";
       default: return "bg-gray-100 text-gray-700";
@@ -294,7 +294,7 @@ export default function MyJobsPage() {
             <div className="text-8xl mb-6">⚠️</div>
             <h3 className="text-2xl font-bold text-red-900 mb-3">Feil</h3>
             <p className="text-red-700 mb-6 max-w-md mx-auto">{error}</p>
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-gray-600">
               Det kan hende du ikke er logget inn som arbeidsgiver.
             </p>
           </CardContent>
@@ -358,7 +358,7 @@ export default function MyJobsPage() {
                       </div>
                     </div>
                     <div className="text-left sm:text-right">
-                      <div className="text-3xl font-bold text-green-600 mb-1">
+                      <div className="text-3xl font-bold text-primary mb-1">
                         {job.payNok} kr
                       </div>
                       <div className="text-sm text-gray-500 font-medium">
@@ -388,7 +388,7 @@ export default function MyJobsPage() {
                             e.stopPropagation();
                             openReviewDialog(job.id, job.selectedWorker!.id, job.selectedWorker!.navn);
                           }}
-                          className="text-green-600 border-green-300 hover:bg-green-50 hover:border-green-400 transition-colors font-medium"
+                          className="text-primary border-primary/30 hover:bg-primary/5 hover:border-primary/40 transition-colors font-medium"
                         >
                           ⭐ Gi vurdering
                         </Button>
@@ -416,7 +416,7 @@ export default function MyJobsPage() {
                               console.log("Delete button clicked for job:", job.id, job.title);
                               openDeleteDialog(job.id, job.title);
                             }}
-                            className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 transition-colors font-medium"
+                            className="text-gray-600 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium"
                           >
                             🗑️ Slett jobb
                           </Button>

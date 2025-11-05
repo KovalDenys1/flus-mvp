@@ -119,7 +119,7 @@ export default function SupportPage() {
       case "in_progress":
         return <Clock className="w-4 h-4 text-secondary" />;
       case "closed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-primary" />;
       default:
         return <HelpCircle className="w-4 h-4 text-gray-500" />;
     }
@@ -145,7 +145,7 @@ export default function SupportPage() {
       case "in_progress":
         return "bg-secondary/10 text-secondary";
       case "closed":
-        return "bg-green-100 text-green-700";
+        return "bg-primary/10 text-primary";
       default:
         return "bg-gray-100 text-gray-700";
     }

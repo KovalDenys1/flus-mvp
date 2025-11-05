@@ -426,7 +426,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 <Button
                   onClick={handleConfirmCompletion}
                   size="sm"
-                  className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
+                  className="flex items-center gap-1 bg-primary hover:bg-primary/90"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Godkjenn arbeid
@@ -689,7 +689,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 <Button
                   onClick={handleSubmitCompletion}
                   disabled={!beforePhoto || !afterPhoto || completingWork}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                 >
                   {completingWork ? "Sender..." : "Fullfør arbeid"}
                 </Button>

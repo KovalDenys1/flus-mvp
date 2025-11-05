@@ -80,9 +80,9 @@ export default function MineSoknaderPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-secondary/10 text-secondary";
-      case "accepted": return "bg-green-100 text-green-700";
-      case "rejected": return "bg-red-100 text-red-700";
-      case "completed": return "bg-purple-100 text-purple-700";
+      case "accepted": return "bg-primary/10 text-primary";
+      case "rejected": return "bg-gray-100 text-gray-700";
+      case "completed": return "bg-primary/10 text-primary";
       default: return "bg-gray-100 text-gray-700";
     }
   };
@@ -149,7 +149,7 @@ export default function MineSoknaderPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-semibold mb-2 text-red-600">Feil</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-600">Feil</h3>
             <p className="text-gray-600">{error}</p>
           </CardContent>
         </Card>
@@ -200,7 +200,7 @@ export default function MineSoknaderPage() {
                       </div>
                       {job && (
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-bold text-green-600">
+                          <div className="text-2xl font-bold text-primary">
                             {job.payNok} kr
                           </div>
                           {job.paymentType && (
@@ -230,7 +230,7 @@ export default function MineSoknaderPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => openReviewDialog(app.jobId, app.job!.employer!.id, app.job!.employer!.navn)}
-                            className="text-green-600 border-green-300 hover:bg-green-50"
+                            className="text-primary border-primary/30 hover:bg-primary/5"
                           >
                             Gi vurdering
                           </Button>

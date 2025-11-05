@@ -132,6 +132,11 @@ export default function Page() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setAppliedJobIds((prev) => new Set(prev).add(jobId));
       toast.success("Søknad sendt ✅");
+      
+      // Refresh stats if the function exists (user might be on stats page)
+      if ((window as any).refreshStats) {
+        (window as any).refreshStats();
+      }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       toast.error("Kunne ikke sende søknad: " + errorMessage);
@@ -139,7 +144,10 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+    <div className="relative min-h-screen">
+      {/* Fixed gradient background */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-secondary/10"></div>
+      
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="text-center mb-8">
@@ -334,7 +342,7 @@ export default function Page() {
                     <Button
                       className={`w-full rounded-lg py-2.5 font-medium text-sm transition-colors h-9 ${
                         appliedJobIds.has(job.id)
-                          ? "bg-green-600 hover:bg-green-700 text-white cursor-default"
+                          ? "bg-primary hover:bg-primary/90 text-white cursor-default"
                           : !isLoggedIn
                           ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                           : "bg-primary hover:bg-primary/90 text-primary-foreground"

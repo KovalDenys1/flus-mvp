@@ -20,7 +20,7 @@ export default function Page() {
   }, []);
 
   if (loading) return <div className="flex items-center justify-center min-h-[40vh] text-gray-500 text-lg">Henter prestasjoner…</div>;
-  if (err || !data) return <div className="flex items-center justify-center min-h-[40vh] text-red-600 text-lg">Feil: {err || "Ingen data"}</div>;
+  if (err || !data) return <div className="flex items-center justify-center min-h-[40vh] text-gray-600 text-lg">Feil: {err || "Ingen data"}</div>;
 
   const { achievements, rules } = data;
 

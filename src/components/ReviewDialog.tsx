@@ -81,7 +81,7 @@ export default function ReviewDialog({
                   <Star
                     className={`w-8 h-8 ${
                       star <= (hoveredRating || rating)
-                        ? "text-yellow-400 fill-current"
+                        ? "text-secondary fill-current"
                         : "text-gray-300"
                     }`}
                   />

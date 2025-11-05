@@ -246,7 +246,7 @@ export default function WorkerProfilePage() {
       <Star
         key={i}
         className={`w-4 h-4 ${
-          i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          i < rating ? "fill-secondary text-secondary" : "text-gray-300"
         }`}
       />
     ));
@@ -414,7 +414,7 @@ export default function WorkerProfilePage() {
                           href={user.website_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/5 transition text-sm"
                         >
                           <ExternalLink className="w-4 h-4" />
                           Nettside
@@ -444,18 +444,18 @@ export default function WorkerProfilePage() {
                 <div className="text-3xl font-bold text-secondary">{stats.totalApplicationsSent}</div>
                 <div className="text-sm text-gray-600 mt-1">Søknader sendt</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">{stats.completedJobsWorker}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg">
+                <div className="text-3xl font-bold text-primary">{stats.completedJobsWorker}</div>
                 <div className="text-sm text-gray-600 mt-1">Fullførte jobber</div>
               </div>
               <div className="text-center p-4 bg-primary/10 rounded-lg">
                 <div className="text-3xl font-bold text-primary">{stats.totalEarnings} kr</div>
                 <div className="text-sm text-gray-600 mt-1">Total inntjening</div>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600 flex items-center justify-center gap-1">
+              <div className="text-center p-4 bg-secondary/10 rounded-lg">
+                <div className="text-3xl font-bold text-secondary flex items-center justify-center gap-1">
                   {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="w-5 h-5 fill-secondary text-secondary" />
                 </div>
                 <div className="text-sm text-gray-600 mt-1">{stats.totalReviews} anmeldelser</div>
               </div>
@@ -487,7 +487,7 @@ export default function WorkerProfilePage() {
                   </div>
                 </div>
 
-                <div className="bg-purple-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                <div className="bg-primary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                   <h4 className="font-medium mb-2">Kategorier</h4>
                   <div className="text-sm text-gray-600">
                     {achievements.perCategory.length > 0 ? (
@@ -506,10 +506,10 @@ export default function WorkerProfilePage() {
                 </div>
 
                 {stats && (
-                  <div className="bg-indigo-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                  <div className="bg-primary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">Total inntjening:</span>
-                      <span className="text-2xl font-bold text-indigo-600">
+                      <span className="text-2xl font-bold text-primary">
                         {stats.totalEarnings} kr
                       </span>
                     </div>
@@ -520,11 +520,11 @@ export default function WorkerProfilePage() {
                 )}
 
                 {achievements.badges.length > 0 && (
-                  <div className="bg-yellow-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                  <div className="bg-secondary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                     <h4 className="font-medium mb-2">Badges</h4>
                     <div className="flex flex-wrap gap-2">
                       {achievements.badges.slice(0, 3).map(badge => (
-                        <Badge key={badge} variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
+                        <Badge key={badge} variant="secondary" className="bg-secondary/10 text-secondary border-secondary/20 text-xs">
                           {badge}
                         </Badge>
                       ))}
@@ -536,7 +536,7 @@ export default function WorkerProfilePage() {
                 )}
 
                 {achievements.canContactCurator && (
-                  <div className="bg-green-50 rounded-lg p-4 h-24 flex flex-col justify-center border border-green-200">
+                  <div className="bg-primary/10 rounded-lg p-4 h-24 flex flex-col justify-center border border-primary/20">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🎯</span>
                       <div>
@@ -564,10 +564,10 @@ export default function WorkerProfilePage() {
                       </div>
                     </div>
 
-                    <div className="bg-green-50 rounded-lg p-4 h-24 flex flex-col justify-center">
+                    <div className="bg-primary/10 rounded-lg p-4 h-24 flex flex-col justify-center">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Fullføringsrate:</span>
-                        <span className="text-2xl font-bold text-green-600">
+                        <span className="text-2xl font-bold text-primary">
                           {stats.totalApplicationsSent > 0
                             ? Math.round((stats.completedJobsWorker / stats.totalApplicationsSent) * 100)
                             : 0}%

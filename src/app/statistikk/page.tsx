@@ -24,24 +24,30 @@ export default function StatistikkPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const loadStats = async () => {
+    try {
+      const res = await fetch("/api/profile/stats");
+      if (!res.ok) {
+        throw new Error("Kunne ikke laste statistikk");
+      }
+      const data = await res.json();
+      setStats(data.stats);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ukjent feil");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const res = await fetch("/api/profile/stats");
-        if (!res.ok) {
-          throw new Error("Kunne ikke laste statistikk");
-        }
-        const data = await res.json();
-        setStats(data.stats);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Ukjent feil");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadStats();
+  }, [refreshKey]);
+
+  // Function to refresh stats (can be called from outside)
+  useEffect(() => {
+    (window as any).refreshStats = () => setRefreshKey(prev => prev + 1);
   }, []);
 
   if (loading) {
@@ -65,7 +71,7 @@ export default function StatistikkPage() {
     return (
       <AuthGuard requireAuth={true}>
         <div className="max-w-5xl mx-auto py-10 px-4">
-          <div className="text-red-600">Feil: {error}</div>
+          <div className="text-gray-600">Feil: {error}</div>
         </div>
       </AuthGuard>
     );
@@ -86,9 +92,17 @@ export default function StatistikkPage() {
       <div className="max-w-5xl mx-auto py-10 px-4 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Min statistikk</h1>
-          <Badge variant="secondary" className="text-sm">
-            Rolle: {stats.role === "employer" ? "Arbeidsgiver" : stats.role === "worker" ? "Arbeidstaker" : "Begge"}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setRefreshKey(prev => prev + 1)}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition text-sm font-medium"
+            >
+              🔄 Oppdater
+            </button>
+            <Badge variant="secondary" className="text-sm">
+              Rolle: {stats.role === "employer" ? "Arbeidsgiver" : stats.role === "worker" ? "Arbeidstaker" : "Begge"}
+            </Badge>
+          </div>
         </div>
 
         {/* Employer Statistics */}
@@ -129,11 +143,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-green-600">{stats.completedJobs}</div>
+                      <div className="text-3xl font-bold text-primary">{stats.completedJobs}</div>
                       <div className="text-sm text-gray-600">Fullførte jobber</div>
                       <div className="text-xs text-gray-500 mt-1">Alle godkjente jobber</div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-green-600" />
+                    <CheckCircle className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -155,11 +169,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-teal-600">{stats.acceptedApplications}</div>
+                      <div className="text-3xl font-bold text-primary">{stats.acceptedApplications}</div>
                       <div className="text-sm text-gray-600">Godkjente søknader</div>
-                      <div className="text-xs text-gray-500 mt-1">Akseptert eller fullført</div>
+                      <div className="text-xs text-gray-500 mt-1">Søknader som ble godkjent</div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-teal-600" />
+                    <CheckCircle className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -183,11 +197,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-red-600">{stats.rejectedApplications}</div>
+                      <div className="text-3xl font-bold text-gray-600">{stats.rejectedApplications}</div>
                       <div className="text-sm text-gray-600">Avviste søknader</div>
                       <div className="text-xs text-gray-500 mt-1">Ikke valgt</div>
                     </div>
-                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -198,19 +212,19 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-yellow-600">{stats.averageRating.toFixed(1)}</div>
+                      <div className="text-3xl font-bold text-secondary">{stats.averageRating.toFixed(1)}</div>
                       <div className="text-sm text-gray-600">Gjennomsnittlig vurdering</div>
                       <div className="flex items-center mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${i < Math.floor(stats.averageRating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+                            className={`w-4 h-4 ${i < Math.floor(stats.averageRating) ? "text-secondary fill-current" : "text-gray-300"}`}
                           />
                         ))}
                         <span className="text-xs text-gray-500 ml-1">({stats.totalReviews})</span>
                       </div>
                     </div>
-                    <Star className="w-8 h-8 text-yellow-600" />
+                    <Star className="w-8 h-8 text-secondary" />
                   </div>
                 </CardContent>
               </Card>
@@ -220,7 +234,7 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-indigo-600">
+                      <div className="text-3xl font-bold text-primary">
                         {stats.totalApplications > 0 
                           ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
                           : 0}%
@@ -228,7 +242,7 @@ export default function StatistikkPage() {
                       <div className="text-sm text-gray-600">Akseptrate</div>
                       <div className="text-xs text-gray-500 mt-1">Godkjente av totalt mottatte</div>
                     </div>
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
@@ -263,11 +277,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-green-600">{stats.acceptedApplications}</div>
+                      <div className="text-3xl font-bold text-primary">{stats.acceptedApplications}</div>
                       <div className="text-sm text-gray-600">Godkjente jobber</div>
                       <div className="text-xs text-gray-500 mt-1">Aksepterte eller fullførte</div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-green-600" />
+                    <CheckCircle className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -276,11 +290,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-purple-600">{stats.completedJobs}</div>
+                      <div className="text-3xl font-bold text-primary">{stats.completedJobs}</div>
                       <div className="text-sm text-gray-600">Fullførte jobber</div>
                       <div className="text-xs text-gray-500 mt-1">Godkjent av arbeidsgiver</div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-purple-600" />
+                    <CheckCircle className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
@@ -317,11 +331,11 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-red-600">{stats.rejectedApplications}</div>
+                      <div className="text-3xl font-bold text-gray-600">{stats.rejectedApplications}</div>
                       <div className="text-sm text-gray-600">Avviste søknader</div>
                       <div className="text-xs text-gray-500 mt-1">Ikke valgt</div>
                     </div>
-                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -332,19 +346,19 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-yellow-600">{stats.averageRating.toFixed(1)}</div>
+                      <div className="text-3xl font-bold text-secondary">{stats.averageRating.toFixed(1)}</div>
                       <div className="text-sm text-gray-600">Gjennomsnittlig vurdering</div>
                       <div className="flex items-center mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${i < Math.floor(stats.averageRating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+                            className={`w-4 h-4 ${i < Math.floor(stats.averageRating) ? "text-secondary fill-current" : "text-gray-300"}`}
                           />
                         ))}
                         <span className="text-xs text-gray-500 ml-1">({stats.totalReviews})</span>
                       </div>
                     </div>
-                    <Star className="w-8 h-8 text-yellow-600" />
+                    <Star className="w-8 h-8 text-secondary" />
                   </div>
                 </CardContent>
               </Card>
@@ -354,7 +368,7 @@ export default function StatistikkPage() {
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-indigo-600">
+                      <div className="text-3xl font-bold text-primary">
                         {stats.totalApplications > 0 
                           ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
                           : 0}%
@@ -362,7 +376,7 @@ export default function StatistikkPage() {
                       <div className="text-sm text-gray-600">Suksessrate</div>
                       <div className="text-xs text-gray-500 mt-1">Godkjente søknader</div>
                     </div>
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>

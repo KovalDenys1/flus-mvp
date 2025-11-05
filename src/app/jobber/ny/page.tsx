@@ -314,8 +314,8 @@ export default function CreateJobPage() {
               </div>
 
               {form.address && (
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <p className="text-sm text-green-800">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <p className="text-sm text-primary">
                     ✅ <strong>Valgt adresse:</strong> {form.address}
                     {form.postalCode && `, ${form.postalCode} ${form.areaName}`}
                   </p>
@@ -567,7 +567,7 @@ export default function CreateJobPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-semibold mb-2">💰 Betaling</h4>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-2xl font-bold text-primary">
                         {form.payNok ? `${form.payNok} kr` : "0 kr"}
                         {form.paymentType === "hourly" && "/time"}
                       </p>

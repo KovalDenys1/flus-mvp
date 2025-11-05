@@ -170,12 +170,12 @@ export default function DashboardPage() {
                     <div className="text-2xl font-bold text-secondary">{stats.totalJobsCreated}</div>
                     <div className="text-sm text-muted-foreground">Jobber opprettet</div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stats.activeJobs}</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.activeJobs}</div>
                     <div className="text-sm text-gray-600">Aktive jobber</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{stats.completedJobs}</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.completedJobs}</div>
                     <div className="text-sm text-gray-600">Fullførte jobber</div>
                   </div>
                   <div className="text-center p-4 bg-primary/10 rounded-lg">
@@ -207,12 +207,12 @@ export default function DashboardPage() {
                     <div className="text-2xl font-bold text-secondary">{stats.totalApplicationsSent}</div>
                     <div className="text-sm text-muted-foreground">Søknader sendt</div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stats.acceptedJobs}</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.acceptedJobs}</div>
                     <div className="text-sm text-gray-600">Godkjente jobber</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{stats.completedJobsWorker}</div>
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{stats.completedJobsWorker}</div>
                     <div className="text-sm text-gray-600">Fullførte jobber</div>
                   </div>
                   <div className="text-center p-4 bg-primary/10 rounded-lg">
