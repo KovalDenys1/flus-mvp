@@ -50,7 +50,7 @@ export default function AdminJobsPage() {
     };
 
     fetchJobs();
-  }, [view]);
+  }, [view, supabase]);
 
   // ✅ Filter jobs by title
   const filteredJobs = jobs.filter((job) =>

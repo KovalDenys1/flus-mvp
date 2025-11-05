@@ -13,7 +13,7 @@ import {
   type ChartData,
   type ChartOptions,
 } from "chart.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import "./page.css";
 
@@ -121,7 +121,7 @@ export default function Home() {
   const [logs, setLogs] = useState<string[]>([]);
 
   // 🧠 Fetch stats (current totals)
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     // Users
     const { count: totalUsers } = await supabase
       .from("users")
@@ -137,20 +137,20 @@ export default function Home() {
       .select("*", { count: "exact", head: true })
       .eq("role", "employer");
 
-    // Jobs
-    const { count: totalJobs } = await supabase
-      .from("jobs")
-      .select("*", { count: "exact", head: true });
+    // Jobs - commented out as not currently used in graphs
+    // const { count: _totalJobs } = await supabase
+    //   .from("jobs")
+    //   .select("*", { count: "exact", head: true });
 
-    const { count: openJobs } = await supabase
-      .from("jobs")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "open");
+    // const { count: _openJobs } = await supabase
+    //   .from("jobs")
+    //   .select("*", { count: "exact", head: true })
+    //   .eq("status", "open");
 
-    const { count: completedJobs } = await supabase
-      .from("jobs")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "completed");
+    // const { count: _completedJobs } = await supabase
+    //   .from("jobs")
+    //   .select("*", { count: "exact", head: true })
+    //   .eq("status", "completed");
 
     // Bedrift
     const { count: totalBedrift } = await supabase
@@ -203,7 +203,7 @@ export default function Home() {
         },
       ],
     }));
-  };
+  }, [supabase]);
 
   // 🧠 Live updates
   useEffect(() => {
@@ -315,7 +315,7 @@ export default function Home() {
       supabase.removeChannel(jobsChannel);
       supabase.removeChannel(bedriftChannel);
     };
-  }, []);
+  }, [fetchStats, supabase]);
 
   return (
     <section className="container">

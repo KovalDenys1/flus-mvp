@@ -190,9 +190,9 @@ export async function sendApplicationStatusEmail(
 export async function sendWelcomeEmail(
   userEmail: string,
   userName: string,
-  role: 'worker' | 'employer'
+  role: 'worker' | 'employer' | 'admin'
 ): Promise<boolean> {
-  const roleText = role === 'worker' ? 'jobbsøker' : 'arbeidsgiver';
+  const roleText = role === 'worker' ? 'jobbsøker' : role === 'employer' ? 'arbeidsgiver' : 'administrator';
   const subject = `Velkommen til FLUS, ${userName}!`;
 
   const html = `
@@ -226,15 +226,19 @@ export async function sendWelcomeEmail(
                 <li>📋 <strong>Opprett din CV</strong> - Legg til ferdigheter og erfaring</li>
                 <li>🔍 <strong>Finn jobber</strong> - Søk blant tusenvis av lokale muligheter</li>
                 <li>💬 <strong>Søk og chat</strong> - Kontakt arbeidsgivere direkte</li>
-              ` : `
+              ` : role === 'employer' ? `
                 <li>➕ <strong>Opprett jobb</strong> - Legg ut din første jobbannonse</li>
                 <li>👥 <strong>Motta søknader</strong> - Få kvalifiserte kandidater</li>
                 <li>💼 <strong>Administrer</strong> - Følg opp og betal for utført arbeid</li>
+              ` : `
+                <li>👑 <strong>Admin panel</strong> - Tilgang til administrasjonsverktøy</li>
+                <li>📊 <strong>Statistikk</strong> - Se plattformstatistikk og analyser</li>
+                <li>⚙️ <strong>Brukerhåndtering</strong> - Administrer brukere og innhold</li>
               `}
             </ul>
           </div>
 
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flus.app'}/${role === 'worker' ? 'jobber' : 'jobber/ny'}" class="button">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flus.app'}/${role === 'admin' ? 'admin' : role === 'worker' ? 'jobber' : 'jobber/ny'}" class="button">
             Kom i gang →
           </a>
 

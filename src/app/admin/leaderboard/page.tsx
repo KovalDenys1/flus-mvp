@@ -24,7 +24,7 @@ export default function Leaderboard() {
         console.error("❌ Error fetching leaderboard:", error);
       } else {
         // You can simulate scores for now (or replace this with your real data)
-        const withScores = (data || []).map((w, i) => ({
+        const withScores = (data || []).map((w) => ({
           ...w,
           score: Math.floor(Math.random() * 1000),
         }));

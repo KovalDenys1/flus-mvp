@@ -76,7 +76,7 @@ export default function AdminPage() {
     };
 
     fetchUsers();
-  }, []);
+  }, [supabase]);
 
   // ✅ Filter users by name
   const filteredUsers = users.filter((user) =>

@@ -203,7 +203,6 @@ export async function createSystemMessage(conversationId: string, systemEvent: '
  * If conversationId looks like job ID (starts with 'j_'), tries to find conversation for that job
  */
 export async function isUserInConversation(conversationId: string, userId: string): Promise<boolean> {
-  let actualConversationId = conversationId;
   let conversation = null;
 
   // If ID looks like job ID, try to find conversation for that job
@@ -217,12 +216,11 @@ export async function isUserInConversation(conversationId: string, userId: strin
         .single();
 
       if (!error && data) {
-        actualConversationId = data.id;
         conversation = data;
       } else {
         return false;
       }
-    } catch (error) {
+    } catch {
       return false;
     }
   } else {

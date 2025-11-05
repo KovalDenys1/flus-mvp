@@ -321,7 +321,7 @@ export default function CreateJobPage() {
                   value={form.address}
                   onChange={(value) => setForm({ ...form, address: value })}
                   placeholder="F.eks. Karl Johans gate 22, Oslo"
-                  onSelect={(address, lat, lng, area) => {
+                  onSelect={(address, lat, lng) => {
                     setForm({ 
                       ...form, 
                       address, 

@@ -22,7 +22,7 @@ export default function MakeAdminPage() {
       });
       const data = await response.json();
       setResult(data);
-    } catch (error) {
+    } catch {
       setResult({ error: 'Failed to make user admin' });
     }
     setLoading(false);
