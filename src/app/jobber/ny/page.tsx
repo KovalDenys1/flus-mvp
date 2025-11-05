@@ -26,7 +26,6 @@ export default function CreateJobPage() {
     durationMinutes: "",
     areaName: "",
     address: "",
-    postalCode: "",
     lat: null as number | null,
     lng: null as number | null,
     scheduleType: "flexible",
@@ -48,10 +47,48 @@ export default function CreateJobPage() {
     "Rydding",
     "Montering",
     "Dugnad",
+    "Annet",
   ];
 
+  const isFormValid = () => {
+    // Check all required fields
+    if (!form.title.trim() || !form.description.trim() || !form.category || !form.areaName) {
+      return false;
+    }
+
+    const payNok = parseInt(form.payNok.trim());
+    const durationMinutes = parseInt(form.durationMinutes.trim());
+
+    if (isNaN(payNok) || payNok < 50) {
+      return false;
+    }
+
+    if (isNaN(durationMinutes) || durationMinutes < 15) {
+      return false;
+    }
+
+    // Check schedule-specific fields
+    if (form.scheduleType === "fixed" && (!form.startTime || !form.endTime)) {
+      return false;
+    }
+
+    if (form.scheduleType === "deadline" && !form.endTime) {
+      return false;
+    }
+
+    return true;
+  };
+
   const calculateProgress = () => {
-    const requiredFields = [form.title, form.description, form.category, form.payNok, form.durationMinutes];
+    // Only count truly required fields for job creation
+    const requiredFields = [
+      form.title, 
+      form.description, 
+      form.category, 
+      form.payNok, 
+      form.durationMinutes,
+      form.areaName
+    ];
     const filledRequired = requiredFields.filter(field => field && field.toString().trim()).length;
     return Math.round((filledRequired / requiredFields.length) * 100);
   };
@@ -84,13 +121,13 @@ export default function CreateJobPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!form.title.trim() || !form.description.trim() || !form.category) {
+    if (!form.title.trim() || !form.description.trim() || !form.category || !form.areaName) {
       toast.error("Vennligst fyll ut alle påkrevde felt");
       return;
     }
 
-    const payNok = parseInt(form.payNok);
-    const durationMinutes = parseInt(form.durationMinutes);
+    const payNok = parseInt(form.payNok.trim());
+    const durationMinutes = parseInt(form.durationMinutes.trim());
 
     if (isNaN(payNok) || payNok < 50) {
       toast.error("Betaling må være minst 50 kr");
@@ -102,10 +139,8 @@ export default function CreateJobPage() {
       return;
     }
 
-    // Combine address with postal code
-    const fullAddress = form.address.trim()
-      ? `${form.address.trim()}${form.postalCode ? `, ${form.postalCode} ${form.areaName}` : ''}`
-      : '';
+    // Use address directly without postal code
+    const fullAddress = form.address.trim() || null;
 
     setLoading(true);
     try {
@@ -125,6 +160,7 @@ export default function CreateJobPage() {
             photoUrls.push(uploadData.photoUrl);
           } else {
             console.error("Failed to upload photo:", photo.name);
+            throw new Error(`Kunne ikke laste opp bildet: ${photo.name}`);
           }
         }
         setUploadingPhotos(false);
@@ -245,14 +281,13 @@ export default function CreateJobPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Område {form.areaName ? "(automatisk fylt)" : ""}</label>
+                  <label className="block text-sm font-medium mb-1">Område *</label>
                   <Select 
                     value={form.areaName} 
                     onValueChange={(value) => setForm({ ...form, areaName: value })}
-                    disabled={!!form.address} // Disable if address was selected (area auto-filled)
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Velg område eller la oss finne det automatisk" />
+                      <SelectValue placeholder="Velg område" />
                     </SelectTrigger>
                     <SelectContent>
                       {areas.map((area) => (
@@ -262,7 +297,6 @@ export default function CreateJobPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {!form.areaName && <p className="text-xs text-gray-500 mt-1">Område fylles automatisk når du velger adresse</p>}
                 </div>
               </div>
             </CardContent>
@@ -275,49 +309,34 @@ export default function CreateJobPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-secondary/10 p-3 rounded-lg">
-                <p className="text-sm text-secondary">
-                  💡 <strong>Tips:</strong> Bare skriv inn adressen din (f.eks. Furuset alle 19B). 
-                  Vi finner automatisk riktig område for deg!
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Tips:</strong> Bare skriv inn adressen din (f.eks. Tyslevveien 30A). 
+                  Dette hjelper arbeidstakere å finne jobben din.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Adresse</label>
-                  <AddressAutocomplete
-                    value={form.address}
-                    onChange={(value) => setForm({ ...form, address: value })}
-                    placeholder="F.eks. Karl Johans gate 22, Furuset alle 19B"
-                    onSelect={(address, lat, lng, area) => {
-                      setForm({ 
-                        ...form, 
-                        address, 
-                        lat: lat || null, 
-                        lng: lng || null,
-                        areaName: area || form.areaName // Auto-fill area if detected
-                      });
-                    }}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Gatenavn og husnummer</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Postnummer</label>
-                  <Input
-                    value={form.postalCode}
-                    onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-                    placeholder="0170"
-                    maxLength={4}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">4 siffer, f.eks. 0170</p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Adresse (inkludert postnummer og område)</label>
+                <AddressAutocomplete
+                  value={form.address}
+                  onChange={(value) => setForm({ ...form, address: value })}
+                  placeholder="F.eks. Karl Johans gate 22, Oslo"
+                  onSelect={(address, lat, lng, area) => {
+                    setForm({ 
+                      ...form, 
+                      address, 
+                      lat: lat || null, 
+                      lng: lng || null
+                    });
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-1">Skriv full adresse med postnummer og sted</p>
               </div>
 
               {form.address && (
                 <div className="bg-primary/10 p-3 rounded-lg">
                   <p className="text-sm text-primary">
                     ✅ <strong>Valgt adresse:</strong> {form.address}
-                    {form.postalCode && `, ${form.postalCode} ${form.areaName}`}
                   </p>
                 </div>
               )}
@@ -493,13 +512,11 @@ export default function CreateJobPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-secondary/10 p-3 rounded-lg">
-                <p className="text-sm text-secondary">
-                  💡 <strong>Tips:</strong> Legg til bilder av jobben for å gjøre annonsen mer attraktiv.
+                <p className="text-sm text-gray-700">
+                  💡 <strong>Tips:</strong> Legg til bilder av jobben for å gjøre annonsen mer attraktiv. 
                   Arbeidstakere kan se bildene før de søker.
                 </p>
-              </div>
-
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium mb-1">Last opp bilder</label>
                 <Input
                   type="file"
@@ -557,10 +574,7 @@ export default function CreateJobPage() {
                   {form.address && (
                     <div>
                       <h4 className="font-semibold mb-2">📍 Adresse</h4>
-                      <p className="text-gray-700">
-                        {form.address}
-                        {form.postalCode && `, ${form.postalCode} ${form.areaName}`}
-                      </p>
+                      <p className="text-gray-700">{form.address}</p>
                     </div>
                   )}
 
@@ -568,13 +582,13 @@ export default function CreateJobPage() {
                     <div>
                       <h4 className="font-semibold mb-2">💰 Betaling</h4>
                       <p className="text-2xl font-bold text-primary">
-                        {form.payNok ? `${form.payNok} kr` : "0 kr"}
+                        {form.payNok ? `${parseInt(form.payNok) || 0} kr` : "0 kr"}
                         {form.paymentType === "hourly" && "/time"}
                       </p>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">⏱️ Varighet</h4>
-                      <p className="text-lg">{form.durationMinutes ? `${form.durationMinutes} min` : "0 min"}</p>
+                      <p className="text-lg">{form.durationMinutes ? `${parseInt(form.durationMinutes) || 0} min` : "0 min"}</p>
                     </div>
                   </div>
 
@@ -586,7 +600,7 @@ export default function CreateJobPage() {
               </DialogContent>
             </Dialog>
             
-            <Button type="submit" disabled={loading || uploadingPhotos || progress < 100} className="flex-1 bg-primary hover:bg-primary">
+            <Button type="submit" disabled={loading || uploadingPhotos || !isFormValid()} className="flex-1 bg-primary hover:bg-primary">
               {uploadingPhotos ? "Laster opp bilder..." : loading ? "Oppretter..." : "Opprett jobb"}
             </Button>
           </div>

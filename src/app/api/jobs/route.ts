@@ -50,6 +50,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate payment amount
+    if (typeof payNok !== 'number' || payNok < 50) {
+      return NextResponse.json(
+        { error: "Payment must be at least 50 NOK" },
+        { status: 400 }
+      );
+    }
+
+    // Validate duration
+    if (typeof durationMinutes !== 'number' || durationMinutes < 15) {
+      return NextResponse.json(
+        { error: "Duration must be at least 15 minutes" },
+        { status: 400 }
+      );
+    }
+
     // Content moderation - check for inappropriate content
     const contentToCheck = `${title} ${description} ${requirements || ""}`;
     if (containsInappropriateContent(contentToCheck)) {
