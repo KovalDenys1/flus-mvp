@@ -1,0 +1,224 @@
+body {
+  background-color: white;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+.screen {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sideBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-right: 1px solid black;
+  width: 20vw;
+  height: 100vh;
+  background-color: rgb(3, 3, 53);
+  color: white;
+  padding: 1rem;
+}
+
+#close {
+  color: white;
+}
+#close:hover {
+  color: rgb(0, 60, 255);
+}
+
+.sidebarBtn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+ul li {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  transition: background-color 0.2s ease;
+}
+
+ul li:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+ul li.active {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+ul li a {
+  text-decoration: none;
+  color: white;
+  display: block;
+}
+
+/* Main content area */
+.mainPage {
+  width: 80vw;
+  background-color: #f8f9fc;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* User container */
+.user-container {
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.containerList {
+  font-size: 1.8rem;
+  color: rgb(3, 3, 53);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* Search */
+.search {
+  margin-bottom: 1rem;
+  color: black;
+}
+
+.search input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* User list */
+.userUl {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.userListItem {
+  background-color: #fafafa;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.userListItem:hover {
+  transform: scale(1.01);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.userInfo strong {
+  color: rgb(3, 3, 53);
+  font-size: 1rem;
+}
+
+/* Roles */
+.roles {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.roleTxt {
+  font-weight: 600;
+  color: rgb(3, 3, 53);
+}
+
+/* Old role tag style */
+.switch {
+  background-color: rgb(3, 3, 53);
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
+/* Dropdown system */
+.dropdownContainer {
+  position: relative;
+}
+
+.roleButton {
+  background-color: rgb(3, 3, 53);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.roleButton:hover {
+  background-color: rgb(0, 60, 255);
+}
+
+.arrow {
+  font-size: 0.8rem;
+}
+
+.dropdownMenu {
+  position: sticky;
+  top: 2.4rem;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 0.3rem 0;
+  min-width: 130px;
+  z-index: 10;
+}
+
+.dropdownItem {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: rgb(3, 3, 53);
+  font-weight: 500;
+}
+
+.dropdownItem:hover {
+  background: rgba(3, 3, 53, 0.1);
+}
+
+.activeRole {
+  background: rgba(3, 3, 53, 0.15);
+  font-weight: 700;
+}
+
+/* Loading & Empty states */
+.loadingText,
+.emptyText {
+  color: gray;
+  font-style: italic;
+  padding: 1rem 0;
+  text-align: center;
+}

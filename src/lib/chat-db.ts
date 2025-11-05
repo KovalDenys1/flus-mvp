@@ -208,7 +208,6 @@ export async function isUserInConversation(conversationId: string, userId: strin
 
   // If ID looks like job ID, try to find conversation for that job
   if (conversationId.startsWith('j_')) {
-    console.log(`isUserInConversation: ${conversationId} looks like job ID, searching for conversation`);
     try {
       const { data, error } = await supabase
         .from('conversations')
@@ -218,15 +217,12 @@ export async function isUserInConversation(conversationId: string, userId: strin
         .single();
 
       if (!error && data) {
-        console.log(`isUserInConversation: found conversation ${data.id} for job ${conversationId}`);
         actualConversationId = data.id;
         conversation = data;
       } else {
-        console.log(`isUserInConversation: no conversation found for job ${conversationId} and user ${userId}`);
         return false;
       }
     } catch (error) {
-      console.log(`isUserInConversation: error searching for conversation by job ID:`, error);
       return false;
     }
   } else {
@@ -235,8 +231,6 @@ export async function isUserInConversation(conversationId: string, userId: strin
   }
 
   const isParticipant = conversation ? (conversation.worker_id === userId || conversation.employer_id === userId) : false;
-
-  console.log(`isUserInConversation: conversationId=${conversationId}, actualConversationId=${actualConversationId}, userId=${userId}, conversation=`, conversation, `isParticipant=${isParticipant}`);
 
   return isParticipant;
 }

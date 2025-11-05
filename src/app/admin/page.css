@@ -1,0 +1,177 @@
+body {
+  background-color: white;
+  color: black;
+  font-family: "Inter", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* MAIN CONTAINER */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px;
+  border-bottom: 2px solid black;
+  width: 100%;
+  background-color: #f8f8f8;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+button {
+  padding: 8px 14px;
+  border: 1px solid black;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* BUTTON COLORS */
+.bedrift { color: blue; }
+.user { color: purple; }
+.trending { color: crimson; }
+.Reports { color: darkgoldenrod; }
+.leaderboard { color: rgb(190, 163, 9); }
+.setting { color: gray; }
+.profile { color: coral; }
+.back { color: green; }
+
+/* HOVER STATES */
+.bedrift:hover { background-color: blue; color: white; }
+.user:hover { background-color: purple; color: white; }
+.trending:hover { background-color: crimson; color: white; }
+.Reports:hover { background-color: darkgoldenrod; color: white; }
+.leaderboard:hover { color: white; background-color: gold; }
+.setting:hover { background-color: gray; color: white; }
+.profile:hover { background-color: coral; color: white; }
+.back:hover { background-color: green; color: white; }
+
+/* GRAPH SECTION */
+.graph {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 24px;
+  width: 95%;
+  max-width: 1200px;
+  margin: 40px 0;
+  padding: 0 10px;
+}
+
+.graphCard {
+  border: 1px solid black;
+  border-radius: 12px;
+  padding: 16px;
+  height: 420px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.graphCard:hover {
+  transform: scale(1.01);
+}
+
+.graphCard h3 {
+  margin: 0 0 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.graphCard canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* LOGS */
+.logs {
+  width: 95%;
+  max-width: 1200px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logs > h1 {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+}
+
+.logContainer {
+  border: 1px solid black;
+  border-radius: 8px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #fafafa;
+  width: 100%;
+}
+
+.logsUl {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.logsBox {
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* RESPONSIVE BEHAVIOR */
+@media (max-width: 1024px) {
+  .graph {
+    grid-template-columns: 1fr;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .graphCard {
+    height: 360px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  button {
+    width: 90%;
+  }
+
+  .graphCard {
+    height: 300px;
+  }
+
+  .logContainer {
+    max-height: 250px;
+  }
+}

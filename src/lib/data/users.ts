@@ -1,7 +1,7 @@
 import { hashPassword, verifyPassword } from "../utils/hash";
 import { getSupabaseServer } from "../supabase/server";
 
-export type Role = "worker" | "employer";
+export type Role = "worker" | "employer" | "admin";
 
 export type User = {
   id: string;

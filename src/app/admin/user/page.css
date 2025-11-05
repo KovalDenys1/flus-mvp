@@ -1,0 +1,172 @@
+body{
+    background-color: white;
+    color: black;
+    margin: 0;
+    
+}
+
+.admin-page {
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+/* Top buttons spread evenly */
+.top-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+}
+
+.top-buttons button {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.top-buttons button.active {
+  background-color: #0070f3;
+  color: white;
+  border-color: #0070f3;
+}
+
+.top-buttons button:hover {
+  background-color: #e0e0e0;
+}
+
+.section-content h2 {
+  margin-bottom: 1rem;
+}
+
+.section-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+    
+
+
+.buttoncheck{
+  display: flex;
+  gap: 10px;
+}
+
+.userList{
+  display: flex;
+  justify-content: space-between;
+  border: solid black ;
+  padding: 20px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.users{
+  justify-content: center;
+  text-align: center;
+  
+}
+
+.check{
+  display: flex;
+  border: solid black;
+  width: 3vw;
+  height: 5vh;
+  justify-content: center;
+  background-color: rgb(90, 143, 10);
+  scale: 1.2;
+}
+
+.check:active{
+  background-color: greenyellow;
+}
+
+.wrong:active{
+  background-color: red;
+}
+
+.wrong{
+  display: flex;
+  border: solid black;
+  width: 3vw;
+  height: 5vh;
+  justify-content: center;
+  background-color: rgb(138, 9, 9);
+  scale: 1.2;
+}
+
+.search{
+  display: flex ;
+  justify-content: center ;
+  background-color: aquamarine;
+  border-radius: 10px;
+  width: 15.4vw;
+}
+
+
+.exit{
+  display: flex;
+  scale: 2;
+  position: relative;
+  bottom: 6 0px;
+}
+
+.roleTxt{
+  color: #0070f3;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  
+}
+
+/* Overlay background */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Overlay box (modal) */
+.overlay-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  text-align: left;
+  position: relative;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.close-overlay {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.overlay-box h2 {
+  color: #000000;
+  font-size: large;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.overlay-box p {
+  margin: 0.5rem 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

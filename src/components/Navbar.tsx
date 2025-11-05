@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-type User = { id: string; email: string; role: "worker" | "employer" } | null;
+type User = { id: string; email: string; role: "worker" | "employer" | "admin" } | null;
 
 export default function Navbar() {
   const [user, setUser] = useState<User>(null);
@@ -87,6 +87,9 @@ export default function Navbar() {
             {user && <Link className={`${linkClass} ${isActive('/samtaler') ? 'nav-link-active' : ''}`} href="/samtaler">Samtaler</Link>}
             <Link className={`${linkClass} ${isActive('/profil') ? 'nav-link-active' : ''}`} href="/profil">Profil</Link>
             <Link className={`${linkClass} ${isActive('/support') ? 'nav-link-active' : ''}`} href="/support">Support</Link>
+            {user && (user.role === 'admin' || user.email === 'admin@flus.no') && (
+              <Link className={`${linkClass} ${isActive('/admin') ? 'nav-link-active' : ''}`} href="/admin">Admin</Link>
+            )}
           </div>
 
           {/* right: auth actions */}

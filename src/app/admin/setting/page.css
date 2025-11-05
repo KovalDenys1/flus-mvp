@@ -1,0 +1,127 @@
+body {
+  background-color: white;
+  color: white;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.screen {
+  display: flex;
+}
+
+/* Sidebar */
+.sideBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-right: 1px solid black;
+  width: 20vw;
+  height: 124.5vh;
+  background-color: rgb(3, 3, 53);
+  color: white;
+  padding: 1rem;
+}
+
+#close {
+  color: rgb(255, 255, 255);
+}
+
+#close:hover {
+  color: rgb(0, 60, 255);
+}
+
+.sidebarBtn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+ul li {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  transition: background-color 0.2s ease;
+}
+
+ul li:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+ul li.active {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Main Page */
+.mainPage {
+  width: 80vw;
+  padding: 2rem;
+  color: black;
+  background-color: #f8f9fc;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgb(3, 3, 53);
+  margin-bottom: 1.5rem;
+}
+
+/* Settings container */
+.settings-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Settings cards */
+.settings-card {
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.settings-card h2 {
+  color: rgb(3, 3, 53);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.settings-card label {
+  display: block;
+  font-weight: 600;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.settings-card input,
+.settings-card select {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.saveBtn {
+  background-color: rgb(3, 3, 53);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+  background-color: rgb(0, 60, 255);
+}
+

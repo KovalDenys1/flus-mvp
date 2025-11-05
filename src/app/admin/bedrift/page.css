@@ -1,0 +1,98 @@
+body{
+    background-color: white;
+    color: black;
+    margin: 0;
+}
+
+.admin-page {
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+/* Top buttons spread evenly */
+.top-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+}
+
+.top-buttons button {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.top-buttons button.active {
+  background-color: #0070f3;
+  color: white;
+  border-color: #0070f3;
+}
+
+.top-buttons button:hover {
+  background-color: #e0e0e0;
+}
+
+.section-content h2 {
+  margin-bottom: 1rem;
+}
+
+.section-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.buttoncheck{
+  display: flex;
+  gap: 10px;
+}
+
+.bedriftList{
+  display: flex;
+  justify-content: space-between;
+  border: solid black ;
+  padding: 20px;
+}
+
+.check{
+  display: flex;
+  border: solid black;
+  width: 3vw;
+  height: 5vh;
+  justify-content: center;
+  background-color: rgb(90, 143, 10);
+  scale: 1.2;
+}
+
+.check:active{
+  background-color: greenyellow;
+}
+
+.wrong:active{
+  background-color: red;
+}
+
+.wrong{
+  display: flex;
+  border: solid black;
+  width: 3vw;
+  height: 5vh;
+  justify-content: center;
+  background-color: rgb(138, 9, 9);
+  scale: 1.2;
+}
+
+
+
+button{
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.text{
+  font-size: 20px;
+}

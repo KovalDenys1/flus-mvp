@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-type User = { id: string; email: string; role: "worker" | "employer" } | null;
+type User = { id: string; email: string; role: "worker" | "employer" | "admin" } | null;
 
 export default function HomePage() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export default function HomePage() {
             </Badge>
 
             <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">småjobber</span>
+              <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">Finn småjobber</span>
               <br />
               i ditt nærområde
             </h1>

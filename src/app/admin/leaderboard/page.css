@@ -1,0 +1,127 @@
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: linear-gradient(135deg, #1e1f26, #2a2b34);
+  color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Leaderboard Container */
+.leaderboard-container {
+  position: relative;
+  width: 90%;
+  max-width: 700px;
+  background: #2f3039;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Exit Button */
+.exit-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.exit-btn:hover {
+  color: #ff4c4c;
+}
+
+/* Title */
+.leaderboard-title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #ffb84d;
+}
+
+/* List */
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each item */
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #3a3b47;
+  margin: 0.6rem 0;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  transition: transform 0.2s ease, background 0.2s ease;
+  font-size: 1.1rem;
+}
+
+.leaderboard-item:hover {
+  transform: scale(1.02);
+  background: #464754;
+}
+
+/* Rank and Name */
+.rank {
+  font-weight: 700;
+  color: #ffb84d;
+  width: 3rem;
+  text-align: left;
+}
+
+.name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+/* Score */
+.score {
+  color: #ffffff;
+  font-weight: 600;
+  stroke: #000  ;
+}
+
+/* Top 3 highlight */
+.gold {
+  background: linear-gradient(90deg, #ffd700, #ffcc33);
+  color: #000;
+}
+    
+.silver {
+  background: linear-gradient(90deg, #c0c0c0, #dcdcdc);
+  color: #000;
+}
+.bronze {
+  background: linear-gradient(90deg, #cd7f32, #d08a3e);
+  color: #000;
+}
+
+.loading,
+.no-data {
+  color: #aaa;
+  font-size: 1rem;
+  margin-top: 2rem;
+}
