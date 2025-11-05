@@ -183,11 +183,12 @@ export default function MineSoknaderPage() {
             {applications.map((app) => {
               const job = jobs[app.jobId];
               return (
-                <Card key={app.id} className="hover:shadow-md transition">
+                <Link key={app.id} href={`/jobber/${app.jobId}`}>
+                  <Card className="hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 cursor-pointer border-l-4 border-l-transparent hover:border-l-primary bg-gradient-to-r from-white to-primary/5">
                   <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       <div>
-                        <CardTitle className="text-xl">
+                        <CardTitle className="text-xl hover:text-primary transition-colors">
                           {job?.title || `Jobb #${app.jobId}`}
                         </CardTitle>
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -224,27 +225,30 @@ export default function MineSoknaderPage() {
                           year: 'numeric'
                         })}
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        {app.status === "completed" && app.job?.employer && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openReviewDialog(app.jobId, app.job!.employer!.id, app.job!.employer!.navn)}
-                            className="text-primary border-primary/30 hover:bg-primary/5"
-                          >
-                            Gi vurdering
-                          </Button>
-                        )}
-                        <Link
-                          href={`/jobber/${app.jobId}`}
-                          className="text-primary hover:text-primary font-semibold text-sm"
-                        >
-                          Se detaljer →
-                        </Link>
-                      </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          {app.status === "completed" && app.job?.employer && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                openReviewDialog(app.jobId, app.job!.employer!.id, app.job!.employer!.navn);
+                              }}
+                              className="text-primary border-primary/30 hover:bg-primary/5"
+                            >
+                              Gi vurdering
+                            </Button>
+                          )}
+                          <span className="text-primary hover:text-primary font-semibold text-sm flex items-center gap-1 transition-colors">
+                            Se detaljer
+                            <span className="text-lg">→</span>
+                          </span>
+                        </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
