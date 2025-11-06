@@ -182,655 +182,212 @@ Create `.env.local` file (see `.env.example` for reference):
 
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key- Supabase account### Platform Features### Job Features
+# FLUS — Local Job Marketplace MVP
 
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-- Vipps developer account (for OAuth)
-
-# Application
-
-NEXT_PUBLIC_APP_URL=http://localhost:3000- Gmail account (for email notifications)- 🔐 Secure authentication via Vipps OAuth- Flexible scheduling (anytime/fixed/deadline)
-
-
-
-# Vipps OAuth
-
-VIPPS_CLIENT_ID=your-client-id
-
-VIPPS_CLIENT_SECRET=your-client-secret## 🚀 Quick Start- 📱 Fully responsive design- Location support with maps
-
-VIPPS_SUBSCRIPTION_KEY=your-subscription-key
-
-VIPPS_SUBSCRIPTION_KEY_SECONDARY=your-secondary-key
-
-VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-
-VIPPS_API_BASE_URL=https://apitest.vipps.no### 1. Clone and Install- 🌍 Location-based job search with radius filter- Payment options (fixed/hourly)
-
-VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
-
-```bash
-
-# Email Configuration (SMTP)
-
-SMTP_HOST=smtp.gmail.comgit clone https://github.com/KovalDenys1/flus-mvp.git- 📅 Flexible scheduling (anytime/fixed/deadline)- Photo uploads
-
-SMTP_PORT=587
-
-SMTP_SECURE=falsecd flus-mvp
-
-SMTP_USER=your-email@gmail.com
-
-SMTP_PASS=your-app-passwordnpm install- 💰 Multiple payment options (fixed price/hourly rate)- Job categories
-
-
-
-# Google Places API```
-
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
-
-```- 📸 Photo upload support for jobs
-
-
-
-### 4. Email Setup (Optional)### 2. Database Setup
-
-
-
-To enable email notifications:1. Create a new project at [supabase.com](https://supabase.com)- 🎯 Achievement system### Communication & Notifications
-
-1. Enable 2-Factor Authentication on your Gmail account
-
-2. Generate App Password: https://myaccount.google.com/apppasswords2. Run migrations in order in Supabase SQL Editor:
-
-3. Use the generated password as `SMTP_PASS`
-
-   - `supabase/migrations/01_minimal_schema.sql`- 📧 Automated email notifications- **Real-time chat** between employers and workers
-
-### 5. Run Development Server
-
-   - `supabase/migrations/02_minimal_storage.sql`
-
-```bash
-
-npm run dev   - `supabase/migrations/03_add_birth_year.sql`- **Email notifications** for:
-
-```
-
-   - `supabase/migrations/04_update_users_table.sql`
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-   - `supabase/migrations/05_add_support_tickets.sql`## 🛠️ Tech Stack  - New job applications (to employers)
-
-## 📁 Project Structure
-
-   - `supabase/migrations/06_add_initial_photos.sql`
-
-```
-
-flus-mvp/   - `supabase/migrations/07_add_addresses_table.sql`  - Application status changes (to workers)
-
-├── src/
-
-│   ├── app/                    # Next.js App Router   - `supabase/migrations/07_add_admin_role.sql`
-
-│   │   ├── api/               # API routes
-
-│   │   ├── admin/             # Admin dashboard   - `supabase/migrations/08_enable_realtime.sql`- **Framework:** Next.js 15.5.4 with App Router & Turbopack  - Welcome emails upon registration
-
-│   │   ├── jobber/            # Job listings
-
-│   │   ├── profil/            # User profiles
-
-│   │   ├── mine-jobber/       # Employer's jobs
-
-│   │   ├── mine-soknader/     # Worker's applications3. Create storage bucket:- **Database:** Supabase (PostgreSQL + Storage)- **Persistent conversations** with Supabase storage
-
-│   │   ├── samtaler/          # Chat interface
-
-│   │   └── ...   - Navigate to Storage in Supabase Dashboard
-
-│   ├── components/            # React components
-
-│   │   ├── ui/               # UI primitives   - Create bucket named `job-photos`- **Authentication:** Vipps OAuth 2.0
-
-│   │   ├── AddressAutocomplete.tsx  # Address search component
-
-│   │   └── ...   - Make it **Public**
-
-│   └── lib/                   # Utilities & helpers
-
-│       ├── data/             # Data layer   - Set file size limit to **5MB**- **Styling:** Tailwind CSS 4.0## Tech Stack
-
-│       ├── supabase/         # Supabase client
-
-│       ├── vipps/            # Vipps integration
-
-│       └── utils/            # Helper functions
-
-├── supabase/### 3. Environment Configuration- **UI Components:** Radix UI + shadcn/ui
-
-│   └── migrations/           # Database migrations
-
-├── scripts/Create `.env.local` file (see `.env.example` for reference):
-
-│   └── populate-addresses.js # Address population script
-
-└── public/                   # Static assets- **Language:** TypeScript- **Framework**: Next.js 15.5.4 (App Router, Turbopack)
-
-```
-
-```env
-
-## 🔑 Key API Routes
-
-# Supabase- **Email:** Nodemailer with SMTP- **Database**: Supabase (PostgreSQL, Storage, RLS)
-
-### Authentication
-
-- `GET /api/auth/vipps/start` - Initiate Vipps OAuth flowNEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-
-- `GET /api/auth/vipps/callback` - OAuth callback handler
-
-- `GET /api/auth/me` - Get current userNEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key- **State Management:** React Hooks- **Auth**: Vipps OAuth (Login API)
-
-- `POST /api/auth/logout` - Logout user
-
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-### Jobs
-
-- `GET /api/jobs` - List all jobs (with filters)- **Session Management:** HTTP-only cookies- **Styling**: Tailwind CSS 4.0
-
-- `POST /api/jobs` - Create new job
-
-- `GET /api/jobs/[id]` - Get job details# Application
-
-- `DELETE /api/jobs/[id]` - Delete job
-
-- `GET /api/my-jobs` - Get user's jobsNEXT_PUBLIC_APP_URL=http://localhost:3000- **UI**: Radix UI
-
-
-
-### Applications
-
-- `GET /api/applications` - Get user's applications
-
-- `POST /api/applications` - Submit job application# Vipps OAuth## 📋 Prerequisites- **Language**: TypeScript
-
-- `PATCH /api/applications` - Update application status
-
-VIPPS_CLIENT_ID=your-client-id
-
-### Profile & CV
-
-- `GET /api/profile` - Get user profileVIPPS_CLIENT_SECRET=your-client-secret- **Sessions**: HTTP-only cookies
-
-- `POST /api/profile/update` - Update profile
-
-- `GET /api/profile/stats` - Get user statisticsVIPPS_SUBSCRIPTION_KEY=your-subscription-key
-
-- `GET /api/cv` - Get CV entries
-
-- `POST /api/cv` - Add CV entryVIPPS_SUBSCRIPTION_KEY_SECONDARY=your-secondary-key- Node.js 18+ and npm
-
-- `DELETE /api/cv` - Remove CV entry
-
-VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-
-### Chat
-
-- `GET /api/conversations` - List conversationsVIPPS_API_BASE_URL=https://apitest.vipps.no- Supabase account## Quick Start
-
-- `GET /api/conversations/[id]/messages` - Get messages
-
-- `POST /api/conversations/[id]/messages` - Send messageVIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
-
-
-
-## 🎯 Features Overview- Vipps developer account (for OAuth)
-
-
-
-### Dual Role System# Email Configuration (SMTP)
-
-Users can switch between **Worker** and **Employer** modes:
-
-- **Worker Mode:** Browse jobs, apply, manage applications, view CVSMTP_HOST=smtp.gmail.com- Gmail account (for email notifications)### 1. Clone & Install
-
-- **Employer Mode:** Post jobs, review applications, hire workers
-
-- Seamless role switching via navbar toggleSMTP_PORT=587
-
-
-
-### Real-Time ChatSMTP_SECURE=false
-
-- Persistent conversations stored in Supabase
-
-- Photo sharing supportSMTP_USER=your-email@gmail.com
-
-- Work completion flow with before/after photos
-
-- System notifications for work status changesSMTP_PASS=your-app-password## 🚀 Quick Start```bash
-
-
-
-### Job Management```
-
-- Create jobs with detailed requirements
-
-- Set flexible or fixed schedulesgit clone https://github.com/KovalDenys1/flus-mvp.git
-
-- Choose payment type (fixed/hourly)
-
-- Upload photos for context### 4. Email Setup (Optional)
-
-- Track job status (open/assigned/completed)
-
-- **Address autocomplete** for accurate location inputTo enable email notifications:### 1. Clone and Installcd flus-mvp
-
-
-
-### Application System1. Enable 2-Factor Authentication on your Gmail account
-
-- One-click applications
-
-- Track application status2. Generate App Password: https://myaccount.google.com/apppasswordsnpm install
-
-- Email notifications for updates
-
-- Employer can review and accept/reject3. Use the generated password as `SMTP_PASS`
-
-
-
-### Profile & CV```bash```
-
-- Build professional worker profile
-
-- Add work experience and skills### 5. Run Development Server
-
-- Display reviews and ratings
-
-- Track achievements and statistics```bashgit clone https://github.com/KovalDenys1/flus-mvp.git
-
-
-
-### Admin Dashboardnpm run dev
-
-- Platform management interface
-
-- Real-time user and job statistics```cd flus-mvp### 2. Supabase Setup
-
-- Live activity logs
-
-- User role management
-
-- Company (bedrift) oversight
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.npm install
-
-## 👥 Team Contributors
-
-
-
-This project was developed collaboratively by:
-
-## 📁 Project Structure```1. Create Supabase project at [supabase.com](https://supabase.com)
-
-- **Denys Koval** - Project lead, core features, authentication, and deployment
-
-- **Alexander** - Address autocomplete API integration using Google Places API
-
-- **Ayanle** - Admin dashboard development with real-time analytics and monitoring
-
-```2. Run the SQL migration in `supabase/migrations/01_init_schema.sql`
-
-## 🔧 Configuration
-
-flus-mvp/
-
-### Vipps Setup
-
-1. Register at [Vipps Developer Portal](https://vipps.no/developer)├── src/### 2. Database Setup3. Create `job-photos` storage bucket (Public: YES, 5MB limit)
-
-2. Create test app for development
-
-3. Get credentials and add to `.env.local`│   ├── app/                    # Next.js App Router
-
-4. For production, switch to production API URL
-
-│   │   ├── api/               # API routes4. Run `supabase/migrations/02_storage_policies.sql`
-
-### Google Places API Setup
-
-1. Create project in [Google Cloud Console](https://console.cloud.google.com)│   │   ├── jobber/            # Job listings
-
-2. Enable Places API
-
-3. Create API key with Places API restriction│   │   ├── profil/            # User profiles1. Create a new project at [supabase.com](https://supabase.com)
-
-4. Add key to `.env.local` as `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
-
-│   │   ├── mine-jobber/       # Employer's jobs
-
-### Database Schema
-
-The database includes these main tables:│   │   ├── mine-soknader/     # Worker's applications### 3. Environment Variables
-
-- `users` - User accounts with roles
-
-- `jobs` - Job postings│   │   ├── samtaler/          # Chat interface
-
-- `applications` - Job applications
-
-- `conversations` - Chat conversations│   │   └── ...2. Run migrations in order in Supabase SQL Editor:
-
-- `messages` - Chat messages
-
-- `cv_entries` - Work experience│   ├── components/            # React components
-
-- `skills` - User skills
-
-- `reviews` - User reviews and ratings│   │   ├── ui/               # UI primitives   ```Create `.env.local`:
-
-- `bedrift` - Company management
-
-│   │   └── ...
-
-## 🐛 Troubleshooting
-
-│   └── lib/                   # Utilities & helpers   supabase/migrations/01_minimal_schema.sql
-
-**"Failed to fetch" errors:**
-
-- Check that `.env.local` is properly configured│       ├── data/             # Data layer
-
-- Verify Supabase URL and keys
-
-- Restart development server│       ├── supabase/         # Supabase client   supabase/migrations/02_minimal_storage.sql```env
-
-
-
-**Vipps OAuth not working:**│       ├── vipps/            # Vipps integration
-
-- Verify redirect URI matches exactly
-
-- Check Vipps credentials│       └── utils/            # Helper functions   supabase/migrations/03_add_birth_year.sql# Supabase
-
-- For production, update API base URL
-
-├── supabase/
-
-**Email not sending:**
-
-- Verify Gmail App Password is correct│   └── migrations/           # Database migrations   supabase/migrations/04_update_users_table.sqlNEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-
-- Check SMTP configuration
-
-- Ensure 2FA is enabled on Gmail├── scripts/
-
-
-
-**Database errors:**│   └── populate-addresses.js # Address population script   supabase/migrations/05_add_support_tickets.sqlNEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-
-- Run all migrations in correct order
-
-- Check RLS policies are enabled└── public/                   # Static assets
-
-- Verify service role key has admin access
-
-```   supabase/migrations/06_add_initial_photos.sqlSUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-**Images not uploading:**
-
-- Ensure `job-photos` bucket exists
-
-- Check bucket is set to public
-
-- Verify file size is under 5MB## 🔑 Key API Routes   ```
-
-
-
-**Address autocomplete not working:**
-
-- Verify Google Maps API key is correct
-
-- Check that Places API is enabled in Google Cloud Console### Authentication# Vipps OAuth
-
-- Ensure billing is enabled on Google Cloud project
-
-- `GET /api/auth/vipps/start` - Initiate Vipps OAuth flow
-
-## 🚢 Deployment
-
-- `GET /api/auth/vipps/callback` - OAuth callback handler3. Create storage bucket:VIPPS_CLIENT_ID=your-client-id
-
-### Vercel (Recommended)
-
-- `GET /api/auth/me` - Get current user
-
-1. Push code to GitHub
-
-2. Import project in Vercel- `POST /api/auth/logout` - Logout user   - Navigate to Storage in Supabase DashboardVIPPS_CLIENT_SECRET=your-client-secret
-
-3. Add environment variables
-
-4. Deploy
-
-
-
-### Environment Variables for Production### Jobs   - Create bucket named `job-photos`VIPPS_SUBSCRIPTION_KEY=your-subscription-key
-
-Make sure to update these for production:
-
-- `NEXT_PUBLIC_APP_URL` - Your production domain- `GET /api/jobs` - List all jobs (with filters)
-
-- `VIPPS_API_BASE_URL` - Change to `https://api.vipps.no`
-
-- `VIPPS_REDIRECT_URI` - Update to production callback URL- `POST /api/jobs` - Create new job   - Make it **Public**VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-
-- All Supabase credentials
-
-- SMTP credentials- `GET /api/jobs/[id]` - Get job details
-
-- Google Maps API key
-
-- `DELETE /api/jobs/[id]` - Delete job   - Set file size limit to **5MB**VIPPS_REDIRECT_URI=https://your-domain.com/api/auth/vipps/callback
-
-## 📄 License
-
-- `GET /api/my-jobs` - Get user's jobs
-
-MIT License - See LICENSE file for details
-
-
-
-## 👨‍💻 Author
-
-### Applications
-
-Denys Koval - [GitHub](https://github.com/KovalDenys1)
-
-- `GET /api/applications` - Get user's applications### 3. Environment Configuration# Email Configuration (SMTP)
-
-## 🙏 Acknowledgments
-
-- `POST /api/applications` - Submit job application
-
-- Built with Next.js and Supabase
-
-- UI components from shadcn/ui- `PATCH /api/applications` - Update application statusSMTP_HOST=smtp.gmail.com
-
-- Icons from Lucide React
-
-- Authentication via Vipps
-
-- Address search powered by Google Places API
-
-### Profile & CVCreate `.env.local` file (see `.env.example` for reference):SMTP_PORT=587
+**FLUS** is a Norwegian job platform connecting employers with workers for small local tasks and gigs. Built with Next.js 15, Supabase, and Vipps OAuth authentication.
 
 ---
 
-- `GET /api/profile` - Get user profile
+## 🚀 Features
 
-**Made with ❤️ in Norway**
+### For Workers (Jobbsøker)
+- Browse jobs by category, location, and keywords
+- Apply to jobs with one click
+- Real-time chat with employers
+- Track your application status
+- Create professional profile with CV and skills
+- Build reputation through reviews and ratings
+- Email notifications for application updates
 
-- `POST /api/profile/update` - Update profileSMTP_SECURE=false
+### For Employers (Arbeidsgiver)
+- Create and manage job postings
+- Review applications from workers
+- Chat with applicants in real-time
+- View business statistics
+- Receive and give reviews
+- Email notifications for new applications
 
-- `GET /api/profile/stats` - Get user statistics
+### Platform Features
+- Secure authentication via Vipps OAuth
+- Fully responsive design
+- Location-based job search with address autocomplete (Google Places API)
+- Flexible scheduling (anytime/fixed/deadline)
+- Multiple payment options (fixed price/hourly rate)
+- Photo upload support for jobs
+- Achievement system
+- Admin dashboard for platform management
 
-- `GET /api/cv` - Get CV entries```envSMTP_USER=your_email@gmail.com
+---
 
-- `POST /api/cv` - Add CV entry
+## 🛠️ Tech Stack
+- **Framework:** Next.js 15.5.4 (App Router, Turbopack)
+- **Database:** Supabase (PostgreSQL + Storage)
+- **Authentication:** Vipps OAuth 2.0
+- **Styling:** Tailwind CSS 4.0
+- **UI Components:** Radix UI + shadcn/ui
+- **Language:** TypeScript
+- **Email:** Nodemailer with SMTP
+- **State Management:** React Hooks
+- **Session Management:** HTTP-only cookies
+- **Address Search:** Google Places API
 
-- `DELETE /api/cv` - Remove CV entry# SupabaseSMTP_PASS=your_app_password
+---
 
+## 📋 Prerequisites
+- Node.js 18+
+- npm
+- Supabase account
+- Vipps developer account (for OAuth)
+- Gmail account (for email notifications)
+- Google Cloud Platform account (for Places API)
 
+---
 
-### ChatNEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.coNEXT_PUBLIC_APP_URL=https://your-domain.com
+## 🚀 Quick Start
+### 1. Clone and Install
+```bash
+git clone https://github.com/KovalDenys1/flus-mvp.git
+cd flus-mvp
+npm install
+```
 
-- `GET /api/conversations` - List conversations
+### 2. Database Setup
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Run migrations in order in Supabase SQL Editor:
+   - `supabase/migrations/01_init_schema.sql`
+   - `supabase/migrations/02_storage_policies.sql`
+   - `supabase/migrations/03_seed_demo_jobs.sql`
+   - `supabase/migrations/04_add_birth_year.sql`
+3. Create storage bucket:
+   - Navigate to Storage in Supabase Dashboard
+   - Create bucket named `job-photos` (Public, 5MB limit)
 
-- `GET /api/conversations/[id]/messages` - Get messagesNEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key```
-
-- `POST /api/conversations/[id]/messages` - Send message
-
+### 3. Environment Configuration
+Create `.env.local` file (see `.env.example` for reference):
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-## 🎯 Features Overview
+# Application
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Vipps OAuth
+VIPPS_CLIENT_ID=your-client-id
+VIPPS_CLIENT_SECRET=your-client-secret
+VIPPS_SUBSCRIPTION_KEY=your-subscription-key
+VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
+VIPPS_API_BASE_URL=https://apitest.vipps.no
+VIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callback
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+# Google Places API
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+```
 
 ### 4. Email Setup (Optional)
+To enable email notifications:
+1. Enable 2FA on Gmail
+2. Generate App Password: https://myaccount.google.com/apppasswords
+3. Use App Password as `SMTP_PASS`
 
-### Dual Role System
+### 5. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Users can switch between **Worker** and **Employer** modes:# Application
+---
 
-- **Worker Mode:** Browse jobs, apply, manage applications, view CV
+## 🔑 Key API Routes
+### Authentication
+- `GET /api/auth/vipps/start` - Initiate Vipps OAuth flow
+- `GET /api/auth/vipps/callback` - OAuth callback handler
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/logout` - Logout user
 
-- **Employer Mode:** Post jobs, review applications, hire workersNEXT_PUBLIC_APP_URL=http://localhost:3000For email notifications, configure SMTP in `.env.local`. Uses Gmail by default:
+### Jobs
+- `GET /api/jobs` - List all jobs (with filters)
+- `POST /api/jobs` - Create new job
+- `GET /api/jobs/[id]` - Get job details
+- `DELETE /api/jobs/[id]` - Delete job
+- `GET /api/my-jobs` - Get user's jobs
 
-- Seamless role switching via navbar toggle
+### Applications
+- `GET /api/applications` - Get user's applications
+- `POST /api/applications` - Submit job application
+- `PATCH /api/applications` - Update application status
 
+### Profile & CV
+- `GET /api/profile` - Get user profile
+- `POST /api/profile/update` - Update profile
+- `GET /api/profile/stats` - Get user statistics
+- `GET /api/cv` - Get CV entries
+- `POST /api/cv` - Add CV entry
+- `DELETE /api/cv` - Remove CV entry
 
+### Chat
+- `GET /api/conversations` - List conversations
+- `GET /api/conversations/[id]/messages` - Get messages
+- `POST /api/conversations/[id]/messages` - Send message
 
-### Real-Time Chat
-
-- Persistent conversations stored in Supabase# Vipps OAuth1. Enable 2FA on Gmail
-
-- Photo sharing support
-
-- Work completion flow with before/after photosVIPPS_CLIENT_ID=your-client-id2. Generate App Password: https://myaccount.google.com/apppasswords
-
-- System notifications for work status changes
-
-VIPPS_CLIENT_SECRET=your-client-secret3. Use App Password as `SMTP_PASS`
-
-### Job Management
-
-- Create jobs with detailed requirementsVIPPS_SUBSCRIPTION_KEY=your-subscription-key
-
-- Set flexible or fixed schedules
-
-- Choose payment type (fixed/hourly)VIPPS_SUBSCRIPTION_KEY_SECONDARY=your-secondary-key### 5. Run
-
-- Upload photos for context
-
-- Track job status (open/assigned/completed)VIPPS_MERCHANT_SERIAL_NUMBER=your-msn
-
-
-
-### Application SystemVIPPS_API_BASE_URL=https://apitest.vipps.no```bash
-
-- One-click applications
-
-- Track application statusVIPPS_REDIRECT_URI=http://localhost:3000/api/auth/vipps/callbacknpm run dev
-
-- Email notifications for updates
-
-- Employer can review and accept/reject```
-
-
-
-### Profile & CV# Email (SMTP)
-
-- Build professional worker profile
-
-- Add work experience and skillsSMTP_HOST=smtp.gmail.comOpen http://localhost:3000
-
-- Display reviews and ratings
-
-- Track achievements and statisticsSMTP_PORT=587
-
-
-
-## 🔧 ConfigurationSMTP_SECURE=false## ✅ Features Implemented
-
-
-
-### Vipps SetupSMTP_USER=your-email@gmail.com
-
-1. Register at [Vipps Developer Portal](https://vipps.no/developer)
-
-2. Create test app for developmentSMTP_PASS=your-app-password**Complete:**
-
-3. Get credentials and add to `.env.local`
-
-4. For production, switch to production API URL```- ✅ Jobs CRUD with Supabase
-
-
-
-### Database Schema- ✅ Job applications
-
-The database includes these main tables:
-
-- `users` - User accounts with roles### 4. Email Setup (Optional)- ✅ Vipps OAuth authentication
-
-- `jobs` - Job postings
-
-- `applications` - Job applications- ✅ Dual profiles (worker/employer)
-
-- `conversations` - Chat conversations
-
-- `messages` - Chat messagesTo enable email notifications:- ✅ CV system (experience, skills)
-
-- `cv_entries` - Work experience
-
-- `skills` - User skills- ✅ Reviews and ratings
-
-- `reviews` - User reviews and ratings
-
-1. Enable 2-Factor Authentication on your Gmail account- ✅ Photo uploads (Supabase Storage)
+---
 
 ## 🐛 Troubleshooting
+- **Failed to fetch:** Check `.env.local`, restart server
+- **Vipps OAuth not working:** Verify redirect URI, credentials, API base URL
+- **Email not sending:** Check Gmail App Password, SMTP config, 2FA
+- **Database errors:** Run all migrations, check RLS policies, service role key
+- **Images not uploading:** Ensure `job-photos` bucket exists, is public, file < 5MB
+- **Address autocomplete not working:** Check Google Maps API key, Places API enabled
 
-2. Generate App Password: https://myaccount.google.com/apppasswords- ✅ Real-time profile sync
+---
 
-**"Failed to fetch" errors:**
+## 🚢 Deployment
+### Vercel (Recommended)
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
 
-- Check that `.env.local` is properly configured3. Use the generated password as `SMTP_PASS`- ✅ **Persistent chat system** with Supabase
+### Production Environment Variables
+- `NEXT_PUBLIC_APP_URL` - Your production domain
+- `VIPPS_API_BASE_URL` - Change to `https://api.vipps.no`
+- `VIPPS_REDIRECT_URI` - Update to production callback URL
+- All Supabase credentials
+- SMTP credentials
+- Google Maps API key
 
-- Verify Supabase URL and keys
+---
 
-- Restart development server- ✅ **Email notifications** (applications, status updates, welcome)
+## ✅ Production Release Checklist
+- [ ] Lockfile (`package-lock.json` or `pnpm-lock.yaml`) is present and committed
+- [ ] All migrations applied in Supabase
+- [ ] All environment variables set in Vercel/production
+- [ ] SMTP and OAuth credentials tested
+- [ ] `npm run build` and `npm run lint` pass without errors
+- [ ] E2E tests (Playwright) pass
+- [ ] `.env.local` and secrets are NOT in git
+- [ ] README is up to date
+- [ ] CI/CD workflow (build, lint, test) is configured
 
+---
 
+## 👨‍💻 Author
+Denys Koval - [GitHub](https://github.com/KovalDenys1)
 
-**Vipps OAuth not working:**### 5. Run Development Server- ✅ **E2E testing** with Playwright
+## 🙏 Acknowledgments
+- Built with Next.js and Supabase
+- UI components from shadcn/ui
+- Icons from Lucide React
+- Authentication via Vipps
 
-- Verify redirect URI matches exactly
+---
 
-- Check Vipps credentials- ✅ Responsive design
-
-- For production, update API base URL
-
-```bash
-
-**Email not sending:**
-
-- Verify Gmail App Password is correctnpm run dev**Partial/Demo:**
+**Made with ❤️ in Norway**
 
 - Check SMTP configuration
 
